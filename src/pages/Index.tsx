@@ -6,7 +6,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
 const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/265342b7-5d59-4e3c-a39b-25895cd691d6.jpg';
-const PC_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/41cc991b-26a5-46f6-99a1-9b917da5ff86.jpg';
 
 const NAV = [
   { label: 'Главная', href: '#home' },
@@ -20,24 +19,27 @@ type Product = {
   id: number;
   name: string;
   brand: string;
+  cpuBrand: string;
   cpu: string;
   gpu: string;
   ram: number;
   price: number;
   fps: string;
   tag?: string;
+  img: string;
 };
 
 const PRODUCTS: Product[] = [
-  { id: 1, name: '240FPS Nova RTX', brand: 'NVIDIA', cpu: 'Ryzen 7 7800X3D', gpu: 'RTX 5070 Ti', ram: 32, price: 189990, fps: '240+ FPS', tag: 'Хит' },
-  { id: 2, name: '240FPS Titan Pro', brand: 'NVIDIA', cpu: 'Intel i9-14900K', gpu: 'RTX 5090', ram: 64, price: 359990, fps: '360+ FPS', tag: 'Топ' },
-  { id: 3, name: '240FPS Storm', brand: 'AMD', cpu: 'Ryzen 5 7600', gpu: 'RX 7700 XT', ram: 16, price: 119990, fps: '180+ FPS' },
-  { id: 4, name: '240FPS Blaze', brand: 'NVIDIA', cpu: 'Intel i5-13600KF', gpu: 'RTX 5060 Ti', ram: 32, price: 139990, fps: '200+ FPS', tag: 'Выбор' },
-  { id: 5, name: '240FPS Fury X', brand: 'AMD', cpu: 'Ryzen 9 7950X', gpu: 'RX 7900 XTX', ram: 64, price: 299990, fps: '300+ FPS' },
-  { id: 6, name: '240FPS Spark', brand: 'NVIDIA', cpu: 'Ryzen 5 5600', gpu: 'RTX 5060', ram: 16, price: 94990, fps: '144+ FPS' },
+  { id: 1, name: '240FPS Nova RTX', brand: 'NVIDIA', cpuBrand: 'AMD', cpu: 'Ryzen 7 7800X3D', gpu: 'RTX 5070 Ti', ram: 32, price: 189990, fps: '240+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
+  { id: 2, name: '240FPS Titan Pro', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i9-14900K', gpu: 'RTX 5090', ram: 64, price: 359990, fps: '360+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
+  { id: 3, name: '240FPS Storm', brand: 'AMD', cpuBrand: 'AMD', cpu: 'Ryzen 5 7600', gpu: 'RX 7700 XT', ram: 16, price: 119990, fps: '180+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
+  { id: 4, name: '240FPS Blaze', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-13600KF', gpu: 'RTX 5060 Ti', ram: 32, price: 139990, fps: '200+ FPS', tag: 'Выбор', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
+  { id: 5, name: '240FPS Fury X', brand: 'AMD', cpuBrand: 'AMD', cpu: 'Ryzen 9 7950X', gpu: 'RX 7900 XTX', ram: 64, price: 299990, fps: '300+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
+  { id: 6, name: '240FPS Spark', brand: 'NVIDIA', cpuBrand: 'AMD', cpu: 'Ryzen 5 5600', gpu: 'RTX 5060', ram: 16, price: 94990, fps: '144+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg' },
 ];
 
 const BRANDS = ['NVIDIA', 'AMD'];
+const CPU_BRANDS = ['Intel', 'AMD'];
 const RAM_OPTIONS = [16, 32, 64];
 
 const BLOG = [
@@ -51,6 +53,7 @@ const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 const Index = () => {
   const [price, setPrice] = useState<number[]>([400000]);
   const [brands, setBrands] = useState<string[]>([]);
+  const [cpuBrands, setCpuBrands] = useState<string[]>([]);
   const [rams, setRams] = useState<number[]>([]);
   const [cart, setCart] = useState<number[]>([]);
 
@@ -63,9 +66,10 @@ const Index = () => {
         (p) =>
           p.price <= price[0] &&
           (brands.length === 0 || brands.includes(p.brand)) &&
+          (cpuBrands.length === 0 || cpuBrands.includes(p.cpuBrand)) &&
           (rams.length === 0 || rams.includes(p.ram))
       ),
-    [price, brands, rams]
+    [price, brands, cpuBrands, rams]
   );
 
   return (
@@ -189,6 +193,17 @@ const Index = () => {
               </div>
             </div>
             <div className="border-t border-border pt-5">
+              <div className="text-sm font-500 mb-3">Производитель CPU</div>
+              <div className="space-y-3">
+                {CPU_BRANDS.map((b) => (
+                  <label key={b} className="flex items-center gap-3 cursor-pointer text-sm">
+                    <Checkbox checked={cpuBrands.includes(b)} onCheckedChange={() => toggle(cpuBrands, b, setCpuBrands)} />
+                    {b}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="border-t border-border pt-5">
               <div className="text-sm font-500 mb-3">Оперативная память</div>
               <div className="space-y-3">
                 {RAM_OPTIONS.map((r) => (
@@ -202,7 +217,7 @@ const Index = () => {
             <Button
               variant="ghost"
               className="w-full text-muted-foreground hover:text-primary"
-              onClick={() => { setPrice([400000]); setBrands([]); setRams([]); }}
+              onClick={() => { setPrice([400000]); setBrands([]); setCpuBrands([]); setRams([]); }}
             >
               Сбросить фильтры
             </Button>
@@ -213,7 +228,7 @@ const Index = () => {
             {filtered.map((p) => (
               <div key={p.id} className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
                 <div className="relative aspect-square overflow-hidden bg-muted">
-                  <img src={PC_IMG} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {p.tag && <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-600">{p.tag}</Badge>}
                   <Badge className="absolute top-3 right-3 bg-secondary/90 text-secondary-foreground font-500">{p.fps}</Badge>
                 </div>
