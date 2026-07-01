@@ -47,9 +47,10 @@ const PRODUCTS: Product[] = [
   { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RTX 5070',        ram: 32, price: 160500, fps: '240+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
   { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',     gpu: 'RTX 5070',        ram: 32, price: 179500, fps: '300+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
   { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',     gpu: 'RTX 5070 Ti',     ram: 32, price: 196500, fps: '300+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
+  { id: 18, name: 'DOMINATOR2 V4', brand: 'AMD',   cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RX 9070 XT',      ram: 32, price: 175500, fps: '240+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
 ];
 
-const BRANDS = ['NVIDIA'];
+const BRANDS = ['NVIDIA', 'AMD'];
 const CPU_BRANDS = ['Intel', 'AMD'];
 const RAM_OPTIONS = [16, 32, 64];
 
