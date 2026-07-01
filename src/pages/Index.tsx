@@ -186,7 +186,12 @@ const Index = () => {
           </div>
           <div className="relative animate-scale-in">
             <div className="absolute -inset-4 bg-secondary/30 blur-3xl rounded-full animate-glow" />
-            <img src={HERO_IMG} alt="Игровой ПК 240FPS" className="relative rounded-2xl border border-border w-full object-cover" />
+            <div className="relative rounded-2xl border border-border overflow-hidden">
+              <img src={HERO_IMG} alt="Игровой ПК 240FPS" className="w-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-secondary/60 via-primary/40 to-transparent" />
+            </div>
           </div>
         </div>
       </section>
