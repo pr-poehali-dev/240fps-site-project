@@ -354,7 +354,7 @@ const Index = () => {
           </aside>
 
           {/* Products */}
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
             {filtered.map((p) => (
               <div key={p.id} className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
                 <div
