@@ -440,6 +440,7 @@ const Index = () => {
             <div className="space-y-5">
               {[
                 { i: 'Phone', t: '+7-913-149-82-40', s: 'Ежедневно 9:00–21:00', href: 'tel:+79131498240' },
+                { i: 'Phone', t: '+7-999-456-09-06', s: 'Ежедневно 9:00–21:00', href: 'tel:+79994560906' },
                 { i: 'Send', t: 'Telegram: @Omsk_240FPS', s: 'Напишите нам в Telegram', href: 'https://t.me/Omsk_240FPS' },
                 { i: 'Users', t: 'ВКонтакте: vk.com/fps240', s: 'Наша группа ВКонтакте', href: 'https://vk.com/fps240' },
                 { i: 'MapPin', t: 'Омск, 70 Лет Октября 20', s: 'Магазин "240ФПС" · Самовывоз и доставка по РФ', href: 'https://yandex.ru/maps/?text=Омск+70+Лет+Октября+20' },
