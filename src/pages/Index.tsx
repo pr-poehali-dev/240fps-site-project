@@ -10,6 +10,7 @@ const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1
 const NAV = [
   { label: 'Главная', href: '#home' },
   { label: 'Каталог', href: '#catalog' },
+  { label: 'Калькулятор', href: '/calculator' },
   { label: 'О компании', href: '#about' },
   { label: 'Блог', href: '#blog' },
   { label: 'Контакты', href: '#contacts' },
@@ -235,7 +236,7 @@ const Index = () => {
                 <a href="#catalog"><Icon name="Cpu" size={18} /> Выбрать компьютер</a>
               </Button>
               <Button size="lg" variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-600" asChild>
-                <a href="#about">О компании</a>
+                <a href="/calculator"><Icon name="Calculator" size={18} /> Собрать свой ПК</a>
               </Button>
             </div>
             <div className="flex gap-8 mt-12">
