@@ -30,15 +30,26 @@ type Product = {
 };
 
 const PRODUCTS: Product[] = [
-  { id: 1, name: '240FPS Nova RTX', brand: 'NVIDIA', cpuBrand: 'AMD', cpu: 'Ryzen 7 7800X3D', gpu: 'RTX 5070 Ti', ram: 32, price: 189990, fps: '240+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
-  { id: 2, name: '240FPS Titan Pro', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i9-14900K', gpu: 'RTX 5090', ram: 64, price: 359990, fps: '360+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
-  { id: 3, name: '240FPS Storm', brand: 'AMD', cpuBrand: 'AMD', cpu: 'Ryzen 5 7600', gpu: 'RX 7700 XT', ram: 16, price: 119990, fps: '180+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
-  { id: 4, name: '240FPS Blaze', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-13600KF', gpu: 'RTX 5060 Ti', ram: 32, price: 139990, fps: '200+ FPS', tag: 'Выбор', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
-  { id: 5, name: '240FPS Fury X', brand: 'AMD', cpuBrand: 'AMD', cpu: 'Ryzen 9 7950X', gpu: 'RX 7900 XTX', ram: 64, price: 299990, fps: '300+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
-  { id: 6, name: '240FPS Spark', brand: 'NVIDIA', cpuBrand: 'AMD', cpu: 'Ryzen 5 5600', gpu: 'RTX 5060', ram: 16, price: 94990, fps: '144+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg' },
+  { id: 1,  name: 'GLADIATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',       gpu: 'RTX 5050',        ram: 16, price: 77500,  fps: '144+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
+  { id: 2,  name: 'GLADIATOR V2', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',       gpu: 'RTX 5060',        ram: 16, price: 81500,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
+  { id: 3,  name: 'GLADIATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',       gpu: 'RTX 5060',        ram: 16, price: 84500,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
+  { id: 4,  name: 'GLADIATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',       gpu: 'RTX 5060 Ti 8Gb', ram: 32, price: 97500,  fps: '180+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
+  { id: 5,  name: 'DOMINATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',      gpu: 'RTX 5060',        ram: 32, price: 110000, fps: '180+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
+  { id: 6,  name: 'DOMINATOR V2', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel 9600X',   gpu: 'RTX 5060',        ram: 32, price: 111000, fps: '180+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg' },
+  { id: 7,  name: 'DOMINATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',      gpu: 'RTX 5060 Ti 16Gb',ram: 32, price: 132500, fps: '200+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
+  { id: 8,  name: 'DOMINATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',    gpu: 'RTX 5060 Ti 16Gb',ram: 32, price: 154500, fps: '240+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
+  { id: 9,  name: 'RAPTOR',       brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',gpu: 'RTX 5050',        ram: 16, price: 81000,  fps: '144+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
+  { id: 10, name: 'RAPTOR V2',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',gpu: 'RTX 5060',        ram: 16, price: 84000,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
+  { id: 11, name: 'RAPTOR V3',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',gpu: 'RTX 5060',        ram: 32, price: 94000,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
+  { id: 12, name: 'RAPTOR V4',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-14600KF',gpu: 'RTX 5060',      ram: 32, price: 138000, fps: '200+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg' },
+  { id: 13, name: 'BERSERK',      brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 5 245KF',  gpu: 'RTX 5060 Ti 16Gb',ram: 32, price: 147500, fps: '240+ FPS', tag: 'Выбор', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
+  { id: 14, name: 'BERSERK V2',   brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 9 285K',   gpu: 'RTX 5080',        ram: 64, price: 340500, fps: '360+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
+  { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RTX 5070',        ram: 32, price: 160500, fps: '240+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
+  { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',     gpu: 'RTX 5070',        ram: 32, price: 179500, fps: '300+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
+  { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',     gpu: 'RTX 5070 Ti',     ram: 32, price: 196500, fps: '300+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
 ];
 
-const BRANDS = ['NVIDIA', 'AMD'];
+const BRANDS = ['NVIDIA'];
 const CPU_BRANDS = ['Intel', 'AMD'];
 const RAM_OPTIONS = [16, 32, 64];
 
@@ -51,7 +62,7 @@ const BLOG = [
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 
 const Index = () => {
-  const [price, setPrice] = useState<number[]>([400000]);
+  const [price, setPrice] = useState<number[]>([350000]);
   const [brands, setBrands] = useState<string[]>([]);
   const [cpuBrands, setCpuBrands] = useState<string[]>([]);
   const [rams, setRams] = useState<number[]>([]);
@@ -196,7 +207,7 @@ const Index = () => {
                 <Icon name="SlidersHorizontal" size={18} className="text-primary" /> Фильтры
               </h3>
               <div className="text-sm font-500 mb-3">Цена до {fmt(price[0])}</div>
-              <Slider min={90000} max={400000} step={10000} value={price} onValueChange={setPrice} />
+              <Slider min={77000} max={350000} step={5000} value={price} onValueChange={setPrice} />
             </div>
             <div className="border-t border-border pt-5">
               <div className="text-sm font-500 mb-3">Производитель GPU</div>
