@@ -29,12 +29,12 @@ type Product = {
 };
 
 const PRODUCTS: Product[] = [
-  { id: 1, name: '240FPS Nova RTX', brand: 'NVIDIA', cpu: 'Ryzen 7 7800X3D', gpu: 'RTX 4070 Ti', ram: 32, price: 189990, fps: '240+ FPS', tag: 'Хит' },
-  { id: 2, name: '240FPS Titan Pro', brand: 'NVIDIA', cpu: 'Intel i9-14900K', gpu: 'RTX 4090', ram: 64, price: 359990, fps: '360+ FPS', tag: 'Топ' },
+  { id: 1, name: '240FPS Nova RTX', brand: 'NVIDIA', cpu: 'Ryzen 7 7800X3D', gpu: 'RTX 5070 Ti', ram: 32, price: 189990, fps: '240+ FPS', tag: 'Хит' },
+  { id: 2, name: '240FPS Titan Pro', brand: 'NVIDIA', cpu: 'Intel i9-14900K', gpu: 'RTX 5090', ram: 64, price: 359990, fps: '360+ FPS', tag: 'Топ' },
   { id: 3, name: '240FPS Storm', brand: 'AMD', cpu: 'Ryzen 5 7600', gpu: 'RX 7700 XT', ram: 16, price: 119990, fps: '180+ FPS' },
-  { id: 4, name: '240FPS Blaze', brand: 'NVIDIA', cpu: 'Intel i5-13600KF', gpu: 'RTX 4060 Ti', ram: 32, price: 139990, fps: '200+ FPS', tag: 'Выбор' },
+  { id: 4, name: '240FPS Blaze', brand: 'NVIDIA', cpu: 'Intel i5-13600KF', gpu: 'RTX 5060 Ti', ram: 32, price: 139990, fps: '200+ FPS', tag: 'Выбор' },
   { id: 5, name: '240FPS Fury X', brand: 'AMD', cpu: 'Ryzen 9 7950X', gpu: 'RX 7900 XTX', ram: 64, price: 299990, fps: '300+ FPS' },
-  { id: 6, name: '240FPS Spark', brand: 'NVIDIA', cpu: 'Ryzen 5 5600', gpu: 'RTX 4060', ram: 16, price: 94990, fps: '144+ FPS' },
+  { id: 6, name: '240FPS Spark', brand: 'NVIDIA', cpu: 'Ryzen 5 5600', gpu: 'RTX 5060', ram: 16, price: 94990, fps: '144+ FPS' },
 ];
 
 const BRANDS = ['NVIDIA', 'AMD'];
@@ -42,7 +42,7 @@ const RAM_OPTIONS = [16, 32, 64];
 
 const BLOG = [
   { title: 'Как выбрать видеокарту в 2026 году', date: '28 июня', cat: 'Гайд' },
-  { title: 'RTX 4090 vs RX 7900 XTX: тесты в играх', date: '20 июня', cat: 'Обзор' },
+  { title: 'RTX 5090 vs RX 7900 XTX: тесты в играх', date: '20 июня', cat: 'Обзор' },
   { title: 'Топ-5 сборок для киберспорта', date: '11 июня', cat: 'Подборка' },
 ];
 
