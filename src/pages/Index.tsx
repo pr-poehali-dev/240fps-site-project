@@ -24,6 +24,7 @@ type Product = {
   cpu: string;
   gpu: string;
   ram: number;
+  storage: number;
   price: number;
   fps: string;
   tag?: string;
@@ -42,29 +43,30 @@ const IMG = {
 };
 
 const PRODUCTS: Product[] = [
-  { id: 1,  name: 'GLADIATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',        gpu: 'RTX 5050',         ram: 16, price: 77500,  fps: '144+ FPS',             img: IMG.a, imgs: [IMG.a, IMG.b] },
-  { id: 2,  name: 'GLADIATOR V2', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',        gpu: 'RTX 5060',         ram: 16, price: 81500,  fps: '165+ FPS',             img: IMG.b, imgs: [IMG.b, IMG.c] },
-  { id: 3,  name: 'GLADIATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',        gpu: 'RTX 5060',         ram: 16, price: 84500,  fps: '165+ FPS',             img: IMG.c, imgs: [IMG.c, IMG.d] },
-  { id: 4,  name: 'GLADIATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',        gpu: 'RTX 5060 Ti 8Gb',  ram: 32, price: 97500,  fps: '180+ FPS', tag: 'Хит', img: IMG.d, imgs: [IMG.d, IMG.e] },
-  { id: 5,  name: 'DOMINATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',       gpu: 'RTX 5060',         ram: 32, price: 110000, fps: '180+ FPS',             img: IMG.e, imgs: [IMG.e, IMG.a] },
-  { id: 6,  name: 'DOMINATOR V2', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel 9600X',    gpu: 'RTX 5060',         ram: 32, price: 111000, fps: '180+ FPS',             img: IMG.f, imgs: [IMG.f, IMG.b] },
-  { id: 7,  name: 'DOMINATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',       gpu: 'RTX 5060 Ti 16Gb', ram: 32, price: 132500, fps: '200+ FPS', tag: 'Хит', img: IMG.a, imgs: [IMG.a, IMG.hero] },
-  { id: 8,  name: 'DOMINATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RTX 5060 Ti 16Gb', ram: 32, price: 154500, fps: '240+ FPS', tag: 'Топ', img: IMG.b, imgs: [IMG.b, IMG.hero] },
-  { id: 9,  name: 'RAPTOR',       brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F', gpu: 'RTX 5050',         ram: 16, price: 81000,  fps: '144+ FPS',             img: IMG.c, imgs: [IMG.c, IMG.f] },
-  { id: 10, name: 'RAPTOR V2',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F', gpu: 'RTX 5060',         ram: 16, price: 84000,  fps: '165+ FPS',             img: IMG.d, imgs: [IMG.d, IMG.a] },
-  { id: 11, name: 'RAPTOR V3',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F', gpu: 'RTX 5060',         ram: 32, price: 94000,  fps: '165+ FPS',             img: IMG.e, imgs: [IMG.e, IMG.c] },
-  { id: 12, name: 'RAPTOR V4',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-14600KF',gpu: 'RTX 5060',         ram: 32, price: 138000, fps: '200+ FPS',             img: IMG.f, imgs: [IMG.f, IMG.d] },
-  { id: 13, name: 'BERSERK',      brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 5 245KF',   gpu: 'RTX 5060 Ti 16Gb', ram: 32, price: 147500, fps: '240+ FPS', tag: 'Выбор',img: IMG.a, imgs: [IMG.a, IMG.e] },
-  { id: 14, name: 'BERSERK V2',   brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 9 285K',    gpu: 'RTX 5080',         ram: 64, price: 340500, fps: '360+ FPS', tag: 'Топ', img: IMG.b, imgs: [IMG.b, IMG.hero] },
-  { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',      gpu: 'RTX 5070',         ram: 32, price: 160500, fps: '240+ FPS',             img: IMG.c, imgs: [IMG.c, IMG.hero] },
-  { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',      gpu: 'RTX 5070',         ram: 32, price: 179500, fps: '300+ FPS',             img: IMG.d, imgs: [IMG.d, IMG.f] },
-  { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',      gpu: 'RTX 5070 Ti',      ram: 32, price: 196500, fps: '300+ FPS', tag: 'Топ', img: IMG.e, imgs: [IMG.e, IMG.hero] },
-  { id: 18, name: 'DOMINATOR2 V4',brand: 'AMD',    cpuBrand: 'AMD',   cpu: 'R7 7800X3D',      gpu: 'RX 9070 XT',       ram: 32, price: 175500, fps: '240+ FPS', tag: 'Хит', img: IMG.f, imgs: [IMG.f, IMG.hero] },
+  { id: 1,  name: 'GLADIATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',         gpu: 'RTX 5050',         ram: 16, storage: 500,  price: 77500,  fps: '144+ FPS',              img: IMG.a, imgs: [IMG.a, IMG.b] },
+  { id: 2,  name: 'GLADIATOR V2', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',         gpu: 'RTX 5060',         ram: 16, storage: 500,  price: 81500,  fps: '165+ FPS',              img: IMG.b, imgs: [IMG.b, IMG.c] },
+  { id: 3,  name: 'GLADIATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',         gpu: 'RTX 5060',         ram: 16, storage: 1000, price: 84500,  fps: '165+ FPS',              img: IMG.c, imgs: [IMG.c, IMG.d] },
+  { id: 4,  name: 'GLADIATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',         gpu: 'RTX 5060 Ti 8Gb',  ram: 32, storage: 1000, price: 97500,  fps: '180+ FPS', tag: 'Хит',  img: IMG.d, imgs: [IMG.d, IMG.e] },
+  { id: 5,  name: 'DOMINATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',        gpu: 'RTX 5060',         ram: 32, storage: 1000, price: 110000, fps: '180+ FPS',              img: IMG.e, imgs: [IMG.e, IMG.a] },
+  { id: 6,  name: 'DOMINATOR V2', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel 9600X',     gpu: 'RTX 5060',         ram: 32, storage: 1000, price: 111000, fps: '180+ FPS',              img: IMG.f, imgs: [IMG.f, IMG.b] },
+  { id: 7,  name: 'DOMINATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',        gpu: 'RTX 5060 Ti 16Gb', ram: 32, storage: 1000, price: 132500, fps: '200+ FPS', tag: 'Хит',  img: IMG.a, imgs: [IMG.a, IMG.hero] },
+  { id: 8,  name: 'DOMINATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',      gpu: 'RTX 5060 Ti 16Gb', ram: 32, storage: 2000, price: 154500, fps: '240+ FPS', tag: 'Топ',  img: IMG.b, imgs: [IMG.b, IMG.hero] },
+  { id: 9,  name: 'RAPTOR',       brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',  gpu: 'RTX 5050',         ram: 16, storage: 500,  price: 81000,  fps: '144+ FPS',              img: IMG.c, imgs: [IMG.c, IMG.f] },
+  { id: 10, name: 'RAPTOR V2',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',  gpu: 'RTX 5060',         ram: 16, storage: 1000, price: 84000,  fps: '165+ FPS',              img: IMG.d, imgs: [IMG.d, IMG.a] },
+  { id: 11, name: 'RAPTOR V3',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',  gpu: 'RTX 5060',         ram: 32, storage: 1000, price: 94000,  fps: '165+ FPS',              img: IMG.e, imgs: [IMG.e, IMG.c] },
+  { id: 12, name: 'RAPTOR V4',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-14600KF', gpu: 'RTX 5060',         ram: 32, storage: 2000, price: 138000, fps: '200+ FPS',              img: IMG.f, imgs: [IMG.f, IMG.d] },
+  { id: 13, name: 'BERSERK',      brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 5 245KF',    gpu: 'RTX 5060 Ti 16Gb', ram: 32, storage: 2000, price: 147500, fps: '240+ FPS', tag: 'Выбор', img: IMG.a, imgs: [IMG.a, IMG.e] },
+  { id: 14, name: 'BERSERK V2',   brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 9 285K',     gpu: 'RTX 5080',         ram: 64, storage: 2000, price: 340500, fps: '360+ FPS', tag: 'Топ',  img: IMG.b, imgs: [IMG.b, IMG.hero] },
+  { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',       gpu: 'RTX 5070',         ram: 32, storage: 2000, price: 160500, fps: '240+ FPS',              img: IMG.c, imgs: [IMG.c, IMG.hero] },
+  { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',       gpu: 'RTX 5070',         ram: 32, storage: 2000, price: 179500, fps: '300+ FPS',              img: IMG.d, imgs: [IMG.d, IMG.f] },
+  { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',       gpu: 'RTX 5070 Ti',      ram: 32, storage: 2000, price: 196500, fps: '300+ FPS', tag: 'Топ',  img: IMG.e, imgs: [IMG.e, IMG.hero] },
+  { id: 18, name: 'DOMINATOR2 V4',brand: 'AMD',    cpuBrand: 'AMD',   cpu: 'R7 7800X3D',       gpu: 'RX 9070 XT',       ram: 32, storage: 2000, price: 175500, fps: '240+ FPS', tag: 'Хит',  img: IMG.f, imgs: [IMG.f, IMG.hero] },
 ];
 
 const BRANDS = ['NVIDIA', 'AMD'];
 const CPU_BRANDS = ['Intel', 'AMD'];
 const RAM_OPTIONS = [16, 32, 64];
+const SSD_OPTIONS = [500, 1000, 2000];
 
 type BlogPost = {
   title: string;
@@ -128,6 +130,7 @@ const Index = () => {
   const [brands, setBrands] = useState<string[]>([]);
   const [cpuBrands, setCpuBrands] = useState<string[]>([]);
   const [rams, setRams] = useState<number[]>([]);
+  const [ssds, setSsds] = useState<number[]>([]);
   const [cart, setCart] = useState<number[]>([]);
   const [orderProduct, setOrderProduct] = useState<Product | null>(null);
   const [orderName, setOrderName] = useState('');
@@ -176,9 +179,10 @@ const Index = () => {
           p.price <= price[0] &&
           (brands.length === 0 || brands.includes(p.brand)) &&
           (cpuBrands.length === 0 || cpuBrands.includes(p.cpuBrand)) &&
-          (rams.length === 0 || rams.includes(p.ram))
+          (rams.length === 0 || rams.includes(p.ram)) &&
+          (ssds.length === 0 || ssds.includes(p.storage))
       ),
-    [price, brands, cpuBrands, rams]
+    [price, brands, cpuBrands, rams, ssds]
   );
 
   return (
@@ -323,10 +327,21 @@ const Index = () => {
                 ))}
               </div>
             </div>
+            <div className="border-t border-border pt-5">
+              <div className="text-sm font-500 mb-3">SSD накопитель</div>
+              <div className="space-y-3">
+                {SSD_OPTIONS.map((s) => (
+                  <label key={s} className="flex items-center gap-3 cursor-pointer text-sm">
+                    <Checkbox checked={ssds.includes(s)} onCheckedChange={() => toggle(ssds, s, setSsds)} />
+                    {s >= 1000 ? `${s / 1000} ТБ` : `${s} ГБ`}
+                  </label>
+                ))}
+              </div>
+            </div>
             <Button
               variant="ghost"
               className="w-full text-muted-foreground hover:text-primary"
-              onClick={() => { setPrice([400000]); setBrands([]); setCpuBrands([]); setRams([]); }}
+              onClick={() => { setPrice([400000]); setBrands([]); setCpuBrands([]); setRams([]); setSsds([]); }}
             >
               Сбросить фильтры
             </Button>
@@ -355,6 +370,7 @@ const Index = () => {
                     <div className="flex items-center gap-2"><Icon name="Cpu" size={14} className="text-primary" /> {p.cpu}</div>
                     <div className="flex items-center gap-2"><Icon name="Gpu" size={14} className="text-primary" fallback="MonitorPlay" /> {p.gpu}</div>
                     <div className="flex items-center gap-2"><Icon name="MemoryStick" size={14} className="text-primary" /> {p.ram} ГБ RAM</div>
+                    <div className="flex items-center gap-2"><Icon name="HardDrive" size={14} className="text-primary" /> SSD {p.storage >= 1000 ? `${p.storage / 1000} ТБ` : `${p.storage} ГБ`}</div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-display font-700 text-xl">{fmt(p.price)}</span>
@@ -582,6 +598,7 @@ const Index = () => {
                   <div className="text-muted-foreground flex gap-2"><Icon name="Cpu" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.cpu}</div>
                   <div className="text-muted-foreground flex gap-2"><Icon name="MonitorPlay" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.gpu}</div>
                   <div className="text-muted-foreground flex gap-2"><Icon name="MemoryStick" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.ram} ГБ RAM</div>
+                  <div className="text-muted-foreground flex gap-2"><Icon name="HardDrive" size={13} className="text-primary mt-0.5 shrink-0" /> SSD {orderProduct.storage >= 1000 ? `${orderProduct.storage / 1000} ТБ` : `${orderProduct.storage} ГБ`}</div>
                   <div className="font-display font-700 text-lg text-primary mt-2">{fmt(orderProduct.price)}</div>
                 </div>
                 <div className="space-y-3 mb-5">
