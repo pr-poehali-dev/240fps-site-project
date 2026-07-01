@@ -1,0 +1,47 @@
+CREATE TABLE components_cpu (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_motherboard (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_ram (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_gpu (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_ssd (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_cooler (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(150) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_psu (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL
+);
+
+CREATE TABLE components_case (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  price INTEGER NOT NULL
+);
