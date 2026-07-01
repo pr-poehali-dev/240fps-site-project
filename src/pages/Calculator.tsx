@@ -46,8 +46,8 @@ const CPU_LGA1851 = ['Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
 const CPU_AM4     = ['R5 5500', 'R5 5600', 'R7 5700', 'R7 5700X'];
 const CPU_AM5     = ['R5 7500F', 'R7 7700', 'R7 7800X3D', 'R7 9800X3D'];
 
-const MB_LGA1700  = ['H610M', 'B860M'];
-const MB_LGA1851  = ['MAG B860 TOMAHAWK WIFI', 'Z890 AORUS ELITE WIFI7'];
+const MB_LGA1700  = ['H610M'];
+const MB_LGA1851  = ['B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890 AORUS ELITE WIFI7'];
 const MB_AM4      = ['A520M', 'B550M'];
 const MB_AM5      = ['A620M', 'B650M', 'B850M', 'B850M FORCE WIFI6E', 'B850M Gaming X AX', 'MSI B850 Gaming Plus WiFi6e'];
 
