@@ -5,7 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
-const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/265342b7-5d59-4e3c-a39b-25895cd691d6.jpg';
+const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/fcd1180c-a99c-428e-bb23-68d933a4b35f.jpg';
 
 const NAV = [
   { label: 'Главная', href: '#home' },
@@ -27,37 +27,97 @@ type Product = {
   fps: string;
   tag?: string;
   img: string;
+  imgs?: string[];
+};
+
+const IMG = {
+  a: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg',
+  b: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg',
+  c: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg',
+  d: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg',
+  e: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg',
+  f: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg',
+  hero: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/fcd1180c-a99c-428e-bb23-68d933a4b35f.jpg',
 };
 
 const PRODUCTS: Product[] = [
-  { id: 1,  name: 'GLADIATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',       gpu: 'RTX 5050',        ram: 16, price: 77500,  fps: '144+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
-  { id: 2,  name: 'GLADIATOR V2', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',       gpu: 'RTX 5060',        ram: 16, price: 81500,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
-  { id: 3,  name: 'GLADIATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',       gpu: 'RTX 5060',        ram: 16, price: 84500,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
-  { id: 4,  name: 'GLADIATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',       gpu: 'RTX 5060 Ti 8Gb', ram: 32, price: 97500,  fps: '180+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
-  { id: 5,  name: 'DOMINATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',      gpu: 'RTX 5060',        ram: 32, price: 110000, fps: '180+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
-  { id: 6,  name: 'DOMINATOR V2', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel 9600X',   gpu: 'RTX 5060',        ram: 32, price: 111000, fps: '180+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg' },
-  { id: 7,  name: 'DOMINATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',      gpu: 'RTX 5060 Ti 16Gb',ram: 32, price: 132500, fps: '200+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
-  { id: 8,  name: 'DOMINATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',    gpu: 'RTX 5060 Ti 16Gb',ram: 32, price: 154500, fps: '240+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
-  { id: 9,  name: 'RAPTOR',       brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',gpu: 'RTX 5050',        ram: 16, price: 81000,  fps: '144+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
-  { id: 10, name: 'RAPTOR V2',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',gpu: 'RTX 5060',        ram: 16, price: 84000,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
-  { id: 11, name: 'RAPTOR V3',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',gpu: 'RTX 5060',        ram: 32, price: 94000,  fps: '165+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
-  { id: 12, name: 'RAPTOR V4',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-14600KF',gpu: 'RTX 5060',      ram: 32, price: 138000, fps: '200+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg' },
-  { id: 13, name: 'BERSERK',      brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 5 245KF',  gpu: 'RTX 5060 Ti 16Gb',ram: 32, price: 147500, fps: '240+ FPS', tag: 'Выбор', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg' },
-  { id: 14, name: 'BERSERK V2',   brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 9 285K',   gpu: 'RTX 5080',        ram: 64, price: 340500, fps: '360+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
-  { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RTX 5070',        ram: 32, price: 160500, fps: '240+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg' },
-  { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',     gpu: 'RTX 5070',        ram: 32, price: 179500, fps: '300+ FPS', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg' },
-  { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',     gpu: 'RTX 5070 Ti',     ram: 32, price: 196500, fps: '300+ FPS', tag: 'Топ', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg' },
-  { id: 18, name: 'DOMINATOR2 V4', brand: 'AMD',   cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RX 9070 XT',      ram: 32, price: 175500, fps: '240+ FPS', tag: 'Хит', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg' },
+  { id: 1,  name: 'GLADIATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',        gpu: 'RTX 5050',         ram: 16, price: 77500,  fps: '144+ FPS',             img: IMG.a, imgs: [IMG.a, IMG.b] },
+  { id: 2,  name: 'GLADIATOR V2', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',        gpu: 'RTX 5060',         ram: 16, price: 81500,  fps: '165+ FPS',             img: IMG.b, imgs: [IMG.b, IMG.c] },
+  { id: 3,  name: 'GLADIATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',        gpu: 'RTX 5060',         ram: 16, price: 84500,  fps: '165+ FPS',             img: IMG.c, imgs: [IMG.c, IMG.d] },
+  { id: 4,  name: 'GLADIATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',        gpu: 'RTX 5060 Ti 8Gb',  ram: 32, price: 97500,  fps: '180+ FPS', tag: 'Хит', img: IMG.d, imgs: [IMG.d, IMG.e] },
+  { id: 5,  name: 'DOMINATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',       gpu: 'RTX 5060',         ram: 32, price: 110000, fps: '180+ FPS',             img: IMG.e, imgs: [IMG.e, IMG.a] },
+  { id: 6,  name: 'DOMINATOR V2', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel 9600X',    gpu: 'RTX 5060',         ram: 32, price: 111000, fps: '180+ FPS',             img: IMG.f, imgs: [IMG.f, IMG.b] },
+  { id: 7,  name: 'DOMINATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',       gpu: 'RTX 5060 Ti 16Gb', ram: 32, price: 132500, fps: '200+ FPS', tag: 'Хит', img: IMG.a, imgs: [IMG.a, IMG.hero] },
+  { id: 8,  name: 'DOMINATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',     gpu: 'RTX 5060 Ti 16Gb', ram: 32, price: 154500, fps: '240+ FPS', tag: 'Топ', img: IMG.b, imgs: [IMG.b, IMG.hero] },
+  { id: 9,  name: 'RAPTOR',       brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F', gpu: 'RTX 5050',         ram: 16, price: 81000,  fps: '144+ FPS',             img: IMG.c, imgs: [IMG.c, IMG.f] },
+  { id: 10, name: 'RAPTOR V2',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F', gpu: 'RTX 5060',         ram: 16, price: 84000,  fps: '165+ FPS',             img: IMG.d, imgs: [IMG.d, IMG.a] },
+  { id: 11, name: 'RAPTOR V3',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F', gpu: 'RTX 5060',         ram: 32, price: 94000,  fps: '165+ FPS',             img: IMG.e, imgs: [IMG.e, IMG.c] },
+  { id: 12, name: 'RAPTOR V4',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-14600KF',gpu: 'RTX 5060',         ram: 32, price: 138000, fps: '200+ FPS',             img: IMG.f, imgs: [IMG.f, IMG.d] },
+  { id: 13, name: 'BERSERK',      brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 5 245KF',   gpu: 'RTX 5060 Ti 16Gb', ram: 32, price: 147500, fps: '240+ FPS', tag: 'Выбор',img: IMG.a, imgs: [IMG.a, IMG.e] },
+  { id: 14, name: 'BERSERK V2',   brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 9 285K',    gpu: 'RTX 5080',         ram: 64, price: 340500, fps: '360+ FPS', tag: 'Топ', img: IMG.b, imgs: [IMG.b, IMG.hero] },
+  { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',      gpu: 'RTX 5070',         ram: 32, price: 160500, fps: '240+ FPS',             img: IMG.c, imgs: [IMG.c, IMG.hero] },
+  { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',      gpu: 'RTX 5070',         ram: 32, price: 179500, fps: '300+ FPS',             img: IMG.d, imgs: [IMG.d, IMG.f] },
+  { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',      gpu: 'RTX 5070 Ti',      ram: 32, price: 196500, fps: '300+ FPS', tag: 'Топ', img: IMG.e, imgs: [IMG.e, IMG.hero] },
+  { id: 18, name: 'DOMINATOR2 V4',brand: 'AMD',    cpuBrand: 'AMD',   cpu: 'R7 7800X3D',      gpu: 'RX 9070 XT',       ram: 32, price: 175500, fps: '240+ FPS', tag: 'Хит', img: IMG.f, imgs: [IMG.f, IMG.hero] },
 ];
 
 const BRANDS = ['NVIDIA', 'AMD'];
 const CPU_BRANDS = ['Intel', 'AMD'];
 const RAM_OPTIONS = [16, 32, 64];
 
-const BLOG = [
-  { title: 'Как выбрать видеокарту в 2026 году', date: '28 июня', cat: 'Гайд', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/902c9617-e2d5-49c8-ada0-7452906c92f9.jpg' },
-  { title: 'RTX 5090 vs RX 7900 XTX: тесты в играх', date: '20 июня', cat: 'Обзор', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/eb798448-830c-4662-b89a-3b039bad3ecf.jpg' },
-  { title: 'Топ-5 сборок для киберспорта', date: '11 июня', cat: 'Подборка', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/ce524460-851c-4de1-a71b-c63253f9d0bc.jpg' },
+type BlogPost = {
+  title: string;
+  date: string;
+  cat: string;
+  img: string;
+  readTime: string;
+  content: { heading: string; text: string }[];
+};
+
+const BLOG: BlogPost[] = [
+  {
+    title: 'Как выбрать видеокарту в 2026 году',
+    date: '28 июня',
+    cat: 'Гайд',
+    readTime: '5 мин',
+    img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/712e2f51-7255-4c98-a953-7b98d64e6433.jpg',
+    content: [
+      { heading: 'С чего начать?', text: 'Выбор видеокарты — одно из ключевых решений при сборке игрового ПК. В 2026 году рынок предлагает широкий выбор: от бюджетных RTX 5050 до флагманских RTX 5090. Главное — понять, под какие задачи и разрешение вы собираете компьютер.' },
+      { heading: 'Разрешение и FPS', text: 'Для игр в Full HD (1080p) с частотой 144+ FPS отлично подойдут RTX 5060 и RTX 5060 Ti. Для 2K (1440p) с 165+ FPS — RTX 5070. Если цель — 4K или 240+ FPS в соревновательных играх, смотрите на RTX 5080 и RTX 5090.' },
+      { heading: 'NVIDIA или AMD?', text: 'NVIDIA доминирует в трассировке лучей и DLSS 4.0 — технологии апскейлинга, которая позволяет получать больше FPS без потери качества. AMD предлагает отличное соотношение цена/производительность в чистой растеризации, особенно серия RX 9070.' },
+      { heading: 'Объём памяти', text: 'Минимум для современных игр — 8 ГБ VRAM. Оптимально — 16 ГБ, особенно если планируете текстуры в высоком качестве или стриминг. RTX 5060 Ti 16Gb — один из лучших вариантов по соотношению цены и памяти в 2026 году.' },
+      { heading: 'Итог', text: 'Не переплачивайте за топовые карты, если играете в 1080p. Подберите видеокарту под монитор и игры — и сборка от 240FPS поможет вам это сделать правильно.' },
+    ],
+  },
+  {
+    title: 'RTX 5090 vs RX 9070 XT: тесты в играх',
+    date: '20 июня',
+    cat: 'Обзор',
+    readTime: '7 мин',
+    img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/f8b1bf5e-4696-4533-b8be-8f102c7f62d1.jpg',
+    content: [
+      { heading: 'Противостояние флагманов', text: 'RTX 5090 — абсолютный топ от NVIDIA с 32 ГБ VRAM и поддержкой DLSS 4.0. RX 9070 XT — флагман AMD нового поколения, который предлагает впечатляющую производительность по значительно более доступной цене.' },
+      { heading: 'Результаты в 4K', text: 'В Cyberpunk 2077 при максимальных настройках в 4K: RTX 5090 выдаёт 145 FPS со включённым ray tracing и DLSS Quality. RX 9070 XT показывает 98 FPS с FSR 4.0. Разница ощутимая, но и разница в цене — почти двукратная.' },
+      { heading: 'Киберспортивные игры', text: 'В CS2 и Valorant при 1080p обе карты легко пробивают 400+ FPS — разница нивелируется. Для соревновательных игр переплачивать за 5090 нет смысла. Здесь решает связка с процессором: R7 9800X3D или Intel Ultra 9.' },
+      { heading: 'Трассировка лучей', text: 'По ray tracing NVIDIA по-прежнему впереди — преимущество RTX 5090 достигает 60% в некоторых сценах Cyberpunk. Если для вас важна кинематографическая картинка, выбор очевиден. Если нет — AMD выгоднее.' },
+      { heading: 'Наш вердикт', text: 'RTX 5090 — лучшая карта на рынке, но её цена оправдана только при 4K-гейминге с ray tracing. RX 9070 XT — феноменальный выбор за свои деньги. В 240FPS мы используем обе в разных конфигурациях под задачи клиента.' },
+    ],
+  },
+  {
+    title: 'Топ-5 сборок для киберспорта',
+    date: '11 июня',
+    cat: 'Подборка',
+    readTime: '4 мин',
+    img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/ce0c5cae-d52d-4177-9693-dd7a70fcfdc6.jpg',
+    content: [
+      { heading: 'Что важно для киберспорта?', text: 'В соревновательном гейминге главное — стабильно высокий FPS (200+), минимальный input lag и надёжность. Красивая графика уходит на второй план — важна скорость отклика и предсказуемость работы системы.' },
+      { heading: '1. DOMINATOR V3 — лучший старт', text: 'R5 7500F + RTX 5060 Ti 16Gb + 32 ГБ RAM. Выдаёт 200+ FPS в CS2 и Valorant при средних настройках. Отличный выбор для начинающего киберспортсмена с бюджетом до 135 000 ₽.' },
+      { heading: '2. DOMINATOR V4 — для серьёзных игроков', text: 'R7 7800X3D + RTX 5060 Ti 16Gb. Процессор с 3D V-Cache обеспечивает феноменальный прирост в играх. CS2: 350+ FPS. Valorant: 450+ FPS. Идеален для игр на мониторах 240 Гц и выше.' },
+      { heading: '3. BERSERK V3 — баланс мощи', text: 'R7 7800X3D + RTX 5070. Универсальная машина — одинаково хороша и в киберспорте, и в ААА-играх с трассировкой. 300+ FPS в соревновательных тайтлах гарантировано.' },
+      { heading: '4. BERSERK V4 — новый уровень', text: 'R7 9800X3D + RTX 5070. Новейший процессор AMD с ещё большим кешем. Прирост в CS2 относительно 7800X3D — около 15%. Для тех, кто хочет всё и сразу.' },
+      { heading: '5. BERSERK V2 — абсолютный топ', text: 'Intel Ultra 9 285K + RTX 5080 + 64 ГБ RAM. Максимум производительности без компромиссов. 360+ FPS в любой дисциплине. Флагман линейки 240FPS для профессиональных игроков.' },
+    ],
+  },
 ];
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
@@ -70,6 +130,9 @@ const Index = () => {
   const [cart, setCart] = useState<number[]>([]);
   const [orderProduct, setOrderProduct] = useState<Product | null>(null);
   const [orderName, setOrderName] = useState('');
+  const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
+  const [productModal, setProductModal] = useState<Product | null>(null);
+  const [productImgIdx, setProductImgIdx] = useState(0);
   const [orderPhone, setOrderPhone] = useState('');
   const [sent, setSent] = useState(false);
   const [callbackOpen, setCallbackOpen] = useState(false);
@@ -272,10 +335,18 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
             {filtered.map((p) => (
               <div key={p.id} className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
-                <div className="relative aspect-square overflow-hidden bg-muted">
+                <div
+                  className="relative aspect-square overflow-hidden bg-muted cursor-pointer"
+                  onClick={() => { setProductModal(p); setProductImgIdx(0); }}
+                >
                   <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {p.tag && <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-600">{p.tag}</Badge>}
                   <Badge className="absolute top-3 right-3 bg-secondary/90 text-secondary-foreground font-500">{p.fps}</Badge>
+                  {p.imgs && p.imgs.length > 1 && (
+                    <div className="absolute bottom-2 right-2 bg-black/60 rounded-md px-2 py-1 text-xs text-white flex items-center gap-1">
+                      <Icon name="Images" size={12} /> {p.imgs.length}
+                    </div>
+                  )}
                 </div>
                 <div className="p-5">
                   <div className="font-display font-600 text-lg mb-3">{p.name}</div>
@@ -340,11 +411,10 @@ const Index = () => {
       <section id="blog" className="container py-16">
         <div className="flex items-end justify-between mb-8">
           <h2 className="font-display font-700 text-4xl uppercase">Блог</h2>
-          <a href="#blog" className="text-sm text-primary font-500 hover:underline">Все статьи →</a>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
           {BLOG.map((b) => (
-            <a key={b.title} href="#blog" className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all">
+            <button key={b.title} onClick={() => setBlogPost(b)} className="group text-left rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
               <div className="aspect-video overflow-hidden bg-muted">
                 <img src={b.img} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
@@ -352,10 +422,11 @@ const Index = () => {
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
                   <Badge variant="outline" className="border-primary/40 text-primary">{b.cat}</Badge>
                   {b.date}
+                  <span className="ml-auto flex items-center gap-1"><Icon name="Clock" size={11} /> {b.readTime}</span>
                 </div>
                 <div className="font-600 group-hover:text-primary transition-colors">{b.title}</div>
               </div>
-            </a>
+            </button>
           ))}
         </div>
       </section>
@@ -534,6 +605,73 @@ const Index = () => {
                 </Button>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Blog Article Modal */}
+      {blogPost && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto" onClick={() => setBlogPost(null)}>
+          <div className="bg-card border border-border rounded-2xl w-full max-w-2xl my-8" onClick={(e) => e.stopPropagation()}>
+            <div className="aspect-video overflow-hidden rounded-t-2xl">
+              <img src={blogPost.img} alt={blogPost.title} className="w-full h-full object-cover" />
+            </div>
+            <div className="p-6 md:p-8">
+              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
+                <Badge variant="outline" className="border-primary/40 text-primary">{blogPost.cat}</Badge>
+                {blogPost.date}
+                <span className="flex items-center gap-1"><Icon name="Clock" size={11} /> {blogPost.readTime}</span>
+                <button onClick={() => setBlogPost(null)} className="ml-auto text-muted-foreground hover:text-foreground transition-colors">
+                  <Icon name="X" size={18} />
+                </button>
+              </div>
+              <h2 className="font-display font-700 text-2xl md:text-3xl uppercase mb-6">{blogPost.title}</h2>
+              <div className="space-y-5">
+                {blogPost.content.map((section) => (
+                  <div key={section.heading}>
+                    <h3 className="font-600 text-primary mb-2">{section.heading}</h3>
+                    <p className="text-muted-foreground leading-relaxed text-sm">{section.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 pt-6 border-t border-border">
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-600 glow-yellow" asChild>
+                  <a href="#catalog"><Icon name="Cpu" size={16} /> Выбрать сборку</a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Photo Gallery Modal */}
+      {productModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onClick={() => setProductModal(null)}>
+          <div className="relative w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setProductModal(null)} className="absolute -top-10 right-0 text-white/70 hover:text-white transition-colors z-10">
+              <Icon name="X" size={24} />
+            </button>
+            <div className="rounded-2xl overflow-hidden border border-border">
+              <img
+                src={productModal.imgs?.[productImgIdx] ?? productModal.img}
+                alt={productModal.name}
+                className="w-full object-cover max-h-[70vh]"
+              />
+            </div>
+            {productModal.imgs && productModal.imgs.length > 1 && (
+              <div className="flex gap-3 mt-4 justify-center">
+                {productModal.imgs.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setProductImgIdx(i)}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${i === productImgIdx ? 'border-primary' : 'border-border opacity-60 hover:opacity-100'}`}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="text-center mt-3 text-white/70 text-sm font-500">{productModal.name}</div>
           </div>
         </div>
       )}
