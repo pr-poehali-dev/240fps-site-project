@@ -43,9 +43,9 @@ const CPU_BRANDS = ['Intel', 'AMD'];
 const RAM_OPTIONS = [16, 32, 64];
 
 const BLOG = [
-  { title: 'Как выбрать видеокарту в 2026 году', date: '28 июня', cat: 'Гайд' },
-  { title: 'RTX 5090 vs RX 7900 XTX: тесты в играх', date: '20 июня', cat: 'Обзор' },
-  { title: 'Топ-5 сборок для киберспорта', date: '11 июня', cat: 'Подборка' },
+  { title: 'Как выбрать видеокарту в 2026 году', date: '28 июня', cat: 'Гайд', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/902c9617-e2d5-49c8-ada0-7452906c92f9.jpg' },
+  { title: 'RTX 5090 vs RX 7900 XTX: тесты в играх', date: '20 июня', cat: 'Обзор', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/eb798448-830c-4662-b89a-3b039bad3ecf.jpg' },
+  { title: 'Топ-5 сборок для киберспорта', date: '11 июня', cat: 'Подборка', img: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/ce524460-851c-4de1-a71b-c63253f9d0bc.jpg' },
 ];
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
@@ -56,6 +56,18 @@ const Index = () => {
   const [cpuBrands, setCpuBrands] = useState<string[]>([]);
   const [rams, setRams] = useState<number[]>([]);
   const [cart, setCart] = useState<number[]>([]);
+  const [orderProduct, setOrderProduct] = useState<Product | null>(null);
+  const [orderName, setOrderName] = useState('');
+  const [orderPhone, setOrderPhone] = useState('');
+
+  const sendOrder = () => {
+    if (!orderProduct) return;
+    const text = `Заявка на покупку!\n\n🖥 ${orderProduct.name}\nЦП: ${orderProduct.cpu}\nГП: ${orderProduct.gpu}\nОЗУ: ${orderProduct.ram} ГБ\nЦена: ${fmt(orderProduct.price)}\n\n👤 Имя: ${orderName}\n📞 Телефон: ${orderPhone}`;
+    window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
+    setOrderProduct(null);
+    setOrderName('');
+    setOrderPhone('');
+  };
 
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -131,7 +143,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="flex gap-8 mt-12">
-              {[['5000+', 'Сборок'], ['4.9', 'Рейтинг'], ['3 года', 'Гарантия']].map(([v, l]) => (
+              {[['5000+', 'Сборок'], ['5.0', 'Рейтинг'], ['1 год', 'Гарантия']].map(([v, l]) => (
                 <div key={l}>
                   <div className="font-display font-700 text-3xl text-primary">{v}</div>
                   <div className="text-sm text-muted-foreground">{l}</div>
@@ -150,7 +162,7 @@ const Index = () => {
       <section className="container py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
           { icon: 'Rocket', t: 'Максимальный FPS', d: 'Оптимизация под 240+ кадров' },
-          { icon: 'ShieldCheck', t: 'Гарантия 3 года', d: 'Официальная поддержка' },
+          { icon: 'ShieldCheck', t: 'Гарантия 1 год', d: 'Официальная поддержка' },
           { icon: 'Truck', t: 'Доставка по РФ', d: 'Бережная упаковка' },
           { icon: 'Wrench', t: 'Тест 24 часа', d: 'Каждая сборка под нагрузкой' },
         ].map((f) => (
@@ -244,10 +256,10 @@ const Index = () => {
                     <Button
                       size="sm"
                       className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-600"
-                      onClick={() => toggle(cart, p.id, setCart)}
+                      onClick={() => setOrderProduct(p)}
                     >
-                      <Icon name={cart.includes(p.id) ? 'Check' : 'Plus'} size={16} />
-                      {cart.includes(p.id) ? 'В корзине' : 'Купить'}
+                      <Icon name="Plus" size={16} />
+                      Купить
                     </Button>
                   </div>
                 </div>
@@ -301,7 +313,7 @@ const Index = () => {
           {BLOG.map((b) => (
             <a key={b.title} href="#blog" className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all">
               <div className="aspect-video overflow-hidden bg-muted">
-                <img src={HERO_IMG} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={b.img} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-5">
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
@@ -389,6 +401,47 @@ const Index = () => {
           © 2026 240FPS. Все права защищены.
         </div>
       </footer>
+      {/* Order Modal */}
+      {orderProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setOrderProduct(null)}>
+          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display font-700 text-xl uppercase">Оформить заказ</h3>
+              <button onClick={() => setOrderProduct(null)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <Icon name="X" size={20} />
+              </button>
+            </div>
+            <div className="p-4 rounded-xl bg-muted/50 border border-border mb-5 space-y-1 text-sm">
+              <div className="font-600 text-base mb-2">{orderProduct.name}</div>
+              <div className="text-muted-foreground flex gap-2"><Icon name="Cpu" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.cpu}</div>
+              <div className="text-muted-foreground flex gap-2"><Icon name="MonitorPlay" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.gpu}</div>
+              <div className="text-muted-foreground flex gap-2"><Icon name="MemoryStick" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.ram} ГБ RAM</div>
+              <div className="font-display font-700 text-lg text-primary mt-2">{fmt(orderProduct.price)}</div>
+            </div>
+            <div className="space-y-3 mb-5">
+              <input
+                className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                placeholder="Ваше имя"
+                value={orderName}
+                onChange={(e) => setOrderName(e.target.value)}
+              />
+              <input
+                className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                placeholder="Номер телефона"
+                value={orderPhone}
+                onChange={(e) => setOrderPhone(e.target.value)}
+              />
+            </div>
+            <Button
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+              disabled={!orderName.trim() || !orderPhone.trim()}
+              onClick={sendOrder}
+            >
+              <Icon name="Send" size={18} /> Отправить заявку в Telegram
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
