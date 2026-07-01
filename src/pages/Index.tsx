@@ -301,7 +301,7 @@ const Index = () => {
           {BLOG.map((b) => (
             <a key={b.title} href="#blog" className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all">
               <div className="aspect-video overflow-hidden bg-muted">
-                <img src={PC_IMG} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={HERO_IMG} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-5">
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
