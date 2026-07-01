@@ -5,7 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
-const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/aab525b7-c98e-443e-8075-0fb705fc6887.jpg';
+const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/7cab4a75-1097-44a4-a885-d47e3614c16e.jpg';
 
 const NAV = [
   { label: 'Главная', href: '#home' },
