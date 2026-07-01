@@ -323,16 +323,20 @@ const Index = () => {
             <p className="text-muted-foreground mb-8">Свяжитесь с нами любым удобным способом — поможем подобрать сборку.</p>
             <div className="space-y-5">
               {[
-                { i: 'Phone', t: '+7 (800) 240-00-00', s: 'Ежедневно 9:00–21:00' },
-                { i: 'Mail', t: 'hello@240fps.ru', s: 'Ответим в течение часа' },
-                { i: 'MapPin', t: 'Москва, ул. Геймерская, 24', s: 'Шоурум и самовывоз' },
+                { i: 'Phone', t: '+7-913-149-82-40', s: 'Ежедневно 9:00–21:00', href: 'tel:+79131498240' },
+                { i: 'Send', t: 'Telegram: @Omsk_240FPS', s: 'Напишите нам в Telegram', href: 'https://t.me/Omsk_240FPS' },
+                { i: 'MapPin', t: 'Омск', s: 'Самовывоз и доставка по РФ', href: undefined },
               ].map((c) => (
                 <div key={c.t} className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
                     <Icon name={c.i} size={22} className="text-primary" />
                   </div>
                   <div>
-                    <div className="font-600">{c.t}</div>
+                    {c.href ? (
+                      <a href={c.href} target="_blank" rel="noopener noreferrer" className="font-600 hover:text-primary transition-colors">{c.t}</a>
+                    ) : (
+                      <div className="font-600">{c.t}</div>
+                    )}
                     <div className="text-sm text-muted-foreground">{c.s}</div>
                   </div>
                 </div>
@@ -345,8 +349,11 @@ const Index = () => {
               <input className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors" placeholder="Ваше имя" />
               <input className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors" placeholder="Телефон" />
               <textarea className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors min-h-28 resize-none" placeholder="Комментарий" />
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow">
-                Отправить заявку
+              <Button
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+                onClick={() => window.open('https://t.me/MaxSokhin', '_blank')}
+              >
+                <Icon name="Send" size={18} /> Отправить заявку в Telegram
               </Button>
             </div>
           </div>
@@ -368,8 +375,11 @@ const Index = () => {
             ))}
           </div>
           <div className="flex gap-3">
-            {['Send', 'Youtube', 'Instagram'].map((i) => (
-              <a key={i} href="#" className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-secondary transition-colors">
+            {[
+              { i: 'Send', href: 'https://t.me/Omsk_240FPS' },
+              { i: 'Phone', href: 'tel:+79131498240' },
+            ].map(({ i, href }) => (
+              <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-secondary transition-colors">
                 <Icon name={i} size={18} />
               </a>
             ))}
