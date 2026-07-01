@@ -72,6 +72,22 @@ const Index = () => {
   const [orderName, setOrderName] = useState('');
   const [orderPhone, setOrderPhone] = useState('');
   const [sent, setSent] = useState(false);
+  const [callbackOpen, setCallbackOpen] = useState(false);
+  const [callbackName, setCallbackName] = useState('');
+  const [callbackPhone, setCallbackPhone] = useState('');
+  const [callbackSent, setCallbackSent] = useState(false);
+
+  const sendCallback = () => {
+    const text = `📞 Заявка на звонок!\n\n👤 Имя: ${callbackName}\n📞 Телефон: ${callbackPhone}`;
+    window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
+    setCallbackSent(true);
+    setTimeout(() => {
+      setCallbackSent(false);
+      setCallbackOpen(false);
+      setCallbackName('');
+      setCallbackPhone('');
+    }, 3000);
+  };
 
   const sendOrder = () => {
     if (!orderProduct) return;
@@ -122,7 +138,7 @@ const Index = () => {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="hidden sm:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground">
+            <Button variant="outline" size="sm" className="hidden sm:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => setCallbackOpen(true)}>
               <Icon name="Phone" size={16} /> Заказать звонок
             </Button>
             <button className="relative">
@@ -354,6 +370,7 @@ const Index = () => {
               {[
                 { i: 'Phone', t: '+7-913-149-82-40', s: 'Ежедневно 9:00–21:00', href: 'tel:+79131498240' },
                 { i: 'Send', t: 'Telegram: @Omsk_240FPS', s: 'Напишите нам в Telegram', href: 'https://t.me/Omsk_240FPS' },
+                { i: 'Users', t: 'ВКонтакте: vk.com/fps240', s: 'Наша группа ВКонтакте', href: 'https://vk.com/fps240' },
                 { i: 'MapPin', t: 'Омск', s: 'Самовывоз и доставка по РФ', href: undefined },
               ].map((c) => (
                 <div key={c.t} className="flex items-center gap-4">
@@ -405,8 +422,9 @@ const Index = () => {
           </div>
           <div className="flex gap-3">
             {[
-              { i: 'Send', href: 'https://t.me/Omsk_240FPS' },
-              { i: 'Phone', href: 'tel:+79131498240' },
+              { i: 'Send', href: 'https://t.me/Omsk_240FPS', label: 'Telegram' },
+              { i: 'Users', href: 'https://vk.com/fps240', label: 'ВКонтакте' },
+              { i: 'Phone', href: 'tel:+79131498240', label: 'Телефон' },
             ].map(({ i, href }) => (
               <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-secondary transition-colors">
                 <Icon name={i} size={18} />
@@ -418,6 +436,54 @@ const Index = () => {
           © 2026 240FPS. Все права защищены.
         </div>
       </footer>
+      {/* Callback Modal */}
+      {callbackOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setCallbackOpen(false)}>
+          <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display font-700 text-xl uppercase">Заказать звонок</h3>
+              <button onClick={() => setCallbackOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <Icon name="X" size={20} />
+              </button>
+            </div>
+            {callbackSent ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center glow-yellow">
+                  <Icon name="CheckCircle" size={36} className="text-primary" />
+                </div>
+                <div className="font-display font-700 text-xl">Заявка отправлена!</div>
+                <div className="text-muted-foreground text-sm">Мы перезвоним вам в ближайшее время.</div>
+              </div>
+            ) : (
+              <>
+                <p className="text-muted-foreground text-sm mb-5">Оставьте имя и номер — мы перезвоним в течение 15 минут.</p>
+                <div className="space-y-3 mb-5">
+                  <input
+                    className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                    placeholder="Ваше имя"
+                    value={callbackName}
+                    onChange={(e) => setCallbackName(e.target.value)}
+                  />
+                  <input
+                    className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                    placeholder="Номер телефона"
+                    value={callbackPhone}
+                    onChange={(e) => setCallbackPhone(e.target.value)}
+                  />
+                </div>
+                <Button
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+                  disabled={!callbackName.trim() || !callbackPhone.trim()}
+                  onClick={sendCallback}
+                >
+                  <Icon name="Phone" size={18} /> Перезвоните мне
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Order Modal */}
       {orderProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={() => setOrderProduct(null)}>
