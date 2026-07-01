@@ -63,8 +63,8 @@ const PRODUCTS: Product[] = [
   { id: 18, name: 'DOMINATOR2 V4',brand: 'AMD',    cpuBrand: 'AMD',   cpu: 'R7 7800X3D',       gpu: 'RX 9070 XT',       ram: 32, storage: 1000, price: 175500, fps: '240+ FPS', tag: 'Хит',  img: IMG.f, imgs: [IMG.f, IMG.hero] },
 ];
 
-const BRANDS = ['NVIDIA', 'AMD'];
-const CPU_BRANDS = ['Intel', 'AMD'];
+const GPU_MODELS = [...new Set(PRODUCTS.map((p) => p.gpu))].sort();
+const CPU_MODELS = [...new Set(PRODUCTS.map((p) => p.cpu))].sort();
 const RAM_OPTIONS = [16, 32, 64];
 const SSD_OPTIONS = [500, 1000, 2000];
 
@@ -127,8 +127,8 @@ const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 
 const Index = () => {
   const [price, setPrice] = useState<number[]>([350000]);
-  const [brands, setBrands] = useState<string[]>([]);
-  const [cpuBrands, setCpuBrands] = useState<string[]>([]);
+  const [gpuModels, setGpuModels] = useState<string[]>([]);
+  const [cpuModels, setCpuModels] = useState<string[]>([]);
   const [rams, setRams] = useState<number[]>([]);
   const [ssds, setSsds] = useState<number[]>([]);
   const [cart, setCart] = useState<number[]>([]);
@@ -177,12 +177,12 @@ const Index = () => {
       PRODUCTS.filter(
         (p) =>
           p.price <= price[0] &&
-          (brands.length === 0 || brands.includes(p.brand)) &&
-          (cpuBrands.length === 0 || cpuBrands.includes(p.cpuBrand)) &&
+          (gpuModels.length === 0 || gpuModels.includes(p.gpu)) &&
+          (cpuModels.length === 0 || cpuModels.includes(p.cpu)) &&
           (rams.length === 0 || rams.includes(p.ram)) &&
           (ssds.length === 0 || ssds.includes(p.storage))
       ),
-    [price, brands, cpuBrands, rams, ssds]
+    [price, gpuModels, cpuModels, rams, ssds]
   );
 
   return (
@@ -295,23 +295,29 @@ const Index = () => {
               <Slider min={77000} max={350000} step={5000} value={price} onValueChange={setPrice} />
             </div>
             <div className="border-t border-border pt-5">
-              <div className="text-sm font-500 mb-3">Производитель GPU</div>
-              <div className="space-y-3">
-                {BRANDS.map((b) => (
-                  <label key={b} className="flex items-center gap-3 cursor-pointer text-sm">
-                    <Checkbox checked={brands.includes(b)} onCheckedChange={() => toggle(brands, b, setBrands)} />
-                    {b}
+              <div className="text-sm font-500 mb-3 flex items-center justify-between">
+                <span>Видеокарта</span>
+                {gpuModels.length > 0 && <button onClick={() => setGpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors">сбросить</button>}
+              </div>
+              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                {GPU_MODELS.map((g) => (
+                  <label key={g} className="flex items-center gap-3 cursor-pointer text-sm">
+                    <Checkbox checked={gpuModels.includes(g)} onCheckedChange={() => toggle(gpuModels, g, setGpuModels)} />
+                    {g}
                   </label>
                 ))}
               </div>
             </div>
             <div className="border-t border-border pt-5">
-              <div className="text-sm font-500 mb-3">Производитель CPU</div>
-              <div className="space-y-3">
-                {CPU_BRANDS.map((b) => (
-                  <label key={b} className="flex items-center gap-3 cursor-pointer text-sm">
-                    <Checkbox checked={cpuBrands.includes(b)} onCheckedChange={() => toggle(cpuBrands, b, setCpuBrands)} />
-                    {b}
+              <div className="text-sm font-500 mb-3 flex items-center justify-between">
+                <span>Процессор</span>
+                {cpuModels.length > 0 && <button onClick={() => setCpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors">сбросить</button>}
+              </div>
+              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                {CPU_MODELS.map((c) => (
+                  <label key={c} className="flex items-center gap-3 cursor-pointer text-sm">
+                    <Checkbox checked={cpuModels.includes(c)} onCheckedChange={() => toggle(cpuModels, c, setCpuModels)} />
+                    {c}
                   </label>
                 ))}
               </div>
@@ -341,7 +347,7 @@ const Index = () => {
             <Button
               variant="ghost"
               className="w-full text-muted-foreground hover:text-primary"
-              onClick={() => { setPrice([400000]); setBrands([]); setCpuBrands([]); setRams([]); setSsds([]); }}
+              onClick={() => { setPrice([350000]); setGpuModels([]); setCpuModels([]); setRams([]); setSsds([]); }}
             >
               Сбросить фильтры
             </Button>
