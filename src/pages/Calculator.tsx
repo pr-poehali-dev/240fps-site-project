@@ -54,7 +54,9 @@ export default function Calculator() {
       .catch(() => setLoading(false));
   }, []);
 
-  const total = Object.values(selected).reduce((sum, p) => sum + (p?.price ?? 0), 0);
+  const partsTotal = Object.values(selected).reduce((sum, p) => sum + (p?.price ?? 0), 0);
+  const assemblyFee = partsTotal === 0 ? 0 : partsTotal > 150000 ? 6000 : 5000;
+  const total = partsTotal + assemblyFee;
   const keys = Object.keys(LABELS) as (keyof Components)[];
 
   const select = (category: keyof Components, part: Part) => {
@@ -73,7 +75,7 @@ export default function Calculator() {
       .filter((k) => selected[k])
       .map((k) => `${LABELS[k].label}: ${selected[k]!.name} — ${fmt(selected[k]!.price)}`)
       .join('\n');
-    const text = `🖥 Заявка на сборку!\n\n${lines}\n\n💰 Итого: ${fmt(total)}\n\n👤 Имя: ${name}\n📞 Телефон: ${phone}`;
+    const text = `🖥 Заявка на сборку!\n\n${lines}\n\n🔧 Услуга сборки: ${fmt(assemblyFee)}\n💰 Итого: ${fmt(total)}\n\n👤 Имя: ${name}\n📞 Телефон: ${phone}`;
     window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
     setSent(true);
     setTimeout(() => { setSent(false); setOrderOpen(false); setName(''); setPhone(''); }, 3000);
@@ -181,8 +183,22 @@ export default function Calculator() {
               )}
 
               <div className="border-t border-border pt-4 mt-4">
+                {assemblyFee > 0 && (
+                  <div className="space-y-2 mb-4 text-sm">
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>Комплектующие:</span>
+                      <span>{fmt(partsTotal)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <Icon name="Wrench" size={13} className="text-secondary" /> Услуга сборки:
+                      </span>
+                      <span className="text-secondary font-500">+ {fmt(assemblyFee)}</span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between mb-5">
-                  <span className="text-muted-foreground text-sm">Итого:</span>
+                  <span className="text-muted-foreground text-sm font-600">Итого:</span>
                   <span className="font-display font-700 text-2xl text-primary">{fmt(total)}</span>
                 </div>
                 <Button
