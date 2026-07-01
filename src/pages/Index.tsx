@@ -59,14 +59,19 @@ const Index = () => {
   const [orderProduct, setOrderProduct] = useState<Product | null>(null);
   const [orderName, setOrderName] = useState('');
   const [orderPhone, setOrderPhone] = useState('');
+  const [sent, setSent] = useState(false);
 
   const sendOrder = () => {
     if (!orderProduct) return;
     const text = `Заявка на покупку!\n\n🖥 ${orderProduct.name}\nЦП: ${orderProduct.cpu}\nГП: ${orderProduct.gpu}\nОЗУ: ${orderProduct.ram} ГБ\nЦена: ${fmt(orderProduct.price)}\n\n👤 Имя: ${orderName}\n📞 Телефон: ${orderPhone}`;
     window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
-    setOrderProduct(null);
-    setOrderName('');
-    setOrderPhone('');
+    setSent(true);
+    setTimeout(() => {
+      setSent(false);
+      setOrderProduct(null);
+      setOrderName('');
+      setOrderPhone('');
+    }, 3000);
   };
 
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
@@ -411,34 +416,46 @@ const Index = () => {
                 <Icon name="X" size={20} />
               </button>
             </div>
-            <div className="p-4 rounded-xl bg-muted/50 border border-border mb-5 space-y-1 text-sm">
-              <div className="font-600 text-base mb-2">{orderProduct.name}</div>
-              <div className="text-muted-foreground flex gap-2"><Icon name="Cpu" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.cpu}</div>
-              <div className="text-muted-foreground flex gap-2"><Icon name="MonitorPlay" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.gpu}</div>
-              <div className="text-muted-foreground flex gap-2"><Icon name="MemoryStick" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.ram} ГБ RAM</div>
-              <div className="font-display font-700 text-lg text-primary mt-2">{fmt(orderProduct.price)}</div>
-            </div>
-            <div className="space-y-3 mb-5">
-              <input
-                className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
-                placeholder="Ваше имя"
-                value={orderName}
-                onChange={(e) => setOrderName(e.target.value)}
-              />
-              <input
-                className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
-                placeholder="Номер телефона"
-                value={orderPhone}
-                onChange={(e) => setOrderPhone(e.target.value)}
-              />
-            </div>
-            <Button
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
-              disabled={!orderName.trim() || !orderPhone.trim()}
-              onClick={sendOrder}
-            >
-              <Icon name="Send" size={18} /> Отправить заявку в Telegram
-            </Button>
+            {sent ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center glow-yellow">
+                  <Icon name="CheckCircle" size={36} className="text-primary" />
+                </div>
+                <div className="font-display font-700 text-xl">Заявка отправлена!</div>
+                <div className="text-muted-foreground text-sm">Telegram открылся с вашей заявкой.<br />Мы свяжемся с вами в ближайшее время.</div>
+              </div>
+            ) : (
+              <>
+                <div className="p-4 rounded-xl bg-muted/50 border border-border mb-5 space-y-1 text-sm">
+                  <div className="font-600 text-base mb-2">{orderProduct.name}</div>
+                  <div className="text-muted-foreground flex gap-2"><Icon name="Cpu" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.cpu}</div>
+                  <div className="text-muted-foreground flex gap-2"><Icon name="MonitorPlay" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.gpu}</div>
+                  <div className="text-muted-foreground flex gap-2"><Icon name="MemoryStick" size={13} className="text-primary mt-0.5 shrink-0" /> {orderProduct.ram} ГБ RAM</div>
+                  <div className="font-display font-700 text-lg text-primary mt-2">{fmt(orderProduct.price)}</div>
+                </div>
+                <div className="space-y-3 mb-5">
+                  <input
+                    className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                    placeholder="Ваше имя"
+                    value={orderName}
+                    onChange={(e) => setOrderName(e.target.value)}
+                  />
+                  <input
+                    className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                    placeholder="Номер телефона"
+                    value={orderPhone}
+                    onChange={(e) => setOrderPhone(e.target.value)}
+                  />
+                </div>
+                <Button
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+                  disabled={!orderName.trim() || !orderPhone.trim()}
+                  onClick={sendOrder}
+                >
+                  <Icon name="Send" size={18} /> Отправить заявку в Telegram
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
