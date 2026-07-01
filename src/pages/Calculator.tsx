@@ -17,7 +17,7 @@ type Components = {
   case: Part[];
 };
 type Brand = 'intel' | 'amd';
-type Platform = 'am4' | 'am5' | 'intel';
+type Platform = 'lga1700' | 'lga1851' | 'am4' | 'am5';
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 
@@ -41,25 +41,29 @@ const LABELS: Record<keyof Components, { label: string; icon: string }> = {
 };
 
 // Фильтры совместимости по имени компонента
-const CPU_INTEL = ['i5 12400F', 'i5 14400F', 'i5 14600KF', 'i7 14700KF', 'Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
-const CPU_AM4   = ['R5 5500', 'R5 5600', 'R7 5700', 'R7 5700X'];
-const CPU_AM5   = ['R5 7500F', 'R7 7700', 'R7 7800X3D', 'R7 9800X3D'];
+const CPU_LGA1700 = ['i5 12400F', 'i5 14400F', 'i5 14600KF', 'i7 14700KF'];
+const CPU_LGA1851 = ['Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
+const CPU_AM4     = ['R5 5500', 'R5 5600', 'R7 5700', 'R7 5700X'];
+const CPU_AM5     = ['R5 7500F', 'R7 7700', 'R7 7800X3D', 'R7 9800X3D'];
 
-const MB_INTEL  = ['H610M', 'B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890 AORUS ELITE WIFI7'];
-const MB_AM4    = ['A520M', 'B550M'];
-const MB_AM5    = ['A620M', 'B650M', 'B850M', 'B850M FORCE WIFI6E', 'B850M Gaming X AX', 'MSI B850 Gaming Plus WiFi6e'];
+const MB_LGA1700  = ['H610M', 'B860M'];
+const MB_LGA1851  = ['MAG B860 TOMAHAWK WIFI', 'Z890 AORUS ELITE WIFI7'];
+const MB_AM4      = ['A520M', 'B550M'];
+const MB_AM5      = ['A620M', 'B650M', 'B850M', 'B850M FORCE WIFI6E', 'B850M Gaming X AX', 'MSI B850 Gaming Plus WiFi6e'];
 
-const RAM_DDR4  = ['DDR4 16GB', 'DDR4 32GB'];
-const RAM_DDR5  = ['DDR5 16GB 5600CH', 'DDR5 16GB 6000', 'DDR5 32GB 5600CH', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
+const RAM_DDR4     = ['DDR4 16GB', 'DDR4 32GB'];
+const RAM_DDR5     = ['DDR5 16GB 5600CH', 'DDR5 16GB 6000', 'DDR5 32GB 5600CH', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
+const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
 function filterByNames(parts: Part[], names: string[]): Part[] {
   return parts.filter((p) => names.includes(p.name));
 }
 
-const PLATFORM_INFO: Record<Platform, { label: string; socket: string; moboNames: string[]; ramNames: string[]; cpuNames: string[] }> = {
-  intel: { label: 'Intel (LGA1700/LGA1851)', socket: 'Intel',  moboNames: MB_INTEL, ramNames: RAM_DDR5, cpuNames: CPU_INTEL },
-  am4:   { label: 'AMD AM4 (DDR4)',          socket: 'AM4',    moboNames: MB_AM4,   ramNames: RAM_DDR4, cpuNames: CPU_AM4   },
-  am5:   { label: 'AMD AM5 (DDR5)',          socket: 'AM5',    moboNames: MB_AM5,   ramNames: RAM_DDR5, cpuNames: CPU_AM5   },
+const PLATFORM_INFO: Record<Platform, { label: string; moboNames: string[]; ramNames: string[]; cpuNames: string[] }> = {
+  lga1700: { label: 'Intel LGA1700 (DDR4/DDR5)', moboNames: MB_LGA1700, ramNames: RAM_DDR4_DDR5, cpuNames: CPU_LGA1700 },
+  lga1851: { label: 'Intel LGA1851 (DDR5)',       moboNames: MB_LGA1851, ramNames: RAM_DDR5,      cpuNames: CPU_LGA1851 },
+  am4:     { label: 'AMD AM4 (DDR4)',             moboNames: MB_AM4,     ramNames: RAM_DDR4,      cpuNames: CPU_AM4     },
+  am5:     { label: 'AMD AM5 (DDR5)',             moboNames: MB_AM5,     ramNames: RAM_DDR5,      cpuNames: CPU_AM5     },
 };
 
 type SelectKey = keyof Components;
@@ -100,7 +104,7 @@ export default function Calculator() {
 
   const chooseBrand = (b: Brand) => {
     setBrand(b);
-    setPlatform(b === 'intel' ? 'intel' : null);
+    setPlatform(null);
     setSelected({});
   };
 
@@ -205,18 +209,24 @@ export default function Calculator() {
                 </div>
               </div>
 
-              {/* Шаг 2: выбор платформы AMD */}
-              {brand === 'amd' && (
+              {/* Шаг 2: выбор платформы */}
+              {brand && (
                 <div className="rounded-xl bg-card border border-border overflow-hidden">
                   <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
                     <Icon name="CircuitBoard" size={18} className="text-primary" />
-                    <span className="font-600">Шаг 2 — Платформа AMD</span>
+                    <span className="font-600">Шаг 2 — Платформа {brand === 'intel' ? 'Intel' : 'AMD'}</span>
                   </div>
                   <div className="p-4 grid grid-cols-2 gap-3">
-                    {[
-                      { key: 'am4' as Platform, title: 'AM4', sub: 'DDR4 · Ryzen 5000' },
-                      { key: 'am5' as Platform, title: 'AM5', sub: 'DDR5 · Ryzen 7000/9000' },
-                    ].map(({ key, title, sub }) => (
+                    {(brand === 'intel'
+                      ? [
+                          { key: 'lga1700' as Platform, title: 'LGA1700', sub: 'DDR4/DDR5 · Core 12–14' },
+                          { key: 'lga1851' as Platform, title: 'LGA1851', sub: 'DDR5 · Core Ultra' },
+                        ]
+                      : [
+                          { key: 'am4' as Platform, title: 'AM4', sub: 'DDR4 · Ryzen 5000' },
+                          { key: 'am5' as Platform, title: 'AM5', sub: 'DDR5 · Ryzen 7000/9000' },
+                        ]
+                    ).map(({ key, title, sub }) => (
                       <button
                         key={key}
                         onClick={() => choosePlatform(key)}
