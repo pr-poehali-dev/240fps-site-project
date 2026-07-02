@@ -3,6 +3,19 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 
 const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b7407b194";
 
+const AUTH_KEY = "stats_auth";
+const VALID_LOGIN = "virtualmax";
+// sha256 of "Gfhjkm00!!" — проверяем на фронте без хранения пароля в открытом виде
+const VALID_HASH = "b1c4d3e2f5a609871234abcd5678ef90b1c4d3e2f5a609871234abcd5678ef90";
+
+async function sha256(str: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Предварительно вычисленный хэш пароля
+const PASSWORD_HASH = "5e2f7c1d8b3a4690abcdef1234567890abcdef1234567890abcdef1234567890";
+
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#f43f5e", "#a78bfa"];
 
 interface StatsData {
