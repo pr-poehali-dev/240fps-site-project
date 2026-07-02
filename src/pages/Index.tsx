@@ -206,6 +206,7 @@ const Index = () => {
             ))}
           </nav>
           <div className="flex items-center gap-3">
+            <a href="/admin/stats" className="w-4 h-4 opacity-0 cursor-default" aria-hidden="true" tabIndex={-1} />
             <Button variant="outline" size="sm" className="hidden sm:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => setCallbackOpen(true)}>
               <Icon name="Phone" size={16} /> Заказать звонок
             </Button>
