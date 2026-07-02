@@ -41,18 +41,18 @@ const LABELS: Record<keyof Components, { label: string; icon: string }> = {
 };
 
 // Фильтры совместимости по имени компонента
-const CPU_LGA1700 = ['i5 12400F', 'i5 14400F', 'i5 14600KF', 'i7 14700KF'];
-const CPU_LGA1851 = ['Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
-const CPU_AM4     = ['R5 5500', 'R5 5600', 'R7 5700', 'R7 5700X'];
-const CPU_AM5     = ['R5 7500F', 'R7 7700', 'R7 7800X3D', 'R7 9800X3D'];
+const CPU_LGA1700 = ['Intel Core i5-12400F', 'Intel Core i5-14400F', 'Intel Core i5-14600KF', 'Intel Core i7-14700KF'];
+const CPU_LGA1851 = ['Intel Core Ultra 5 245KF', 'Intel Core Ultra 7 265KF', 'Intel Core Ultra 9 285K'];
+const CPU_AM4     = ['Ryzen 5 5500', 'Ryzen 5 5600', 'Ryzen 7 5700', 'Ryzen 7 5700X'];
+const CPU_AM5     = ['Ryzen 5 7500F', 'Ryzen 7 7700', 'Ryzen 7 7800X3D', 'Ryzen 7 9800X3D'];
 
-const MB_LGA1700  = ['H610M'];
-const MB_LGA1851  = ['B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890 AORUS ELITE WIFI7'];
-const MB_AM4      = ['A520M', 'B550M'];
-const MB_AM5      = ['A620M', 'B650M', 'B850M', 'B850M FORCE WIFI6E', 'B850M Gaming X AX', 'MSI B850 Gaming Plus WiFi6e'];
+const MB_LGA1700  = ['GigaByte H610M K DDR4'];
+const MB_LGA1851  = ['ASRock B760 PRO PS WIFI DDR5', 'GigaByte B850 GAMING WIFI6'];
+const MB_AM4      = ['MSI B550M-A PRO'];
+const MB_AM5      = ['GigaByte A620M DS3H', 'GigaByte B650M D3HP AX', 'MSI PRO B650M-B', 'Asus B650-A Gaming WIFI', 'Asus TUF GAMING B850M-PLUS WIFI', 'MSI PRO B850M-A WIFI', 'Asrock B850M-X WIFI R2.0', 'GigaByte B850 GAMING WIFI6'];
 
-const RAM_DDR4     = ['DDR4 16GB', 'DDR4 32GB'];
-const RAM_DDR5     = ['DDR5 16GB 5600CH', 'DDR5 16GB 6000', 'DDR5 32GB 5600CH', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
+const RAM_DDR4     = ['DDR4 16Gb', 'DDR4 32Gb'];
+const RAM_DDR5     = ['DDR5 16Gb 5600', 'DDR5 16Gb 6000', 'DDR5 32Gb 5600', 'DDR5 32Gb 6000', 'DDR5 32Gb 6400 CL32', 'DDR5 64Gb 5600', 'DDR5 64Gb 6000'];
 const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
 function filterByNames(parts: Part[], names: string[]): Part[] {

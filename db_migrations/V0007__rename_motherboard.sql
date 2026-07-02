@@ -1,0 +1,11 @@
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'GigaByte A620M DS3H' WHERE id = 2;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'MSI B550M-A PRO' WHERE id = 3;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'GigaByte B650M D3HP AX' WHERE id = 4;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'Asus TUF GAMING B850M-PLUS WIFI' WHERE id = 5;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'MSI PRO B850M-A WIFI' WHERE id = 6;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'Asrock B850M-X WIFI R2.0' WHERE id = 7;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'ASRock B760 PRO PS WIFI DDR5' WHERE id = 8;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'GigaByte H610M K DDR4' WHERE id = 9;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'MSI PRO B650M-B' WHERE id = 10;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'Asus B650-A Gaming WIFI' WHERE id = 11;
+UPDATE t_p288352_240fps_site_project.components_motherboard SET name = 'GigaByte B850 GAMING WIFI6' WHERE id = 12;

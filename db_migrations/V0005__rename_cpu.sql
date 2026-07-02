@@ -1,0 +1,15 @@
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core i5-12400F' WHERE id = 1;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core i5-14400F' WHERE id = 2;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core i5-14600KF' WHERE id = 3;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core i7-14700KF' WHERE id = 4;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 5 5500' WHERE id = 5;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 5 5600' WHERE id = 6;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 5 7500F' WHERE id = 7;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 7 7700' WHERE id = 8;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 7 7800X3D' WHERE id = 9;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 7 9800X3D' WHERE id = 10;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core Ultra 5 245KF' WHERE id = 11;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core Ultra 7 265KF' WHERE id = 12;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 7 5700X' WHERE id = 13;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Intel Core Ultra 9 285K' WHERE id = 14;
+UPDATE t_p288352_240fps_site_project.components_cpu SET name = 'Ryzen 7 5700' WHERE id = 15;
