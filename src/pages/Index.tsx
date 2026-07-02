@@ -467,6 +467,8 @@ const Index = () => {
                 { i: 'Send', t: 'Telegram: @Omsk_240FPS', s: 'Напишите нам в Telegram', href: 'https://t.me/Omsk_240FPS' },
                 { i: 'Users', t: 'ВКонтакте: vk.com/fps240', s: 'Наша группа ВКонтакте', href: 'https://vk.com/fps240' },
                 { i: 'MapPin', t: 'Омск, 70 Лет Октября 20', s: 'Магазин "240ФПС" · Самовывоз и доставка по РФ', href: 'https://yandex.ru/maps/?text=Омск+70+Лет+Октября+20' },
+                { i: 'MapPin', t: 'Тюмень, Казачьи Луга 9', s: 'Магазин "240ФПС" · Самовывоз и доставка по РФ', href: 'https://yandex.ru/maps/?text=Тюмень+Казачьи+Луга+9' },
+                { i: 'MapPin', t: 'Краснодар, Восточно-Кругликовская 30/2', s: 'Магазин "240ФПС" · Самовывоз и доставка по РФ', href: 'https://yandex.ru/maps/?text=Краснодар+Восточно-Кругликовская+30/2' },
               ].map((c) => (
                 <div key={c.t} className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
