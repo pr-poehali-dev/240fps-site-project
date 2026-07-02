@@ -32,8 +32,8 @@ def handler(event: dict, context) -> dict:
 
     result = {}
     for key, table in categories.items():
-        rows = con.run(f'SELECT id, name, price FROM {table} ORDER BY price')
-        result[key] = [{'id': r[0], 'name': r[1], 'price': r[2]} for r in rows]
+        rows = con.run(f'SELECT id, name, price, in_stock FROM {table} ORDER BY price')
+        result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'in_stock': r[3]} for r in rows]
 
     con.close()
 

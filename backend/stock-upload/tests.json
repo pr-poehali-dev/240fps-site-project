@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Upload empty csv",
+      "method": "POST",
+      "path": "/",
+      "body": {"csv_content": ""},
+      "expectedStatus": 400
+    },
+    {
+      "name": "Upload sample stock",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "csv_content": "1\tПроцессор Ryzen 5 7500F\t\t4\t4шт\t9218\t36872\t36872\n2\tВидеокарта RTX5060 GigaByte WINDFORCE 8Gb\t\t1\t1шт\t18000\t18000\t18000\n3\tМатеринская плата MSI PRO B650M-B\t\t1\t1шт\t7926\t7926\t7926"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"success": true},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
