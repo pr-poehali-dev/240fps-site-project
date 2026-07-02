@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "Track visit",
+      "method": "POST",
+      "path": "/",
+      "body": {"session_id": "test-session-123", "page": "/", "referrer": ""},
+      "expectedStatus": 200,
+      "expectedBody": {"ok": true},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
