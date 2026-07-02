@@ -190,14 +190,17 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="container flex items-center justify-between h-18 py-3">
-          <a href="#home" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow">
-              <Icon name="Zap" className="text-primary-foreground" size={22} />
-            </div>
-            <span className="font-display font-700 text-2xl tracking-tight">
-              240<span className="text-primary">FPS</span>
-            </span>
-          </a>
+          <div className="flex items-center gap-2">
+            <a href="/admin/stats" className="w-4 h-8 opacity-0 cursor-default" aria-hidden="true" tabIndex={-1} />
+            <a href="#home" className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow">
+                <Icon name="Zap" className="text-primary-foreground" size={22} />
+              </div>
+              <span className="font-display font-700 text-2xl tracking-tight">
+                240<span className="text-primary">FPS</span>
+              </span>
+            </a>
+          </div>
           <nav className="hidden md:flex items-center gap-8">
             {NAV.map((n) => (
               <a key={n.label} href={n.href} className="text-sm font-500 text-muted-foreground hover:text-primary transition-colors">
@@ -206,7 +209,6 @@ const Index = () => {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <a href="/admin/stats" className="w-4 h-4 opacity-0 cursor-default" aria-hidden="true" tabIndex={-1} />
             <Button variant="outline" size="sm" className="hidden sm:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => setCallbackOpen(true)}>
               <Icon name="Phone" size={16} /> Заказать звонок
             </Button>
