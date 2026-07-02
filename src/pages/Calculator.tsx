@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 const API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
 
-type Part = { id: number; name: string; price: number; in_stock: boolean };
+type Part = { id: number; name: string; price: number };
 type Components = {
   cpu: Part[];
   motherboard: Part[];
@@ -260,29 +260,30 @@ export default function Calculator() {
                         </Badge>
                       )}
                     </div>
-                    <div className="p-4 space-y-2">
-                      {parts.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => selectPart(key, p)}
-                          className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border-2 text-left transition-all ${
-                            picked?.id === p.id
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border bg-background hover:border-primary/40'
-                          }`}
+                    <div className="p-4">
+                      <div className="relative">
+                        <select
+                          value={picked ? String(picked.id) : ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (!val) {
+                              setSelected((prev) => { const n = { ...prev }; delete n[key]; return n; });
+                            } else {
+                              const part = parts.find((p) => p.id === Number(val));
+                              if (part) selectPart(key, part);
+                            }
+                          }}
+                          className="w-full h-11 pl-4 pr-10 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors text-sm appearance-none cursor-pointer"
                         >
-                          <div className="flex items-center gap-3 min-w-0">
-                            {picked?.id === p.id && <Icon name="CheckCircle" size={15} className="text-primary shrink-0" />}
-                            <span className={`text-sm font-500 truncate ${picked?.id === p.id ? 'text-primary' : ''}`}>{p.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-500 ${p.in_stock ? 'bg-green-500/15 text-green-500' : 'bg-muted text-muted-foreground'}`}>
-                              {p.in_stock ? 'В наличии' : 'Заказ 3-5 дней'}
-                            </span>
-                            <span className="font-600 text-sm text-primary">{fmt(p.price)}</span>
-                          </div>
-                        </button>
-                      ))}
+                          <option value="">— Выберите {label.toLowerCase()} —</option>
+                          {parts.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {p.name} — {fmt(p.price)}
+                            </option>
+                          ))}
+                        </select>
+                        <Icon name="ChevronDown" size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      </div>
                     </div>
                   </div>
                 );

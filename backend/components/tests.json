@@ -4,7 +4,9 @@
       "name": "Get all components",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 200
+      "expectedStatus": 200,
+      "expectedBody": {"cpu": [{"name": "R5 5500"}], "gpu": [{"name": "RTX 5050"}]},
+      "bodyMatcher": "partial"
     }
   ]
 }
