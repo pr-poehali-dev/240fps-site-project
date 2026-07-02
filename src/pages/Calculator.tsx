@@ -43,8 +43,8 @@ const LABELS: Record<keyof Components, { label: string; icon: string }> = {
 // Фильтры совместимости по имени компонента
 const CPU_LGA1700 = ['i5 12400F', 'i5 14400F', 'i5 14600KF', 'i7 14700KF', 'i5 12400'];
 const CPU_LGA1851 = ['Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
-const CPU_AM4     = ['R5 5500', 'R5 5600', 'R7 5700', 'R7 5700X'];
-const CPU_AM5     = ['R5 7500F', 'R7 7700', 'R7 7800X3D', 'R7 9800X3D', '9950X', '9600X'];
+const CPU_AM4     = ['Ryzen 5 5500', 'Ryzen 5 5600', 'Ryzen 7 5700', 'Ryzen 7 5700X'];
+const CPU_AM5     = ['Ryzen 5 7500F', 'Ryzen 7 7700', 'Ryzen 7 7800X3D', 'Ryzen 7 9800X3D', 'Ryzen 9 9950X', 'Ryzen 5 9600X'];
 
 const MB_LGA1700  = ['H610M', 'B660m D4'];
 const MB_LGA1851  = ['B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890M GAMING X', 'Z790 GAMING PLUS WIFI', 'B760m D4'];
