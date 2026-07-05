@@ -159,31 +159,55 @@ function ProductForm({
     fps: initial?.fps ?? EMPTY_PRODUCT.fps,
     tag: initial?.tag ?? "",
   });
-  const [file, setFile] = useState<File | null>(null);
+  const [existingImgs, setExistingImgs] = useState<string[]>(initial?.imgs?.length ? initial.imgs : (initial?.img ? [initial.img] : []));
+  const [newFiles, setNewFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const totalPhotos = existingImgs.length + newFiles.length;
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
 
+  const addFiles = (files: FileList | null) => {
+    if (!files) return;
+    const arr = Array.from(files).slice(0, 5 - totalPhotos);
+    setNewFiles(prev => [...prev, ...arr]);
+  };
+
+  const removeExisting = (idx: number) => setExistingImgs(prev => prev.filter((_, i) => i !== idx));
+  const removeNew = (idx: number) => setNewFiles(prev => prev.filter((_, i) => i !== idx));
+
+  const makeMainExisting = (idx: number) =>
+    setExistingImgs(prev => {
+      const next = [...prev];
+      const [picked] = next.splice(idx, 1);
+      return [picked, ...next];
+    });
+
   const save = async () => {
+    if (totalPhotos === 0) {
+      setError("Добавьте хотя бы одно фото");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
+      const newPhotos = await Promise.all(
+        newFiles.map(async f => ({ file_base64: await fileToBase64(f), content_type: f.type || "image/jpeg" }))
+      );
+
       const payload: Record<string, unknown> = {
         ...form,
         tag: form.tag || null,
       };
-      if (file) {
-        payload.file_base64 = await fileToBase64(file);
-        payload.content_type = file.type || "image/jpeg";
-      }
+
       if (initial) {
         payload.id = initial.id;
-      } else if (!file) {
-        setError("Загрузите фото для новой сборки");
-        setSaving(false);
-        return;
+        payload.imgs = existingImgs;
+        payload.new_photos = newPhotos;
+      } else {
+        payload.photos = newPhotos;
       }
 
       const res = await fetch(PRODUCTS_URL, {
@@ -257,13 +281,51 @@ function ProductForm({
       </div>
 
       <div>
-        <label className="text-xs text-muted-foreground mb-1 block">{initial ? "Заменить фото (необязательно)" : "Фото сборки"}</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={e => setFile(e.target.files?.[0] || null)}
-          className="text-sm"
-        />
+        <label className="text-xs text-muted-foreground mb-2 block">Фото сборки (главное + до 4 дополнительных)</label>
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
+          {existingImgs.map((img, i) => (
+            <div key={img} className="relative aspect-square rounded-lg overflow-hidden border-2 group" style={{ borderColor: i === 0 ? "var(--primary)" : "var(--border)" }}>
+              <img src={img} alt="" className="w-full h-full object-cover" />
+              {i === 0 && (
+                <div className="absolute top-1 left-1 bg-primary text-primary-foreground text-[10px] font-semibold rounded px-1.5 py-0.5">Главное</div>
+              )}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                {i !== 0 && (
+                  <button type="button" onClick={() => makeMainExisting(i)} className="text-white text-[10px] bg-secondary rounded px-1.5 py-1">
+                    Сделать главным
+                  </button>
+                )}
+                <button type="button" onClick={() => removeExisting(i)} className="text-white bg-destructive rounded p-1">
+                  <span className="text-xs">✕</span>
+                </button>
+              </div>
+            </div>
+          ))}
+          {newFiles.map((f, i) => (
+            <div key={i} className="relative aspect-square rounded-lg overflow-hidden border-2 border-border group">
+              <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+              <div className="absolute top-1 left-1 bg-muted text-foreground text-[10px] font-semibold rounded px-1.5 py-0.5">Новое</div>
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button type="button" onClick={() => removeNew(i)} className="text-white bg-destructive rounded p-1">
+                  <span className="text-xs">✕</span>
+                </button>
+              </div>
+            </div>
+          ))}
+          {totalPhotos < 5 && (
+            <label className="aspect-square rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors flex items-center justify-center cursor-pointer text-muted-foreground text-2xl">
+              +
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => { addFiles(e.target.files); e.target.value = ""; }}
+              />
+            </label>
+          )}
+        </div>
+        <div className="text-xs text-muted-foreground">Первое фото — главное, остальные откроются в галерее при клике на карточку товара.</div>
       </div>
 
       {error && <div className="text-destructive text-sm">{error}</div>}

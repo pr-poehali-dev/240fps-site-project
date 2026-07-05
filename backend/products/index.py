@@ -86,9 +86,15 @@ def handler(event: dict, context) -> dict:
     body = json.loads(event.get('body') or '{}')
 
     if method == 'POST':
-        img = body.get('img', '')
-        if body.get('file_base64'):
-            img = upload_image(body['file_base64'], body.get('content_type', 'image/jpeg'))
+        photos = body.get('photos') or []
+        imgs = []
+        for p in photos[:5]:
+            imgs.append(upload_image(p.get('file_base64', ''), p.get('content_type', 'image/jpeg')))
+
+        if not imgs and body.get('file_base64'):
+            imgs = [upload_image(body['file_base64'], body.get('content_type', 'image/jpeg'))]
+
+        img = imgs[0] if imgs else body.get('img', '')
 
         conn = psycopg2.connect(dsn)
         cur = conn.cursor()
@@ -100,7 +106,7 @@ def handler(event: dict, context) -> dict:
             (
                 body.get('name', ''), body.get('brand', 'NVIDIA'), body.get('cpu_brand', 'Intel'),
                 body.get('cpu', ''), body.get('gpu', ''), body.get('ram', 16), body.get('storage', 500),
-                body.get('price', 0), body.get('fps', ''), body.get('tag'), img, [img] if img else [], sort_order,
+                body.get('price', 0), body.get('fps', ''), body.get('tag'), img, imgs, sort_order,
             )
         )
         new_id = cur.fetchone()[0]
@@ -110,7 +116,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 200,
             'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': True, 'id': new_id, 'img': img}),
+            'body': json.dumps({'ok': True, 'id': new_id, 'img': img, 'imgs': imgs}),
         }
 
     if method == 'PUT':
@@ -129,13 +135,27 @@ def handler(event: dict, context) -> dict:
                 updates.append(f'{f} = %s')
                 values.append(body[f])
 
-        img_url = None
-        if body.get('file_base64'):
+        final_imgs = None
+
+        if 'imgs' in body or 'new_photos' in body:
+            final_imgs = list(body.get('imgs') or [])
+            new_photos = body.get('new_photos') or []
+            for p in new_photos:
+                if len(final_imgs) >= 5:
+                    break
+                final_imgs.append(upload_image(p.get('file_base64', ''), p.get('content_type', 'image/jpeg')))
+            final_imgs = final_imgs[:5]
+            updates.append('imgs = %s')
+            values.append(final_imgs)
+            updates.append('img = %s')
+            values.append(final_imgs[0] if final_imgs else '')
+        elif body.get('file_base64'):
             img_url = upload_image(body['file_base64'], body.get('content_type', 'image/jpeg'))
+            final_imgs = [img_url]
             updates.append('img = %s')
             values.append(img_url)
             updates.append('imgs = %s')
-            values.append([img_url])
+            values.append(final_imgs)
         elif 'img' in body:
             updates.append('img = %s')
             values.append(body['img'])
@@ -159,7 +179,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 200,
             'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': True, 'img': img_url}),
+            'body': json.dumps({'ok': True, 'imgs': final_imgs}),
         }
 
     if method == 'DELETE':
