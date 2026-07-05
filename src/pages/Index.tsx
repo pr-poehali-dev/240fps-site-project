@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/1ac8b245-73c4-4432-bd62-0af698d5fefa.png';
 
@@ -11,7 +12,7 @@ const NAV = [
   { label: 'Главная', href: '#home' },
   { label: 'Каталог', href: '#catalog' },
   { label: 'Калькулятор', href: '/calculator' },
-  { label: 'О компании', href: '#about' },
+  { label: 'О нас', href: '#about' },
   { label: 'Блог', href: '#blog' },
   { label: 'Контакты', href: '#contacts' },
 ];
@@ -145,6 +146,7 @@ const Index = () => {
   const [callbackName, setCallbackName] = useState('');
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackSent, setCallbackSent] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetch(PRODUCTS_URL)
@@ -201,14 +203,14 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
-        <div className="container flex items-center justify-between h-18 py-3">
-          <div className="flex items-center gap-2">
+        <div className="container flex items-center justify-between h-16 md:h-18 py-3">
+          <div className="flex items-center gap-2 min-w-0">
             <a href="/admin/stats" className="w-4 h-8 opacity-0 cursor-default" aria-hidden="true" tabIndex={-1} />
-            <a href="#home" className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow">
-                <Icon name="Zap" className="text-primary-foreground" size={22} />
+            <a href="#home" className="flex items-center gap-2 shrink-0">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow shrink-0">
+                <Icon name="Zap" className="text-primary-foreground" size={20} />
               </div>
-              <span className="font-display font-700 text-2xl tracking-tight">
+              <span className="font-display font-700 text-xl md:text-2xl tracking-tight">
                 240<span className="text-primary">FPS</span>
               </span>
             </a>
@@ -220,18 +222,53 @@ const Index = () => {
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="hidden sm:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => setCallbackOpen(true)}>
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
+            <Button variant="outline" size="sm" className="hidden lg:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => setCallbackOpen(true)}>
               <Icon name="Phone" size={16} /> Заказать звонок
             </Button>
-            <button className="relative">
-              <Icon name="ShoppingCart" size={24} className="text-foreground hover:text-primary transition-colors" />
+            <button className="relative shrink-0">
+              <Icon name="ShoppingCart" size={22} className="text-foreground hover:text-primary transition-colors" />
               {cart.length > 0 && (
                 <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-secondary text-secondary-foreground text-xs flex items-center justify-center font-600">
                   {cart.length}
                 </span>
               )}
             </button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="md:hidden shrink-0 text-foreground hover:text-primary transition-colors">
+                  <Icon name="Menu" size={24} />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-4/5 max-w-xs flex flex-col">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-yellow">
+                    <Icon name="Zap" className="text-primary-foreground" size={18} />
+                  </div>
+                  <span className="font-display font-700 text-xl tracking-tight">
+                    240<span className="text-primary">FPS</span>
+                  </span>
+                </div>
+                <nav className="flex flex-col gap-1">
+                  {NAV.map((n) => (
+                    <a
+                      key={n.label}
+                      href={n.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="py-3 px-2 rounded-lg text-base font-500 text-foreground hover:bg-muted hover:text-primary transition-colors"
+                    >
+                      {n.label}
+                    </a>
+                  ))}
+                </nav>
+                <Button
+                  className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 font-600 glow-yellow"
+                  onClick={() => { setMobileMenuOpen(false); setCallbackOpen(true); }}
+                >
+                  <Icon name="Phone" size={16} /> Заказать звонок
+                </Button>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
@@ -421,7 +458,7 @@ const Index = () => {
       <section id="about" className="relative grid-bg py-20 border-y border-border">
         <div className="container grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <Badge className="bg-primary/15 text-primary border-primary/30 mb-4 font-500">О компании</Badge>
+            <Badge className="bg-primary/15 text-primary border-primary/30 mb-4 font-500">О нас</Badge>
             <h2 className="font-display font-700 text-4xl uppercase mb-5">Мы собираем компьютеры мечты</h2>
             <p className="text-muted-foreground mb-4">
               240FPS — команда энтузиастов, которая с 2018 года создаёт игровые ПК для геймеров, стримеров и киберспортсменов.
@@ -520,14 +557,14 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t border-border bg-card">
-        <div className="container py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="container py-10 flex flex-col items-center gap-6 md:flex-row md:justify-between md:gap-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
               <Icon name="Zap" className="text-primary-foreground" size={18} />
             </div>
             <span className="font-display font-700 text-xl">240<span className="text-primary">FPS</span></span>
           </div>
-          <div className="flex gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground max-w-full px-2">
             {NAV.map((n) => (
               <a key={n.label} href={n.href} className="hover:text-primary transition-colors">{n.label}</a>
             ))}
@@ -538,7 +575,7 @@ const Index = () => {
               { i: 'Users', href: 'https://vk.com/fps240', label: 'ВКонтакте' },
               { i: 'Phone', href: 'tel:+79131498240', label: 'Телефон' },
             ].map(({ i, href }) => (
-              <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-secondary transition-colors">
+              <a key={i} href={href} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center hover:bg-secondary transition-colors shrink-0">
                 <Icon name={i} size={18} />
               </a>
             ))}

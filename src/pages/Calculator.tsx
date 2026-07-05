@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
 
@@ -78,6 +79,7 @@ export default function Calculator() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [sent, setSent] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetch(API_URL)
@@ -144,12 +146,12 @@ export default function Calculator() {
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
-        <div className="container flex items-center justify-between h-18 py-3">
-          <a href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow">
-              <Icon name="Zap" className="text-primary-foreground" size={22} />
+        <div className="container flex items-center justify-between h-16 md:h-18 py-3">
+          <a href="/" className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow shrink-0">
+              <Icon name="Zap" className="text-primary-foreground" size={20} />
             </div>
-            <span className="font-display font-700 text-2xl tracking-tight">
+            <span className="font-display font-700 text-xl md:text-2xl tracking-tight">
               240<span className="text-primary">FPS</span>
             </span>
           </a>
@@ -160,6 +162,35 @@ export default function Calculator() {
               </a>
             ))}
           </nav>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <button className="md:hidden shrink-0 text-foreground hover:text-primary transition-colors">
+                <Icon name="Menu" size={24} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-4/5 max-w-xs flex flex-col">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-yellow">
+                  <Icon name="Zap" className="text-primary-foreground" size={18} />
+                </div>
+                <span className="font-display font-700 text-xl tracking-tight">
+                  240<span className="text-primary">FPS</span>
+                </span>
+              </div>
+              <nav className="flex flex-col gap-1">
+                {NAV.map((n) => (
+                  <a
+                    key={n.label}
+                    href={n.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="py-3 px-2 rounded-lg text-base font-500 text-foreground hover:bg-muted hover:text-primary transition-colors"
+                  >
+                    {n.label}
+                  </a>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </header>
 

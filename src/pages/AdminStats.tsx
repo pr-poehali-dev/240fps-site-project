@@ -5,6 +5,7 @@ const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b740
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
+const ROLE_KEY = "admin_role";
 const PRODUCTS_URL = "https://functions.poehali.dev/c48cecd4-2c62-4a36-a7c7-f88df7d5ea05";
 
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#f43f5e", "#a78bfa"];
@@ -25,7 +26,7 @@ interface StatsData {
   by_page: { page: string; count: number }[];
 }
 
-function LoginScreen({ onLogin }: { onLogin: () => void }) {
+function LoginScreen({ onLogin }: { onLogin: (role: string) => void }) {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -45,7 +46,8 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
       if (data.ok) {
         sessionStorage.setItem(AUTH_KEY, "1");
         sessionStorage.setItem(PWD_KEY, password);
-        onLogin();
+        sessionStorage.setItem(ROLE_KEY, data.role || "admin");
+        onLogin(data.role || "admin");
       } else {
         setError("Неверный логин или пароль");
       }
@@ -452,18 +454,20 @@ function ProductsManager() {
   );
 }
 
-function Dashboard() {
-  const [tab, setTab] = useState<"stats" | "products">("stats");
+function Dashboard({ role }: { role: string }) {
+  const isAdmin = role === "admin";
+  const [tab, setTab] = useState<"stats" | "products">(isAdmin ? "stats" : "products");
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!isAdmin) return;
     fetch(STATS_URL)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false); })
       .catch(() => { setError("Не удалось загрузить статистику"); setLoading(false); });
-  }, []);
+  }, [isAdmin]);
 
   const deviceData = (data?.by_device || []).map(d => ({ ...d, name: DEVICE_LABELS[d.device] || d.device }));
 
@@ -472,27 +476,29 @@ function Dashboard() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl font-bold uppercase">Админ-панель</h1>
         <button
-          onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); window.location.reload(); }}
+          onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Выйти
         </button>
       </div>
 
-      <div className="flex gap-2 mb-8 border-b border-border">
-        <button
-          onClick={() => setTab("stats")}
-          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "stats" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-        >
-          Статистика
-        </button>
-        <button
-          onClick={() => setTab("products")}
-          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "products" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-        >
-          Каталог сборок
-        </button>
-      </div>
+      {isAdmin && (
+        <div className="flex gap-2 mb-8 border-b border-border">
+          <button
+            onClick={() => setTab("stats")}
+            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "stats" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            Статистика
+          </button>
+          <button
+            onClick={() => setTab("products")}
+            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "products" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            Каталог сборок
+          </button>
+        </div>
+      )}
 
       {tab === "products" && <ProductsManager />}
 
@@ -616,7 +622,8 @@ function Dashboard() {
 
 export default function AdminStats() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem(AUTH_KEY) === "1");
+  const [role, setRole] = useState(() => sessionStorage.getItem(ROLE_KEY) || "admin");
 
-  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
-  return <Dashboard />;
+  if (!authed) return <LoginScreen onLogin={(r) => { setRole(r); setAuthed(true); }} />;
+  return <Dashboard role={role} />;
 }

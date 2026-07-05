@@ -20,18 +20,30 @@ def handler(event: dict, context) -> dict:
     login = body.get('login', '')
     password = body.get('password', '')
 
-    valid_login = os.environ.get('ADMIN_LOGIN', '')
-    valid_password = os.environ.get('ADMIN_PASSWORD', '')
+    accounts = [
+        {
+            'login': os.environ.get('ADMIN_LOGIN', ''),
+            'password': os.environ.get('ADMIN_PASSWORD', ''),
+            'role': 'admin',
+        },
+        {
+            'login': os.environ.get('CATALOG_LOGIN', ''),
+            'password': os.environ.get('CATALOG_PASSWORD', ''),
+            'role': 'catalog',
+        },
+    ]
 
-    login_ok = hmac.compare_digest(login, valid_login)
-    password_ok = hmac.compare_digest(password, valid_password)
-
-    if login_ok and password_ok:
-        return {
-            'statusCode': 200,
-            'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': True}),
-        }
+    for acc in accounts:
+        if not acc['login']:
+            continue
+        login_ok = hmac.compare_digest(login, acc['login'])
+        password_ok = hmac.compare_digest(password, acc['password'])
+        if login_ok and password_ok:
+            return {
+                'statusCode': 200,
+                'headers': {**cors, 'Content-Type': 'application/json'},
+                'body': json.dumps({'ok': True, 'role': acc['role']}),
+            }
 
     return {
         'statusCode': 401,
