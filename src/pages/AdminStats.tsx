@@ -4,6 +4,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b7407b194";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
 const AUTH_KEY = "admin_authed";
+const PWD_KEY = "admin_pwd";
+const PRODUCT_IMAGES_URL = "https://functions.poehali.dev/fa0b7713-c38c-4391-a003-db2e04b88fe3";
 
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#f43f5e", "#a78bfa"];
 
@@ -42,6 +44,7 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
       const data = await res.json();
       if (data.ok) {
         sessionStorage.setItem(AUTH_KEY, "1");
+        sessionStorage.setItem(PWD_KEY, password);
         onLogin();
       } else {
         setError("Неверный логин или пароль");
@@ -86,7 +89,107 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
   );
 }
 
+interface ProductImage {
+  product_id: number;
+  name: string;
+  img: string;
+}
+
+function ProductPhotos() {
+  const [items, setItems] = useState<ProductImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const [errorId, setErrorId] = useState<number | null>(null);
+
+  const load = () => {
+    setLoading(true);
+    fetch(PRODUCT_IMAGES_URL)
+      .then(r => r.json())
+      .then(d => { setItems(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const onFile = async (productId: number, file: File) => {
+    setUploadingId(productId);
+    setErrorId(null);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const res = await fetch(PRODUCT_IMAGES_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Password": sessionStorage.getItem(PWD_KEY) || "",
+        },
+        body: JSON.stringify({
+          product_id: productId,
+          file_base64: base64,
+          content_type: file.type || "image/jpeg",
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setItems(prev => prev.map(i => i.product_id === productId ? { ...i, img: data.img } : i));
+      } else {
+        setErrorId(productId);
+      }
+    } catch {
+      setErrorId(productId);
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
+  if (loading) return <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>;
+
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {items.map(item => (
+        <div key={item.product_id} className="bg-card border border-border rounded-xl overflow-hidden">
+          <div className="aspect-square bg-muted relative">
+            <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+            {uploadingId === item.product_id && (
+              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm">
+                Загрузка...
+              </div>
+            )}
+          </div>
+          <div className="p-4">
+            <div className="font-semibold mb-3">{item.name}</div>
+            <label className="block">
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) onFile(item.product_id, file);
+                  e.target.value = "";
+                }}
+              />
+              <span className="block text-center bg-primary text-primary-foreground rounded-lg py-2 text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity">
+                Заменить фото
+              </span>
+            </label>
+            {errorId === item.product_id && (
+              <div className="text-destructive text-xs mt-2 text-center">Ошибка загрузки</div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Dashboard() {
+  const [tab, setTab] = useState<"stats" | "photos">("stats");
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -98,22 +201,41 @@ function Dashboard() {
       .catch(() => { setError("Не удалось загрузить статистику"); setLoading(false); });
   }, []);
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Загрузка...</div>;
-  if (error) return <div className="min-h-screen bg-background flex items-center justify-center text-destructive">{error}</div>;
-
-  const deviceData = (data!.by_device || []).map(d => ({ ...d, name: DEVICE_LABELS[d.device] || d.device }));
+  const deviceData = (data?.by_device || []).map(d => ({ ...d, name: DEVICE_LABELS[d.device] || d.device }));
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-3xl font-bold uppercase">Статистика посещений</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-3xl font-bold uppercase">Админ-панель</h1>
         <button
-          onClick={() => { sessionStorage.removeItem(AUTH_KEY); window.location.reload(); }}
+          onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); window.location.reload(); }}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Выйти
         </button>
       </div>
+
+      <div className="flex gap-2 mb-8 border-b border-border">
+        <button
+          onClick={() => setTab("stats")}
+          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "stats" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Статистика
+        </button>
+        <button
+          onClick={() => setTab("photos")}
+          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "photos" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          Фото каталога
+        </button>
+      </div>
+
+      {tab === "photos" && <ProductPhotos />}
+
+      {tab === "stats" && loading && <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>}
+      {tab === "stats" && error && <div className="text-destructive text-sm py-10 text-center">{error}</div>}
+      {tab === "stats" && data && (
+        <>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {[
@@ -222,6 +344,8 @@ function Dashboard() {
       </div>
 
       <div className="mt-6 text-xs text-muted-foreground">Данные за последние 30 дней</div>
+        </>
+      )}
     </div>
   );
 }

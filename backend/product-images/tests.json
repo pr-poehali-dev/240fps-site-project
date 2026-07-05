@@ -1,0 +1,23 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Получить список фото",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Загрузка без пароля",
+      "method": "POST",
+      "path": "/",
+      "body": {"product_id": 1, "file_base64": "abc", "content_type": "image/jpeg"},
+      "expectedStatus": 401
+    }
+  ]
+}

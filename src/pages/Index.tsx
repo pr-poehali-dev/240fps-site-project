@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -125,7 +125,10 @@ const BLOG: BlogPost[] = [
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 
+const PRODUCT_IMAGES_URL = 'https://functions.poehali.dev/fa0b7713-c38c-4391-a003-db2e04b88fe3';
+
 const Index = () => {
+  const [productImages, setProductImages] = useState<Record<number, string>>({});
   const [price, setPrice] = useState<number[]>([350000]);
   const [gpuModels, setGpuModels] = useState<string[]>([]);
   const [cpuModels, setCpuModels] = useState<string[]>([]);
@@ -143,6 +146,17 @@ const Index = () => {
   const [callbackName, setCallbackName] = useState('');
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackSent, setCallbackSent] = useState(false);
+
+  useEffect(() => {
+    fetch(PRODUCT_IMAGES_URL)
+      .then((r) => r.json())
+      .then((rows: { product_id: number; img: string }[]) => {
+        const map: Record<number, string> = {};
+        rows.forEach((r) => { map[r.product_id] = r.img; });
+        setProductImages(map);
+      })
+      .catch(() => {});
+  }, []);
 
   const sendCallback = () => {
     const text = `📞 Заявка на звонок!\n\n👤 Имя: ${callbackName}\n📞 Телефон: ${callbackPhone}`;
@@ -181,8 +195,8 @@ const Index = () => {
           (cpuModels.length === 0 || cpuModels.includes(p.cpu)) &&
           (rams.length === 0 || rams.includes(p.ram)) &&
           (ssds.length === 0 || ssds.includes(p.storage))
-      ),
-    [price, gpuModels, cpuModels, rams, ssds]
+      ).map((p) => (productImages[p.id] ? { ...p, img: productImages[p.id] } : p)),
+    [price, gpuModels, cpuModels, rams, ssds, productImages]
   );
 
   return (
