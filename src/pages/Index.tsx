@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/1ac8b245-73c4-4432-bd62-0af698d5fefa.png';
 
@@ -127,13 +128,17 @@ const mapProduct = (p: ApiProduct): Product => ({
   imgs: p.imgs,
 });
 
+const PRICE_MIN = 77000;
+const PRICE_MAX = 350000;
+
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [price, setPrice] = useState<number[]>([350000]);
+  const [price, setPrice] = useState<number[]>([PRICE_MIN, PRICE_MAX]);
   const [gpuModels, setGpuModels] = useState<string[]>([]);
   const [cpuModels, setCpuModels] = useState<string[]>([]);
   const [rams, setRams] = useState<number[]>([]);
   const [ssds, setSsds] = useState<number[]>([]);
+  const [filterOpen, setFilterOpen] = useState({ price: false, gpu: false, cpu: false, ram: false, ssd: false });
   const [cart, setCart] = useState<number[]>([]);
   const [orderProduct, setOrderProduct] = useState<Product | null>(null);
   const [orderName, setOrderName] = useState('');
@@ -190,7 +195,7 @@ const Index = () => {
     () =>
       products.filter(
         (p) =>
-          p.price <= price[0] &&
+          p.price >= price[0] && p.price <= price[1] &&
           (gpuModels.length === 0 || gpuModels.includes(p.gpu)) &&
           (cpuModels.length === 0 || cpuModels.includes(p.cpu)) &&
           (rams.length === 0 || rams.includes(p.ram)) &&
@@ -338,68 +343,96 @@ const Index = () => {
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           {/* Filters */}
-          <aside className="space-y-6 p-6 rounded-xl bg-card border border-border h-fit lg:sticky lg:top-24">
-            <div>
-              <h3 className="font-display font-600 text-lg uppercase mb-4 flex items-center gap-2">
-                <Icon name="SlidersHorizontal" size={18} className="text-primary" /> Фильтры
-              </h3>
-              <div className="text-sm font-500 mb-3">Цена до {fmt(price[0])}</div>
-              <Slider min={77000} max={350000} step={5000} value={price} onValueChange={setPrice} />
-            </div>
-            <div className="border-t border-border pt-5">
-              <div className="text-sm font-500 mb-3 flex items-center justify-between">
-                <span>Видеокарта</span>
-                {gpuModels.length > 0 && <button onClick={() => setGpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors">сбросить</button>}
-              </div>
-              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                {gpuOptions.map((g) => (
-                  <label key={g} className="flex items-center gap-3 cursor-pointer text-sm">
-                    <Checkbox checked={gpuModels.includes(g)} onCheckedChange={() => toggle(gpuModels, g, setGpuModels)} />
-                    {g}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="border-t border-border pt-5">
-              <div className="text-sm font-500 mb-3 flex items-center justify-between">
-                <span>Процессор</span>
-                {cpuModels.length > 0 && <button onClick={() => setCpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors">сбросить</button>}
-              </div>
-              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                {cpuOptions.map((c) => (
-                  <label key={c} className="flex items-center gap-3 cursor-pointer text-sm">
-                    <Checkbox checked={cpuModels.includes(c)} onCheckedChange={() => toggle(cpuModels, c, setCpuModels)} />
-                    {c}
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="border-t border-border pt-5">
-              <div className="text-sm font-500 mb-3">Оперативная память</div>
-              <div className="space-y-3">
+          <aside className="space-y-1 p-6 rounded-xl bg-card border border-border h-fit lg:sticky lg:top-24">
+            <h3 className="font-display font-600 text-lg uppercase mb-4 flex items-center gap-2">
+              <Icon name="SlidersHorizontal" size={18} className="text-primary" /> Фильтры
+            </h3>
+
+            <Collapsible open={filterOpen.price} onOpenChange={(o) => setFilterOpen((f) => ({ ...f, price: o }))} className="border-t border-border pt-4 pb-1">
+              <CollapsibleTrigger className="w-full flex items-center justify-between text-sm font-500 mb-1">
+                <span>Цена</span>
+                <Icon name="ChevronDown" size={16} className={`text-muted-foreground transition-transform ${filterOpen.price ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3">
+                <div className="text-sm text-muted-foreground mb-3">{fmt(price[0])} — {fmt(price[1])}</div>
+                <Slider min={PRICE_MIN} max={PRICE_MAX} step={5000} value={price} onValueChange={setPrice} minStepsBetweenThumbs={1} />
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible open={filterOpen.gpu} onOpenChange={(o) => setFilterOpen((f) => ({ ...f, gpu: o }))} className="border-t border-border pt-4 pb-1">
+              <CollapsibleTrigger className="w-full flex items-center justify-between text-sm font-500 mb-1">
+                <span>Видеокарта{gpuModels.length > 0 ? ` (${gpuModels.length})` : ''}</span>
+                <Icon name="ChevronDown" size={16} className={`text-muted-foreground transition-transform ${filterOpen.gpu ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3">
+                {gpuModels.length > 0 && (
+                  <button onClick={() => setGpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors mb-2 block">сбросить</button>
+                )}
+                <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                  {gpuOptions.map((g) => (
+                    <label key={g} className="flex items-center gap-3 cursor-pointer text-sm">
+                      <Checkbox checked={gpuModels.includes(g)} onCheckedChange={() => toggle(gpuModels, g, setGpuModels)} />
+                      {g}
+                    </label>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible open={filterOpen.cpu} onOpenChange={(o) => setFilterOpen((f) => ({ ...f, cpu: o }))} className="border-t border-border pt-4 pb-1">
+              <CollapsibleTrigger className="w-full flex items-center justify-between text-sm font-500 mb-1">
+                <span>Процессор{cpuModels.length > 0 ? ` (${cpuModels.length})` : ''}</span>
+                <Icon name="ChevronDown" size={16} className={`text-muted-foreground transition-transform ${filterOpen.cpu ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3">
+                {cpuModels.length > 0 && (
+                  <button onClick={() => setCpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors mb-2 block">сбросить</button>
+                )}
+                <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                  {cpuOptions.map((c) => (
+                    <label key={c} className="flex items-center gap-3 cursor-pointer text-sm">
+                      <Checkbox checked={cpuModels.includes(c)} onCheckedChange={() => toggle(cpuModels, c, setCpuModels)} />
+                      {c}
+                    </label>
+                  ))}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible open={filterOpen.ram} onOpenChange={(o) => setFilterOpen((f) => ({ ...f, ram: o }))} className="border-t border-border pt-4 pb-1">
+              <CollapsibleTrigger className="w-full flex items-center justify-between text-sm font-500 mb-1">
+                <span>Оперативная память{rams.length > 0 ? ` (${rams.length})` : ''}</span>
+                <Icon name="ChevronDown" size={16} className={`text-muted-foreground transition-transform ${filterOpen.ram ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3 space-y-3">
                 {RAM_OPTIONS.map((r) => (
                   <label key={r} className="flex items-center gap-3 cursor-pointer text-sm">
                     <Checkbox checked={rams.includes(r)} onCheckedChange={() => toggle(rams, r, setRams)} />
                     {r} ГБ
                   </label>
                 ))}
-              </div>
-            </div>
-            <div className="border-t border-border pt-5">
-              <div className="text-sm font-500 mb-3">SSD накопитель</div>
-              <div className="space-y-3">
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Collapsible open={filterOpen.ssd} onOpenChange={(o) => setFilterOpen((f) => ({ ...f, ssd: o }))} className="border-t border-border pt-4 pb-1">
+              <CollapsibleTrigger className="w-full flex items-center justify-between text-sm font-500 mb-1">
+                <span>SSD накопитель{ssds.length > 0 ? ` (${ssds.length})` : ''}</span>
+                <Icon name="ChevronDown" size={16} className={`text-muted-foreground transition-transform ${filterOpen.ssd ? 'rotate-180' : ''}`} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-3 space-y-3">
                 {SSD_OPTIONS.map((s) => (
                   <label key={s} className="flex items-center gap-3 cursor-pointer text-sm">
                     <Checkbox checked={ssds.includes(s)} onCheckedChange={() => toggle(ssds, s, setSsds)} />
                     {s >= 1000 ? `${s / 1000} ТБ` : `${s} ГБ`}
                   </label>
                 ))}
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
+
             <Button
               variant="ghost"
-              className="w-full text-muted-foreground hover:text-primary"
-              onClick={() => { setPrice([350000]); setGpuModels([]); setCpuModels([]); setRams([]); setSsds([]); }}
+              className="w-full text-muted-foreground hover:text-primary mt-4"
+              onClick={() => { setPrice([PRICE_MIN, PRICE_MAX]); setGpuModels([]); setCpuModels([]); setRams([]); setSsds([]); }}
             >
               Сбросить фильтры
             </Button>
