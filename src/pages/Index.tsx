@@ -355,7 +355,34 @@ const Index = () => {
               </CollapsibleTrigger>
               <CollapsibleContent className="pt-3">
                 <div className="text-sm text-muted-foreground mb-3">{fmt(price[0])} — {fmt(price[1])}</div>
-                <Slider min={PRICE_MIN} max={PRICE_MAX} step={5000} value={price} onValueChange={setPrice} minStepsBetweenThumbs={1} />
+                <Slider min={PRICE_MIN} max={PRICE_MAX} step={1000} value={price} onValueChange={setPrice} minStepsBetweenThumbs={1} />
+                <div className="flex items-center gap-2 mt-4">
+                  <input
+                    type="number"
+                    min={PRICE_MIN}
+                    max={price[1]}
+                    step={1000}
+                    value={price[0]}
+                    onChange={(e) => {
+                      const v = Math.min(Number(e.target.value) || PRICE_MIN, price[1]);
+                      setPrice([Math.max(v, PRICE_MIN), price[1]]);
+                    }}
+                    className="w-full min-w-0 h-9 px-2 rounded-md bg-background border border-input text-sm outline-none focus:border-primary transition-colors"
+                  />
+                  <span className="text-muted-foreground shrink-0">—</span>
+                  <input
+                    type="number"
+                    min={price[0]}
+                    max={PRICE_MAX}
+                    step={1000}
+                    value={price[1]}
+                    onChange={(e) => {
+                      const v = Math.max(Number(e.target.value) || PRICE_MAX, price[0]);
+                      setPrice([price[0], Math.min(v, PRICE_MAX)]);
+                    }}
+                    className="w-full min-w-0 h-9 px-2 rounded-md bg-background border border-input text-sm outline-none focus:border-primary transition-colors"
+                  />
+                </div>
               </CollapsibleContent>
             </Collapsible>
 
