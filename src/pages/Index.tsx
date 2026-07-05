@@ -32,39 +32,6 @@ type Product = {
   imgs?: string[];
 };
 
-const IMG = {
-  a: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/5866b2d1-4443-4366-a8e3-8f604190c52f.jpg',
-  b: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/6bd8e47b-6f79-41c5-992f-c3dfc9465db5.jpg',
-  c: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/961c46e9-9d96-4813-834d-9a0c864e6a57.jpg',
-  d: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/c4a58926-e305-4631-b900-7efc56f18c46.jpg',
-  e: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/e93c092a-d299-49ed-97e2-34cfb28df332.jpg',
-  f: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/files/9883ca4b-2016-4faa-8123-c3cbf2989feb.jpg',
-  hero: 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/fcd1180c-a99c-428e-bb23-68d933a4b35f.jpg',
-};
-
-const PRODUCTS: Product[] = [
-  { id: 1,  name: 'GLADIATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',         gpu: 'RTX 5050',         ram: 16, storage: 500,  price: 77500,  fps: '144+ FPS',              img: IMG.a, imgs: [IMG.a, IMG.b] },
-  { id: 2,  name: 'GLADIATOR V2', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5500',         gpu: 'RTX 5060',         ram: 16, storage: 500,  price: 81500,  fps: '165+ FPS',              img: IMG.b, imgs: [IMG.b, IMG.c] },
-  { id: 3,  name: 'GLADIATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',         gpu: 'RTX 5060',         ram: 16, storage: 500,  price: 84500,  fps: '165+ FPS',              img: IMG.c, imgs: [IMG.c, IMG.d] },
-  { id: 4,  name: 'GLADIATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 5600',         gpu: 'RTX 5060 Ti 8Gb',  ram: 32, storage: 500,  price: 97500,  fps: '180+ FPS', tag: 'Хит',  img: IMG.d, imgs: [IMG.d, IMG.e] },
-  { id: 5,  name: 'DOMINATOR',    brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',        gpu: 'RTX 5060',         ram: 32, storage: 500,  price: 110000, fps: '180+ FPS',              img: IMG.e, imgs: [IMG.e, IMG.a] },
-  { id: 6,  name: 'DOMINATOR V2', brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel 9600X',     gpu: 'RTX 5060',         ram: 32, storage: 500,  price: 111000, fps: '180+ FPS',              img: IMG.f, imgs: [IMG.f, IMG.b] },
-  { id: 7,  name: 'DOMINATOR V3', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R5 7500F',        gpu: 'RTX 5060 Ti 16Gb', ram: 32, storage: 500,  price: 132500, fps: '200+ FPS', tag: 'Хит',  img: IMG.a, imgs: [IMG.a, IMG.hero] },
-  { id: 8,  name: 'DOMINATOR V4', brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',      gpu: 'RTX 5060 Ti 16Gb', ram: 32, storage: 500,  price: 154500, fps: '240+ FPS', tag: 'Топ',  img: IMG.b, imgs: [IMG.b, IMG.hero] },
-  { id: 9,  name: 'RAPTOR',       brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',  gpu: 'RTX 5050',         ram: 16, storage: 500,  price: 81000,  fps: '144+ FPS',              img: IMG.c, imgs: [IMG.c, IMG.f] },
-  { id: 10, name: 'RAPTOR V2',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',  gpu: 'RTX 5060',         ram: 16, storage: 500,  price: 84000,  fps: '165+ FPS',              img: IMG.d, imgs: [IMG.d, IMG.a] },
-  { id: 11, name: 'RAPTOR V3',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-12400F',  gpu: 'RTX 5060',         ram: 32, storage: 1000, price: 94000,  fps: '165+ FPS',              img: IMG.e, imgs: [IMG.e, IMG.c] },
-  { id: 12, name: 'RAPTOR V4',    brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Intel i5-14600KF', gpu: 'RTX 5060',         ram: 32, storage: 1000, price: 138000, fps: '200+ FPS',              img: IMG.f, imgs: [IMG.f, IMG.d] },
-  { id: 13, name: 'BERSERK',      brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 5 245KF',    gpu: 'RTX 5060 Ti 16Gb', ram: 32, storage: 1000, price: 147500, fps: '240+ FPS', tag: 'Выбор', img: IMG.a, imgs: [IMG.a, IMG.e] },
-  { id: 14, name: 'BERSERK V2',   brand: 'NVIDIA', cpuBrand: 'Intel', cpu: 'Ultra 9 285K',     gpu: 'RTX 5080',         ram: 64, storage: 2000, price: 340500, fps: '360+ FPS', tag: 'Топ',  img: IMG.b, imgs: [IMG.b, IMG.hero] },
-  { id: 15, name: 'BERSERK V3',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 7800X3D',       gpu: 'RTX 5070',         ram: 32, storage: 1000, price: 160500, fps: '240+ FPS',              img: IMG.c, imgs: [IMG.c, IMG.hero] },
-  { id: 16, name: 'BERSERK V4',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',       gpu: 'RTX 5070',         ram: 32, storage: 1000, price: 179500, fps: '300+ FPS',              img: IMG.d, imgs: [IMG.d, IMG.f] },
-  { id: 17, name: 'BERSERK V5',   brand: 'NVIDIA', cpuBrand: 'AMD',   cpu: 'R7 9800X3D',       gpu: 'RTX 5070 Ti',      ram: 32, storage: 1000, price: 196500, fps: '300+ FPS', tag: 'Топ',  img: IMG.e, imgs: [IMG.e, IMG.hero] },
-  { id: 18, name: 'DOMINATOR2 V4',brand: 'AMD',    cpuBrand: 'AMD',   cpu: 'R7 7800X3D',       gpu: 'RX 9070 XT',       ram: 32, storage: 1000, price: 175500, fps: '240+ FPS', tag: 'Хит',  img: IMG.f, imgs: [IMG.f, IMG.hero] },
-];
-
-const GPU_MODELS = [...new Set(PRODUCTS.map((p) => p.gpu))].sort();
-const CPU_MODELS = [...new Set(PRODUCTS.map((p) => p.cpu))].sort();
 const RAM_OPTIONS = [16, 32, 64];
 const SSD_OPTIONS = [500, 1000, 2000];
 
@@ -125,10 +92,42 @@ const BLOG: BlogPost[] = [
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 
-const PRODUCT_IMAGES_URL = 'https://functions.poehali.dev/fa0b7713-c38c-4391-a003-db2e04b88fe3';
+const PRODUCTS_URL = 'https://functions.poehali.dev/c48cecd4-2c62-4a36-a7c7-f88df7d5ea05';
+
+type ApiProduct = {
+  id: number;
+  name: string;
+  brand: string;
+  cpu_brand: string;
+  cpu: string;
+  gpu: string;
+  ram: number;
+  storage: number;
+  price: number;
+  fps: string;
+  tag?: string;
+  img: string;
+  imgs?: string[];
+};
+
+const mapProduct = (p: ApiProduct): Product => ({
+  id: p.id,
+  name: p.name,
+  brand: p.brand,
+  cpuBrand: p.cpu_brand,
+  cpu: p.cpu,
+  gpu: p.gpu,
+  ram: p.ram,
+  storage: p.storage,
+  price: p.price,
+  fps: p.fps,
+  tag: p.tag,
+  img: p.img,
+  imgs: p.imgs,
+});
 
 const Index = () => {
-  const [productImages, setProductImages] = useState<Record<number, string>>({});
+  const [products, setProducts] = useState<Product[]>([]);
   const [price, setPrice] = useState<number[]>([350000]);
   const [gpuModels, setGpuModels] = useState<string[]>([]);
   const [cpuModels, setCpuModels] = useState<string[]>([]);
@@ -148,13 +147,9 @@ const Index = () => {
   const [callbackSent, setCallbackSent] = useState(false);
 
   useEffect(() => {
-    fetch(PRODUCT_IMAGES_URL)
+    fetch(PRODUCTS_URL)
       .then((r) => r.json())
-      .then((rows: { product_id: number; img: string }[]) => {
-        const map: Record<number, string> = {};
-        rows.forEach((r) => { map[r.product_id] = r.img; });
-        setProductImages(map);
-      })
+      .then((rows: ApiProduct[]) => setProducts(rows.map(mapProduct)))
       .catch(() => {});
   }, []);
 
@@ -186,17 +181,20 @@ const Index = () => {
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
+  const gpuOptions = useMemo(() => [...new Set(products.map((p) => p.gpu))].sort(), [products]);
+  const cpuOptions = useMemo(() => [...new Set(products.map((p) => p.cpu))].sort(), [products]);
+
   const filtered = useMemo(
     () =>
-      PRODUCTS.filter(
+      products.filter(
         (p) =>
           p.price <= price[0] &&
           (gpuModels.length === 0 || gpuModels.includes(p.gpu)) &&
           (cpuModels.length === 0 || cpuModels.includes(p.cpu)) &&
           (rams.length === 0 || rams.includes(p.ram)) &&
           (ssds.length === 0 || ssds.includes(p.storage))
-      ).map((p) => (productImages[p.id] ? { ...p, img: productImages[p.id] } : p)),
-    [price, gpuModels, cpuModels, rams, ssds, productImages]
+      ),
+    [products, price, gpuModels, cpuModels, rams, ssds]
   );
 
   return (
@@ -317,7 +315,7 @@ const Index = () => {
                 {gpuModels.length > 0 && <button onClick={() => setGpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors">сбросить</button>}
               </div>
               <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                {GPU_MODELS.map((g) => (
+                {gpuOptions.map((g) => (
                   <label key={g} className="flex items-center gap-3 cursor-pointer text-sm">
                     <Checkbox checked={gpuModels.includes(g)} onCheckedChange={() => toggle(gpuModels, g, setGpuModels)} />
                     {g}
@@ -331,7 +329,7 @@ const Index = () => {
                 {cpuModels.length > 0 && <button onClick={() => setCpuModels([])} className="text-xs text-muted-foreground hover:text-primary transition-colors">сбросить</button>}
               </div>
               <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
-                {CPU_MODELS.map((c) => (
+                {cpuOptions.map((c) => (
                   <label key={c} className="flex items-center gap-3 cursor-pointer text-sm">
                     <Checkbox checked={cpuModels.includes(c)} onCheckedChange={() => toggle(cpuModels, c, setCpuModels)} />
                     {c}

@@ -5,7 +5,7 @@ const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b740
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
-const PRODUCT_IMAGES_URL = "https://functions.poehali.dev/fa0b7713-c38c-4391-a003-db2e04b88fe3";
+const PRODUCTS_URL = "https://functions.poehali.dev/c48cecd4-2c62-4a36-a7c7-f88df7d5ea05";
 
 const COLORS = ["#6366f1", "#22d3ee", "#f59e0b", "#10b981", "#f43f5e", "#a78bfa"];
 
@@ -89,21 +89,213 @@ function LoginScreen({ onLogin }: { onLogin: () => void }) {
   );
 }
 
-interface ProductImage {
-  product_id: number;
+interface ProductItem {
+  id: number;
   name: string;
+  brand: string;
+  cpu_brand: string;
+  cpu: string;
+  gpu: string;
+  ram: number;
+  storage: number;
+  price: number;
+  fps: string;
+  tag: string | null;
   img: string;
+  imgs: string[] | null;
+  active: boolean;
+  sort_order: number;
 }
 
-function ProductPhotos() {
-  const [items, setItems] = useState<ProductImage[]>([]);
+const EMPTY_PRODUCT: Omit<ProductItem, "id" | "img" | "imgs"> = {
+  name: "",
+  brand: "NVIDIA",
+  cpu_brand: "Intel",
+  cpu: "",
+  gpu: "",
+  ram: 16,
+  storage: 500,
+  price: 0,
+  fps: "144+ FPS",
+  tag: null,
+  active: true,
+  sort_order: 0,
+};
+
+function authHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "X-Admin-Password": sessionStorage.getItem(PWD_KEY) || "",
+  };
+}
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function ProductForm({
+  initial,
+  onCancel,
+  onSaved,
+}: {
+  initial: ProductItem | null;
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState({
+    name: initial?.name ?? EMPTY_PRODUCT.name,
+    brand: initial?.brand ?? EMPTY_PRODUCT.brand,
+    cpu_brand: initial?.cpu_brand ?? EMPTY_PRODUCT.cpu_brand,
+    cpu: initial?.cpu ?? EMPTY_PRODUCT.cpu,
+    gpu: initial?.gpu ?? EMPTY_PRODUCT.gpu,
+    ram: initial?.ram ?? EMPTY_PRODUCT.ram,
+    storage: initial?.storage ?? EMPTY_PRODUCT.storage,
+    price: initial?.price ?? EMPTY_PRODUCT.price,
+    fps: initial?.fps ?? EMPTY_PRODUCT.fps,
+    tag: initial?.tag ?? "",
+  });
+  const [file, setFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
+    setForm(prev => ({ ...prev, [key]: value }));
+
+  const save = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      const payload: Record<string, unknown> = {
+        ...form,
+        tag: form.tag || null,
+      };
+      if (file) {
+        payload.file_base64 = await fileToBase64(file);
+        payload.content_type = file.type || "image/jpeg";
+      }
+      if (initial) {
+        payload.id = initial.id;
+      } else if (!file) {
+        setError("Загрузите фото для новой сборки");
+        setSaving(false);
+        return;
+      }
+
+      const res = await fetch(PRODUCTS_URL, {
+        method: initial ? "PUT" : "POST",
+        headers: authHeaders(),
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        onSaved();
+      } else {
+        setError(data.error || "Ошибка сохранения");
+      }
+    } catch {
+      setError("Ошибка подключения");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-6 mb-6 space-y-4">
+      <div className="font-semibold text-lg">{initial ? `Редактирование: ${initial.name}` : "Новая сборка"}</div>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Название</label>
+          <input value={form.name} onChange={e => set("name", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Тег (Хит / Топ / Выбор)</label>
+          <input value={form.tag} onChange={e => set("tag", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Процессор</label>
+          <input value={form.cpu} onChange={e => set("cpu", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Бренд процессора</label>
+          <select value={form.cpu_brand} onChange={e => set("cpu_brand", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="Intel">Intel</option>
+            <option value="AMD">AMD</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Видеокарта</label>
+          <input value={form.gpu} onChange={e => set("gpu", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Бренд видеокарты</label>
+          <select value={form.brand} onChange={e => set("brand", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="NVIDIA">NVIDIA</option>
+            <option value="AMD">AMD</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Оперативная память (ГБ)</label>
+          <input type="number" value={form.ram} onChange={e => set("ram", Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">SSD (ГБ)</label>
+          <input type="number" value={form.storage} onChange={e => set("storage", Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Цена (₽)</label>
+          <input type="number" value={form.price} onChange={e => set("price", Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">FPS (например 240+ FPS)</label>
+          <input value={form.fps} onChange={e => set("fps", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs text-muted-foreground mb-1 block">{initial ? "Заменить фото (необязательно)" : "Фото сборки"}</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={e => setFile(e.target.files?.[0] || null)}
+          className="text-sm"
+        />
+      </div>
+
+      {error && <div className="text-destructive text-sm">{error}</div>}
+
+      <div className="flex gap-3">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="bg-primary text-primary-foreground rounded-lg px-5 py-2 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {saving ? "Сохранение..." : "Сохранить"}
+        </button>
+        <button
+          onClick={onCancel}
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Отмена
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ProductsManager() {
+  const [items, setItems] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploadingId, setUploadingId] = useState<number | null>(null);
-  const [errorId, setErrorId] = useState<number | null>(null);
+  const [editing, setEditing] = useState<ProductItem | null | "new">(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const load = () => {
     setLoading(true);
-    fetch(PRODUCT_IMAGES_URL)
+    fetch(`${PRODUCTS_URL}?all=1`, { headers: authHeaders() })
       .then(r => r.json())
       .then(d => { setItems(d); setLoading(false); })
       .catch(() => setLoading(false));
@@ -111,85 +303,95 @@ function ProductPhotos() {
 
   useEffect(() => { load(); }, []);
 
-  const onFile = async (productId: number, file: File) => {
-    setUploadingId(productId);
-    setErrorId(null);
-    try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+  const toggleActive = async (item: ProductItem) => {
+    await fetch(PRODUCTS_URL, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ id: item.id, active: !item.active }),
+    });
+    load();
+  };
 
-      const res = await fetch(PRODUCT_IMAGES_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Admin-Password": sessionStorage.getItem(PWD_KEY) || "",
-        },
-        body: JSON.stringify({
-          product_id: productId,
-          file_base64: base64,
-          content_type: file.type || "image/jpeg",
-        }),
+  const remove = async (id: number) => {
+    setDeletingId(id);
+    try {
+      await fetch(PRODUCTS_URL, {
+        method: "DELETE",
+        headers: authHeaders(),
+        body: JSON.stringify({ id }),
       });
-      const data = await res.json();
-      if (res.ok && data.ok) {
-        setItems(prev => prev.map(i => i.product_id === productId ? { ...i, img: data.img } : i));
-      } else {
-        setErrorId(productId);
-      }
-    } catch {
-      setErrorId(productId);
+      load();
     } finally {
-      setUploadingId(null);
+      setDeletingId(null);
     }
   };
 
   if (loading) return <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>;
 
+  if (editing) {
+    return (
+      <ProductForm
+        initial={editing === "new" ? null : editing}
+        onCancel={() => setEditing(null)}
+        onSaved={() => { setEditing(null); load(); }}
+      />
+    );
+  }
+
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-      {items.map(item => (
-        <div key={item.product_id} className="bg-card border border-border rounded-xl overflow-hidden">
-          <div className="aspect-square bg-muted relative">
-            <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
-            {uploadingId === item.product_id && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm">
-                Загрузка...
+    <div>
+      <div className="flex justify-end mb-5">
+        <button
+          onClick={() => setEditing("new")}
+          className="bg-primary text-primary-foreground rounded-lg px-5 py-2 text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          + Добавить сборку
+        </button>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {items.map(item => (
+          <div key={item.id} className={`bg-card border rounded-xl overflow-hidden ${item.active ? "border-border" : "border-border opacity-50"}`}>
+            <div className="aspect-square bg-muted relative">
+              <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+              {!item.active && (
+                <div className="absolute top-2 left-2 bg-black/70 text-white text-xs rounded px-2 py-1">Скрыто</div>
+              )}
+            </div>
+            <div className="p-4 space-y-1">
+              <div className="font-semibold">{item.name}</div>
+              <div className="text-xs text-muted-foreground">{item.cpu} · {item.gpu}</div>
+              <div className="text-sm font-semibold text-primary">{item.price.toLocaleString("ru-RU")} ₽</div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setEditing(item)}
+                  className="flex-1 bg-secondary text-secondary-foreground rounded-lg py-2 text-xs font-semibold hover:opacity-90 transition-opacity"
+                >
+                  Изменить
+                </button>
+                <button
+                  onClick={() => toggleActive(item)}
+                  className="flex-1 border border-border rounded-lg py-2 text-xs font-semibold hover:bg-muted transition-colors"
+                >
+                  {item.active ? "Скрыть" : "Показать"}
+                </button>
+                <button
+                  onClick={() => remove(item.id)}
+                  disabled={deletingId === item.id}
+                  className="border border-destructive text-destructive rounded-lg px-3 py-2 text-xs font-semibold hover:bg-destructive hover:text-destructive-foreground transition-colors disabled:opacity-50"
+                >
+                  {deletingId === item.id ? "..." : "Удалить"}
+                </button>
               </div>
-            )}
+            </div>
           </div>
-          <div className="p-4">
-            <div className="font-semibold mb-3">{item.name}</div>
-            <label className="block">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) onFile(item.product_id, file);
-                  e.target.value = "";
-                }}
-              />
-              <span className="block text-center bg-primary text-primary-foreground rounded-lg py-2 text-sm font-semibold cursor-pointer hover:opacity-90 transition-opacity">
-                Заменить фото
-              </span>
-            </label>
-            {errorId === item.product_id && (
-              <div className="text-destructive text-xs mt-2 text-center">Ошибка загрузки</div>
-            )}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
 
 function Dashboard() {
-  const [tab, setTab] = useState<"stats" | "photos">("stats");
+  const [tab, setTab] = useState<"stats" | "products">("stats");
   const [data, setData] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -223,14 +425,14 @@ function Dashboard() {
           Статистика
         </button>
         <button
-          onClick={() => setTab("photos")}
-          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "photos" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          onClick={() => setTab("products")}
+          className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${tab === "products" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
         >
-          Фото каталога
+          Каталог сборок
         </button>
       </div>
 
-      {tab === "photos" && <ProductPhotos />}
+      {tab === "products" && <ProductsManager />}
 
       {tab === "stats" && loading && <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>}
       {tab === "stats" && error && <div className="text-destructive text-sm py-10 text-center">{error}</div>}

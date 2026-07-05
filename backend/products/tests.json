@@ -1,0 +1,37 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Получить активные товары",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Создание без пароля",
+      "method": "POST",
+      "path": "/",
+      "body": {"name": "TEST"},
+      "expectedStatus": 401
+    },
+    {
+      "name": "Изменение без пароля",
+      "method": "PUT",
+      "path": "/",
+      "body": {"id": 1, "price": 1000},
+      "expectedStatus": 401
+    },
+    {
+      "name": "Удаление без пароля",
+      "method": "DELETE",
+      "path": "/",
+      "body": {"id": 1},
+      "expectedStatus": 401
+    }
+  ]
+}
