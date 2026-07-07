@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
+const SEND_LEAD_URL = 'https://functions.poehali.dev/0417654c-b782-4720-851a-0c4f89751599';
 
 type Part = { id: number; name: string; price: number };
 type Components = {
@@ -79,6 +80,8 @@ export default function Calculator() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [orderError, setOrderError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -117,14 +120,29 @@ export default function Calculator() {
 
   const reset = () => { setBrand(null); setPlatform(null); setSelected({}); };
 
-  const sendOrder = () => {
+  const sendOrder = async () => {
+    setSending(true);
+    setOrderError('');
     const platformLabel = platform ? PLATFORM_INFO[platform].label : '';
     const lines = keys
       .filter((k) => selected[k])
       .map((k) => `${LABELS[k].label}: ${selected[k]!.name} — ${fmt(selected[k]!.price)}`)
       .join('\n');
     const text = `🖥 Заявка на сборку!\n🔌 Платформа: ${platformLabel}\n\n${lines}\n\n🔧 Услуга сборки: ${fmt(assemblyFee)}\n💰 Итого: ${fmt(total)}\n\n👤 Имя: ${name}\n📞 Телефон: ${phone}`;
-    window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
+    try {
+      const res = await fetch(SEND_LEAD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error();
+    } catch {
+      setSending(false);
+      setOrderError('Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам.');
+      return;
+    }
+    setSending(false);
     setSent(true);
     setTimeout(() => { setSent(false); setOrderOpen(false); setName(''); setPhone(''); }, 3000);
   };
@@ -414,7 +432,7 @@ export default function Calculator() {
                   <Icon name="CheckCircle" size={36} className="text-primary" />
                 </div>
                 <div className="font-display font-700 text-xl">Заявка отправлена!</div>
-                <div className="text-muted-foreground text-sm">Telegram открылся с вашей сборкой.<br />Мы свяжемся в ближайшее время.</div>
+                <div className="text-muted-foreground text-sm">Мы свяжемся с вами в ближайшее время.</div>
               </div>
             ) : (
               <>
@@ -438,12 +456,17 @@ export default function Calculator() {
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
+                {orderError && <div className="text-destructive text-sm mb-3">{orderError}</div>}
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
-                  disabled={!name.trim() || !phone.trim()}
+                  disabled={!name.trim() || !phone.trim() || sending}
                   onClick={sendOrder}
                 >
-                  <Icon name="Send" size={18} /> Отправить заявку в Telegram
+                  {sending ? (
+                    <><Icon name="Loader2" size={18} className="animate-spin" /> Отправляем…</>
+                  ) : (
+                    <><Icon name="Send" size={18} /> Отправить заявку</>
+                  )}
                 </Button>
               </>
             )}

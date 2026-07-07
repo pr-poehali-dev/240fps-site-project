@@ -95,6 +95,7 @@ const BLOG: BlogPost[] = [
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽';
 
 const PRODUCTS_URL = 'https://functions.poehali.dev/c48cecd4-2c62-4a36-a7c7-f88df7d5ea05';
+const SEND_LEAD_URL = 'https://functions.poehali.dev/0417654c-b782-4720-851a-0c4f89751599';
 
 type ApiProduct = {
   id: number;
@@ -151,7 +152,17 @@ const Index = () => {
   const [callbackName, setCallbackName] = useState('');
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackSent, setCallbackSent] = useState(false);
+  const [callbackSending, setCallbackSending] = useState(false);
+  const [callbackError, setCallbackError] = useState('');
+  const [orderSending, setOrderSending] = useState(false);
+  const [orderError, setOrderError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [contactName, setContactName] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactComment, setContactComment] = useState('');
+  const [contactSending, setContactSending] = useState(false);
+  const [contactSent, setContactSent] = useState(false);
+  const [contactError, setContactError] = useState('');
 
   useEffect(() => {
     fetch(PRODUCTS_URL)
@@ -160,9 +171,30 @@ const Index = () => {
       .catch(() => {});
   }, []);
 
-  const sendCallback = () => {
+  const sendLead = async (text: string): Promise<boolean> => {
+    try {
+      const res = await fetch(SEND_LEAD_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      return Boolean(data.ok);
+    } catch {
+      return false;
+    }
+  };
+
+  const sendCallback = async () => {
+    setCallbackSending(true);
+    setCallbackError('');
     const text = `📞 Заявка на звонок!\n\n👤 Имя: ${callbackName}\n📞 Телефон: ${callbackPhone}`;
-    window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
+    const ok = await sendLead(text);
+    setCallbackSending(false);
+    if (!ok) {
+      setCallbackError('Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам.');
+      return;
+    }
     setCallbackSent(true);
     setTimeout(() => {
       setCallbackSent(false);
@@ -172,10 +204,17 @@ const Index = () => {
     }, 3000);
   };
 
-  const sendOrder = () => {
+  const sendOrder = async () => {
     if (!orderProduct) return;
+    setOrderSending(true);
+    setOrderError('');
     const text = `Заявка на покупку!\n\n🖥 ${orderProduct.name}\nЦП: ${orderProduct.cpu}\nГП: ${orderProduct.gpu}\nОЗУ: ${orderProduct.ram} ГБ\nЦена: ${fmt(orderProduct.price)}\n\n👤 Имя: ${orderName}\n📞 Телефон: ${orderPhone}`;
-    window.open(`https://t.me/MaxSokhin?text=${encodeURIComponent(text)}`, '_blank');
+    const ok = await sendLead(text);
+    setOrderSending(false);
+    if (!ok) {
+      setOrderError('Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам.');
+      return;
+    }
     setSent(true);
     setTimeout(() => {
       setSent(false);
@@ -183,6 +222,23 @@ const Index = () => {
       setOrderName('');
       setOrderPhone('');
     }, 3000);
+  };
+
+  const sendContact = async () => {
+    setContactSending(true);
+    setContactError('');
+    const text = `📝 Заявка с сайта!\n\n👤 Имя: ${contactName}\n📞 Телефон: ${contactPhone}${contactComment ? `\n💬 Комментарий: ${contactComment}` : ''}`;
+    const ok = await sendLead(text);
+    setContactSending(false);
+    if (!ok) {
+      setContactError('Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам.');
+      return;
+    }
+    setContactSent(true);
+    setContactName('');
+    setContactPhone('');
+    setContactComment('');
+    setTimeout(() => setContactSent(false), 4000);
   };
 
   const toggle = <T,>(arr: T[], v: T, set: (a: T[]) => void) =>
@@ -600,17 +656,48 @@ const Index = () => {
           </div>
           <div className="p-8 rounded-2xl bg-card border border-border">
             <h3 className="font-display font-600 text-xl uppercase mb-5">Оставить заявку</h3>
-            <div className="space-y-4">
-              <input className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors" placeholder="Ваше имя" />
-              <input className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors" placeholder="Телефон" />
-              <textarea className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors min-h-28 resize-none" placeholder="Комментарий" />
-              <Button
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
-                onClick={() => window.open('https://t.me/MaxSokhin', '_blank')}
-              >
-                <Icon name="Send" size={18} /> Отправить заявку в Telegram
-              </Button>
-            </div>
+            {contactSent ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center glow-yellow">
+                  <Icon name="CheckCircle" size={36} className="text-primary" />
+                </div>
+                <div className="font-display font-700 text-xl">Заявка отправлена!</div>
+                <div className="text-muted-foreground text-sm">Мы свяжемся с вами в ближайшее время.</div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <input
+                  className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                  placeholder="Ваше имя"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                />
+                <input
+                  className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                  placeholder="Телефон"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+                <textarea
+                  className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors min-h-28 resize-none"
+                  placeholder="Комментарий"
+                  value={contactComment}
+                  onChange={(e) => setContactComment(e.target.value)}
+                />
+                {contactError && <div className="text-destructive text-sm">{contactError}</div>}
+                <Button
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+                  disabled={!contactName.trim() || !contactPhone.trim() || contactSending}
+                  onClick={sendContact}
+                >
+                  {contactSending ? (
+                    <><Icon name="Loader2" size={18} className="animate-spin" /> Отправляем…</>
+                  ) : (
+                    <><Icon name="Send" size={18} /> Отправить заявку</>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -680,12 +767,17 @@ const Index = () => {
                     onChange={(e) => setCallbackPhone(e.target.value)}
                   />
                 </div>
+                {callbackError && <div className="text-destructive text-sm mb-3">{callbackError}</div>}
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
-                  disabled={!callbackName.trim() || !callbackPhone.trim()}
+                  disabled={!callbackName.trim() || !callbackPhone.trim() || callbackSending}
                   onClick={sendCallback}
                 >
-                  <Icon name="Phone" size={18} /> Перезвоните мне
+                  {callbackSending ? (
+                    <><Icon name="Loader2" size={18} className="animate-spin" /> Отправляем…</>
+                  ) : (
+                    <><Icon name="Phone" size={18} /> Перезвоните мне</>
+                  )}
                 </Button>
               </>
             )}
@@ -709,7 +801,7 @@ const Index = () => {
                   <Icon name="CheckCircle" size={36} className="text-primary" />
                 </div>
                 <div className="font-display font-700 text-xl">Заявка отправлена!</div>
-                <div className="text-muted-foreground text-sm">Telegram открылся с вашей заявкой.<br />Мы свяжемся с вами в ближайшее время.</div>
+                <div className="text-muted-foreground text-sm">Мы свяжемся с вами в ближайшее время.</div>
               </div>
             ) : (
               <>
@@ -735,12 +827,17 @@ const Index = () => {
                     onChange={(e) => setOrderPhone(e.target.value)}
                   />
                 </div>
+                {orderError && <div className="text-destructive text-sm mb-3">{orderError}</div>}
                 <Button
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
-                  disabled={!orderName.trim() || !orderPhone.trim()}
+                  disabled={!orderName.trim() || !orderPhone.trim() || orderSending}
                   onClick={sendOrder}
                 >
-                  <Icon name="Send" size={18} /> Отправить заявку в Telegram
+                  {orderSending ? (
+                    <><Icon name="Loader2" size={18} className="animate-spin" /> Отправляем…</>
+                  ) : (
+                    <><Icon name="Send" size={18} /> Отправить заявку</>
+                  )}
                 </Button>
               </>
             )}
