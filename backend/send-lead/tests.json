@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Пустой текст",
+      "method": "POST",
+      "path": "/",
+      "body": {"text": ""},
+      "expectedStatus": 400
+    },
+    {
+      "name": "Валидный текст без токена",
+      "method": "POST",
+      "path": "/",
+      "body": {"text": "Тест"},
+      "expectedStatus": 500
+    }
+  ]
+}
