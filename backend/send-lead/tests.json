@@ -14,11 +14,11 @@
       "expectedStatus": 400
     },
     {
-      "name": "Валидный текст без токена",
+      "name": "Валидный текст",
       "method": "POST",
       "path": "/",
       "body": {"text": "Тест"},
-      "expectedStatus": 500
+      "expectedStatus": 200
     }
   ]
 }
