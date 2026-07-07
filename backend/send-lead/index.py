@@ -50,32 +50,36 @@ def handler(event: dict, context) -> dict:
         'text': text,
     }).encode()
 
-    req = urllib.request.Request(url, data=data, method='POST')
-    try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            resp_body = json.loads(resp.read().decode())
-            if not resp_body.get('ok'):
+    last_error = None
+    for attempt in range(3):
+        req = urllib.request.Request(url, data=data, method='POST')
+        try:
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                resp_body = json.loads(resp.read().decode())
+                if resp_body.get('ok'):
+                    return {
+                        'statusCode': 200,
+                        'headers': {**cors, 'Content-Type': 'application/json'},
+                        'body': json.dumps({'ok': True}),
+                    }
                 print(f'Telegram API error: {resp_body}')
-                return {
-                    'statusCode': 502,
-                    'headers': {**cors, 'Content-Type': 'application/json'},
-                    'body': json.dumps({'ok': False, 'error': 'Telegram API отклонил запрос'}),
-                }
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode()
-        print(f'Telegram HTTPError {e.code}: {err_body}')
-        return {
-            'statusCode': 502,
-            'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': False, 'error': 'Не удалось отправить сообщение в Telegram'}),
-        }
-    except Exception as e:
-        print(f'Telegram send exception: {repr(e)}')
-        return {
-            'statusCode': 502,
-            'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': False, 'error': 'Не удалось отправить сообщение в Telegram'}),
-        }
+                last_error = 'Telegram API отклонил запрос'
+                break
+        except urllib.error.HTTPError as e:
+            err_body = e.read().decode()
+            print(f'Telegram HTTPError {e.code}: {err_body}')
+            last_error = 'Не удалось отправить сообщение в Telegram'
+            break
+        except Exception as e:
+            print(f'Telegram send exception (attempt {attempt + 1}): {repr(e)}')
+            last_error = 'Не удалось отправить сообщение в Telegram'
+            continue
+
+    return {
+        'statusCode': 502,
+        'headers': {**cors, 'Content-Type': 'application/json'},
+        'body': json.dumps({'ok': False, 'error': last_error}),
+    }
 
     return {
         'statusCode': 200,
