@@ -33,8 +33,21 @@ def handler(event: dict, context) -> dict:
     result = {}
     for key, table in categories.items():
         if key == 'case':
-            rows = con.run(f'SELECT id, name, price, image_url FROM {table} WHERE active = true ORDER BY price')
-            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'image': r[3]} for r in rows]
+            rows = con.run(f'SELECT id, name, price, image_url, brand, color FROM {table} WHERE active = true ORDER BY price')
+            case_ids = [r[0] for r in rows]
+            gallery_map = {}
+            if case_ids:
+                ids_str = ','.join(str(i) for i in case_ids)
+                gallery_rows = con.run(f'SELECT case_id, image_url FROM components_case_images WHERE case_id IN ({ids_str}) ORDER BY case_id, sort_order')
+                for cid, img in gallery_rows:
+                    gallery_map.setdefault(cid, []).append(img)
+            result[key] = [
+                {
+                    'id': r[0], 'name': r[1], 'price': r[2], 'image': r[3],
+                    'brand': r[4], 'color': r[5], 'gallery': gallery_map.get(r[0], []),
+                }
+                for r in rows
+            ]
         else:
             rows = con.run(f'SELECT id, name, price FROM {table} WHERE active = true ORDER BY price')
             result[key] = [{'id': r[0], 'name': r[1], 'price': r[2]} for r in rows]

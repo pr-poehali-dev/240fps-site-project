@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
 const SEND_LEAD_URL = 'https://functions.poehali.dev/0417654c-b782-4720-851a-0c4f89751599';
 
-type Part = { id: number; name: string; price: number; image?: string };
+type Part = { id: number; name: string; price: number; image?: string; brand?: string; color?: string; gallery?: string[] };
 type Components = {
   cpu: Part[];
   motherboard: Part[];
@@ -108,6 +108,10 @@ export default function Calculator() {
   const [orderError, setOrderError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAllCases, setShowAllCases] = useState(false);
+  const [caseBrandFilter, setCaseBrandFilter] = useState<string>('all');
+  const [caseColorFilter, setCaseColorFilter] = useState<string>('all');
+  const [galleryPart, setGalleryPart] = useState<Part | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
     fetch(API_URL)
@@ -321,7 +325,11 @@ export default function Calculator() {
                 const picked = selected[key];
 
                 if (key === 'case') {
-                  const visibleParts = showAllCases ? parts : parts.slice(0, 12);
+                  const brands = Array.from(new Set(parts.map((p) => p.brand).filter(Boolean))) as string[];
+                  brands.sort((a, b) => a.localeCompare(b));
+                  const brandFiltered = caseBrandFilter === 'all' ? parts : parts.filter((p) => p.brand === caseBrandFilter);
+                  const colorFiltered = caseColorFilter === 'all' ? brandFiltered : brandFiltered.filter((p) => p.color === caseColorFilter);
+                  const visibleParts = showAllCases ? colorFiltered : colorFiltered.slice(0, 12);
                   return (
                     <div key={key} className="rounded-xl bg-card border border-border overflow-hidden">
                       <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
@@ -334,40 +342,77 @@ export default function Calculator() {
                         )}
                       </div>
                       <div className="p-4">
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          <div className="relative">
+                            <select
+                              value={caseBrandFilter}
+                              onChange={(e) => { setCaseBrandFilter(e.target.value); setShowAllCases(false); }}
+                              className="h-9 pl-3 pr-8 rounded-lg bg-background border border-input focus:border-primary outline-none text-xs appearance-none cursor-pointer font-500"
+                            >
+                              <option value="all">Все бренды</option>
+                              {brands.map((b) => (
+                                <option key={b} value={b}>{b}</option>
+                              ))}
+                            </select>
+                            <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                          </div>
+                          <div className="relative">
+                            <select
+                              value={caseColorFilter}
+                              onChange={(e) => { setCaseColorFilter(e.target.value); setShowAllCases(false); }}
+                              className="h-9 pl-3 pr-8 rounded-lg bg-background border border-input focus:border-primary outline-none text-xs appearance-none cursor-pointer font-500"
+                            >
+                              <option value="all">Любой цвет</option>
+                              <option value="black">Чёрный</option>
+                              <option value="white">Белый</option>
+                            </select>
+                            <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                          </div>
+                        </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           {visibleParts.map((p) => {
                             const isSelected = picked?.id === p.id;
                             return (
-                              <button
+                              <div
                                 key={p.id}
-                                onClick={() => selectPart(key, p)}
                                 className={`flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all ${
                                   isSelected
                                     ? 'border-primary bg-primary/10 glow-yellow'
                                     : 'border-border bg-background hover:border-primary/50'
                                 }`}
                               >
-                                <div className="aspect-square bg-muted/30 flex items-center justify-center overflow-hidden">
+                                <button
+                                  onClick={() => { if (p.gallery && p.gallery.length > 0) { setGalleryPart(p); setGalleryIndex(0); } }}
+                                  className="aspect-square bg-muted/30 flex items-center justify-center overflow-hidden relative group"
+                                >
                                   {p.image ? (
                                     <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" loading="lazy" />
                                   ) : (
                                     <Icon name="Box" size={28} className="text-muted-foreground" />
                                   )}
-                                </div>
-                                <div className="p-2">
+                                  {p.gallery && p.gallery.length > 1 && (
+                                    <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1 opacity-80 group-hover:opacity-100">
+                                      <Icon name="Images" size={12} className="text-white" />
+                                    </div>
+                                  )}
+                                </button>
+                                <button onClick={() => selectPart(key, p)} className="p-2 text-left">
                                   <div className="text-xs font-500 line-clamp-2 mb-1">{p.name}</div>
                                   <div className="text-xs text-primary font-600">{fmt(p.price)}</div>
-                                </div>
-                              </button>
+                                </button>
+                              </div>
                             );
                           })}
                         </div>
-                        {parts.length > 12 && (
+                        {colorFiltered.length === 0 && (
+                          <p className="text-sm text-muted-foreground text-center py-6">Нет моделей по выбранным фильтрам</p>
+                        )}
+                        {colorFiltered.length > 12 && (
                           <button
                             onClick={() => setShowAllCases((v) => !v)}
                             className="w-full mt-3 h-10 rounded-lg border border-border text-sm font-500 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
                           >
-                            {showAllCases ? 'Скрыть' : `Показать все (${parts.length})`}
+                            {showAllCases ? 'Скрыть' : `Показать все (${colorFiltered.length})`}
                           </button>
                         )}
                       </div>
@@ -442,7 +487,23 @@ export default function Calculator() {
                   </p>
                 ) : (
                   <div className="space-y-3 mb-5">
-                    {keys.filter((k) => selected[k]).map((k) => (
+                    {selected.case && (
+                      <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 border border-border mb-1">
+                        <div className="w-14 h-14 rounded-md overflow-hidden bg-muted/50 shrink-0 flex items-center justify-center">
+                          {selected.case.image ? (
+                            <img src={selected.case.image} alt={selected.case.name} className="w-full h-full object-contain" />
+                          ) : (
+                            <Icon name="Box" size={20} className="text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-xs text-muted-foreground mb-0.5">Корпус</div>
+                          <div className="font-500 text-sm truncate">{selected.case.name}</div>
+                          <div className="text-xs text-primary font-600">{fmt(selected.case.price)}</div>
+                        </div>
+                      </div>
+                    )}
+                    {keys.filter((k) => selected[k] && k !== 'case').map((k) => (
                       <div key={k} className="flex items-start justify-between gap-3 text-sm">
                         <div>
                           <div className="text-xs text-muted-foreground mb-0.5">{LABELS[k].label}</div>
@@ -538,6 +599,73 @@ export default function Calculator() {
                 </Button>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Gallery modal */}
+      {galleryPart && galleryPart.gallery && galleryPart.gallery.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setGalleryPart(null)}
+        >
+          <div className="relative w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setGalleryPart(null)}
+              className="absolute -top-10 right-0 text-white/80 hover:text-white transition-colors"
+            >
+              <Icon name="X" size={24} />
+            </button>
+            <div className="rounded-2xl overflow-hidden bg-card border border-border">
+              <div className="relative aspect-square bg-muted/30 flex items-center justify-center">
+                <img
+                  src={galleryPart.gallery[galleryIndex]}
+                  alt={galleryPart.name}
+                  className="w-full h-full object-contain"
+                />
+                {galleryPart.gallery.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setGalleryIndex((i) => (i - 1 + galleryPart.gallery!.length) % galleryPart.gallery!.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
+                    >
+                      <Icon name="ChevronLeft" size={20} />
+                    </button>
+                    <button
+                      onClick={() => setGalleryIndex((i) => (i + 1) % galleryPart.gallery!.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-white transition-colors"
+                    >
+                      <Icon name="ChevronRight" size={20} />
+                    </button>
+                  </>
+                )}
+              </div>
+              <div className="p-4">
+                <div className="font-600 mb-1">{galleryPart.name}</div>
+                <div className="text-primary font-600 mb-3">{fmt(galleryPart.price)}</div>
+                {galleryPart.gallery.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {galleryPart.gallery.map((img, idx) => (
+                      <button
+                        key={img}
+                        onClick={() => setGalleryIndex(idx)}
+                        className={`w-14 h-14 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
+                          idx === galleryIndex ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-contain bg-muted/30" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <Button
+                  className="w-full mt-4 bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-11"
+                  onClick={() => { selectPart('case', galleryPart); setGalleryPart(null); }}
+                >
+                  <Icon name="Check" size={18} /> Выбрать этот корпус
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}

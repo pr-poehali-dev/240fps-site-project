@@ -1,0 +1,15 @@
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mv5-b-0.webp' WHERE name='1STPLAYER Megaview MV5-T Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mv5-w-0.webp' WHERE name='1STPLAYER Megaview MV5-T White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mv6-b-0.webp' WHERE name='1STPLAYER Megaview MV6-T Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mv6-w-0.webp' WHERE name='1STPLAYER Megaview MV6-T White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mv8-b-0.webp' WHERE name='1STPLAYER Megaview MV8-TP Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mi5-b-0.webp' WHERE name='1STPLAYER MIKU Mi5 Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mi5-w-0.webp' WHERE name='1STPLAYER MIKU Mi5 White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/mi7a-b-0.webp' WHERE name='1STPLAYER MIKU Mi7-A Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/au6-b-0.webp' WHERE name='1STPLAYER STEAMPUNK Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/rt5-b-0.webp' WHERE name='1STPLAYER Uview RT5-BK Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/rt5-w-0.webp' WHERE name='1STPLAYER Uview RT5-WH White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/uv5-b-0.webp' WHERE name='1STPLAYER Uview UV5 Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/uv5-w-0.webp' WHERE name='1STPLAYER Uview UV5 White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/uv6-b-0.webp' WHERE name='1STPLAYER Uview UV6 Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url='/cases/gallery/uv6-w-0.webp' WHERE name='1STPLAYER Uview UV6 White';
