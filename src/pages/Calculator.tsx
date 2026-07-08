@@ -57,8 +57,27 @@ const RAM_DDR4     = ['DDR4 16GB', 'DDR4 32GB'];
 const RAM_DDR5     = ['DDR5 16GB 5600', 'DDR5 16GB 6000', 'DDR5 32GB 5600', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
 const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
-// Процессоры, для которых обязательно СЖО (мощное тепловыделение X3D)
-const CPU_LIQUID_REQUIRED = ['Ryzen 7 7800X3D', 'Ryzen 7 9800X3D'];
+// Процессоры, для которых обязательно СЖО (мощное тепловыделение, воздух не предлагаем)
+const CPU_LIQUID_REQUIRED = [
+  'Ryzen 7 7800X3D',
+  'Ryzen 7 9800X3D',
+  'Ryzen 9 9950X',
+  'i5 14600KF',
+  'i7 14700KF',
+  'Ultra 7 265KF',
+  'Ultra 9 285K',
+];
+
+// Воздушные системы охлаждения, недоступные для процессоров из CPU_LIQUID_REQUIRED
+const AIR_COOLERS = ['SE-224 B', 'SE-224 W'];
+
+function filterCoolerByCpu(coolers: Part[], cpuName?: string): Part[] {
+  if (cpuName && CPU_LIQUID_REQUIRED.includes(cpuName)) {
+    const filtered = coolers.filter((c) => !AIR_COOLERS.includes(c.name));
+    return filtered.length ? filtered : coolers;
+  }
+  return coolers;
+}
 
 // Шкала "мощности" блоков питания — от слабого к мощному
 const PSU_TIER: Record<string, number> = {
@@ -86,12 +105,19 @@ const GPU_MIN_PSU_TIER: Record<string, number> = {
 
 const CASE_DEFAULT_NAME = 'Черный аквариум на выбор';
 
-// Материнские платы, недопустимые для мощных X3D процессоров (слабые VRM)
-const MB_EXCLUDED_FOR_X3D = ['A620M'];
+// Материнские платы, недопустимые для конкретных мощных процессоров (слабые VRM)
+const MB_EXCLUDED_BY_CPU: Record<string, string[]> = {
+  'Ryzen 7 7800X3D': ['A620M'],
+  'Ryzen 7 9800X3D': ['A620M'],
+  'Ryzen 9 9950X': ['A620M'],
+  'i5 14600KF': ['H610M'],
+  'i7 14700KF': ['H610M'],
+};
 
 function filterMotherboardByCpu(mobos: Part[], cpuName?: string): Part[] {
-  if (cpuName && CPU_LIQUID_REQUIRED.includes(cpuName)) {
-    const filtered = mobos.filter((m) => !MB_EXCLUDED_FOR_X3D.includes(m.name));
+  const excluded = cpuName ? MB_EXCLUDED_BY_CPU[cpuName] : undefined;
+  if (excluded) {
+    const filtered = mobos.filter((m) => !excluded.includes(m.name));
     return filtered.length ? filtered : mobos;
   }
   return mobos;
@@ -157,6 +183,7 @@ function filteredPartsFor(
   if (key === 'motherboard') return filterMotherboardByCpu(filterByNames(all, info.moboNames), selected?.cpu?.name);
   if (key === 'ram')         return filterByNames(all, info.ramNames);
   if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.name);
+  if (key === 'cooler')      return filterCoolerByCpu(all, selected?.cpu?.name);
   return all;
 }
 
@@ -198,10 +225,12 @@ export default function Calculator() {
         next = { ...prev, [category]: part };
       }
 
-      // При смене процессора — подобрать корректное охлаждение (СЖО для X3D) и проверить плату
+      // При смене процессора — проверить охлаждение (воздух запрещён для мощных CPU) и плату
       if (category === 'cpu' && components) {
-        const cooler = defaultCoolerFor(next.cpu?.name, components.cooler);
-        if (cooler) next.cooler = cooler;
+        const validCoolers = filterCoolerByCpu(components.cooler, next.cpu?.name);
+        if (!next.cooler || !validCoolers.some((c) => c.id === next.cooler!.id)) {
+          next.cooler = defaultCoolerFor(next.cpu?.name, components.cooler);
+        }
 
         const validMobos = filterMotherboardByCpu(
           filteredPartsFor('motherboard', platform, components),
