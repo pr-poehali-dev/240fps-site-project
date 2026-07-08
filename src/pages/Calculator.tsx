@@ -72,8 +72,16 @@ type SelectKey = keyof Components;
 
 const STEPS: SelectKey[] = ['cpu', 'motherboard', 'ram', 'gpu', 'ssd', 'cooler', 'psu', 'case'];
 
-function cheapestOf(parts: Part[]): Part | undefined {
-  return parts.length ? parts.reduce((min, p) => (p.price < min.price ? p : min), parts[0]) : undefined;
+// Комплектующие, которые не должны подставляться по умолчанию (доступны только для ручного выбора)
+const DEFAULT_EXCLUDED: Partial<Record<SelectKey, string[]>> = {
+  gpu: ['GTX 1660 Super'],
+};
+
+function cheapestOf(parts: Part[], key?: SelectKey): Part | undefined {
+  const excluded = key ? DEFAULT_EXCLUDED[key] : undefined;
+  const candidates = excluded ? parts.filter((p) => !excluded.includes(p.name)) : parts;
+  const pool = candidates.length ? candidates : parts;
+  return pool.length ? pool.reduce((min, p) => (p.price < min.price ? p : min), pool[0]) : undefined;
 }
 
 function filteredPartsFor(key: SelectKey, plat: Platform | null, comps: Components | null): Part[] {
@@ -133,7 +141,7 @@ export default function Calculator() {
     setPlatform(p);
     const auto: Partial<Record<SelectKey, Part>> = {};
     STEPS.forEach((key) => {
-      const cheapest = cheapestOf(filteredPartsFor(key, p, components));
+      const cheapest = cheapestOf(filteredPartsFor(key, p, components), key);
       if (cheapest) auto[key] = cheapest;
     });
     setSelected(auto);
