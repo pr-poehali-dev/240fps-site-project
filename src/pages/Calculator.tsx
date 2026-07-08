@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
 const SEND_LEAD_URL = 'https://functions.poehali.dev/0417654c-b782-4720-851a-0c4f89751599';
 
-type Part = { id: number; name: string; price: number };
+type Part = { id: number; name: string; price: number; image?: string };
 type Components = {
   cpu: Part[];
   motherboard: Part[];
@@ -107,6 +107,7 @@ export default function Calculator() {
   const [sending, setSending] = useState(false);
   const [orderError, setOrderError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAllCases, setShowAllCases] = useState(false);
 
   useEffect(() => {
     fetch(API_URL)
@@ -313,11 +314,67 @@ export default function Calculator() {
                 </div>
               )}
 
-              {/* Шаги 3+: выбор комплектующих через дропдауны */}
+              {/* Шаги 3+: выбор комплектующих */}
               {platform && STEPS.map((key) => {
                 const { label, icon } = LABELS[key];
                 const parts = filteredParts(key);
                 const picked = selected[key];
+
+                if (key === 'case') {
+                  const visibleParts = showAllCases ? parts : parts.slice(0, 12);
+                  return (
+                    <div key={key} className="rounded-xl bg-card border border-border overflow-hidden">
+                      <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
+                        <Icon name={icon} size={18} className="text-primary" />
+                        <span className="font-600">{label}</span>
+                        {picked && (
+                          <Badge className="ml-auto bg-primary/15 text-primary border-primary/30 font-500 text-xs">
+                            {picked.name}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {visibleParts.map((p) => {
+                            const isSelected = picked?.id === p.id;
+                            return (
+                              <button
+                                key={p.id}
+                                onClick={() => selectPart(key, p)}
+                                className={`flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all ${
+                                  isSelected
+                                    ? 'border-primary bg-primary/10 glow-yellow'
+                                    : 'border-border bg-background hover:border-primary/50'
+                                }`}
+                              >
+                                <div className="aspect-square bg-muted/30 flex items-center justify-center overflow-hidden">
+                                  {p.image ? (
+                                    <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" loading="lazy" />
+                                  ) : (
+                                    <Icon name="Box" size={28} className="text-muted-foreground" />
+                                  )}
+                                </div>
+                                <div className="p-2">
+                                  <div className="text-xs font-500 line-clamp-2 mb-1">{p.name}</div>
+                                  <div className="text-xs text-primary font-600">{fmt(p.price)}</div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {parts.length > 12 && (
+                          <button
+                            onClick={() => setShowAllCases((v) => !v)}
+                            className="w-full mt-3 h-10 rounded-lg border border-border text-sm font-500 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
+                          >
+                            {showAllCases ? 'Скрыть' : `Показать все (${parts.length})`}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={key} className="rounded-xl bg-card border border-border overflow-hidden">
                     <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
