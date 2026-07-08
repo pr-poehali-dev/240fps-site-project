@@ -334,41 +334,54 @@ export default function Calculator() {
                         )}
                       </div>
                       <div className="p-4">
-                        <div className="grid grid-cols-2 gap-3">
-                          {parts.map((p) => {
-                            const isSelected = picked?.id === p.id;
-                            return (
-                              <div
-                                key={p.id}
-                                className={`flex flex-col rounded-lg border-2 overflow-hidden text-left transition-all ${
-                                  isSelected
-                                    ? 'border-primary bg-primary/10 glow-yellow'
-                                    : 'border-border bg-background hover:border-primary/50'
-                                }`}
-                              >
-                                <button
-                                  onClick={() => { if (p.gallery && p.gallery.length > 0) { setGalleryPart(p); setGalleryIndex(0); } }}
-                                  className="aspect-square bg-muted/30 flex items-center justify-center overflow-hidden relative group"
-                                >
-                                  {p.image ? (
-                                    <img src={p.image} alt={p.name} className="w-full h-full object-contain p-2" loading="lazy" />
-                                  ) : (
-                                    <Icon name="Box" size={28} className="text-muted-foreground" />
-                                  )}
-                                  {p.gallery && p.gallery.length > 1 && (
-                                    <div className="absolute bottom-1 right-1 bg-black/60 rounded-full p-1 opacity-80 group-hover:opacity-100">
-                                      <Icon name="Images" size={12} className="text-white" />
-                                    </div>
-                                  )}
-                                </button>
-                                <button onClick={() => selectPart(key, p)} className="p-2 text-left">
-                                  <div className="text-xs font-500 line-clamp-2 mb-1">{p.name}</div>
-                                  <div className="text-xs text-primary font-600">{fmt(p.price)}</div>
-                                </button>
-                              </div>
-                            );
-                          })}
+                        <div className="relative">
+                          <select
+                            value={picked ? String(picked.id) : ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (!val) {
+                                setSelected((prev) => { const n = { ...prev }; delete n[key]; return n; });
+                              } else {
+                                const part = parts.find((p) => p.id === Number(val));
+                                if (part) selectPart(key, part);
+                              }
+                            }}
+                            className="w-full h-11 pl-4 pr-10 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors text-sm appearance-none cursor-pointer"
+                          >
+                            <option value="">— Выберите {label.toLowerCase()} —</option>
+                            {parts.map((p) => {
+                              const diff = picked ? p.price - picked.price : 0;
+                              const diffLabel = !picked || diff === 0
+                                ? ''
+                                : diff > 0 ? ` (+${fmt(diff)})` : ` (−${fmt(Math.abs(diff))})`;
+                              return (
+                                <option key={p.id} value={p.id}>
+                                  {p.name}{diffLabel}
+                                </option>
+                              );
+                            })}
+                          </select>
+                          <Icon name="ChevronDown" size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                         </div>
+
+                        {picked && (
+                          <button
+                            onClick={() => { if (picked.gallery && picked.gallery.length > 0) { setGalleryPart(picked); setGalleryIndex(0); } }}
+                            className="mt-3 w-full aspect-video rounded-lg bg-muted/30 flex items-center justify-center overflow-hidden relative group border border-border"
+                          >
+                            {picked.image ? (
+                              <img src={picked.image} alt={picked.name} className="w-full h-full object-contain p-3" loading="lazy" />
+                            ) : (
+                              <Icon name="Box" size={32} className="text-muted-foreground" />
+                            )}
+                            {picked.gallery && picked.gallery.length > 1 && (
+                              <div className="absolute bottom-2 right-2 bg-black/60 rounded-full px-2 py-1 flex items-center gap-1 opacity-80 group-hover:opacity-100">
+                                <Icon name="Images" size={13} className="text-white" />
+                                <span className="text-white text-xs">{picked.gallery.length}</span>
+                              </div>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -453,7 +466,6 @@ export default function Calculator() {
                         <div className="p-3">
                           <div className="text-xs text-muted-foreground mb-0.5">Корпус</div>
                           <div className="font-500 text-sm">{selected.case.name}</div>
-                          <div className="text-xs text-primary font-600">{fmt(selected.case.price)}</div>
                         </div>
                       </div>
                     )}
@@ -595,8 +607,7 @@ export default function Calculator() {
                 )}
               </div>
               <div className="p-4">
-                <div className="font-600 mb-1">{galleryPart.name}</div>
-                <div className="text-primary font-600 mb-3">{fmt(galleryPart.price)}</div>
+                <div className="font-600 mb-3">{galleryPart.name}</div>
                 {galleryPart.gallery.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {galleryPart.gallery.map((img, idx) => (
