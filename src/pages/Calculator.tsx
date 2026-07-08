@@ -57,6 +57,55 @@ const RAM_DDR4     = ['DDR4 16GB', 'DDR4 32GB'];
 const RAM_DDR5     = ['DDR5 16GB 5600', 'DDR5 16GB 6000', 'DDR5 32GB 5600', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
 const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
+// Процессоры, для которых обязательно СЖО (мощное тепловыделение X3D)
+const CPU_LIQUID_REQUIRED = ['Ryzen 7 7800X3D', 'Ryzen 7 9800X3D'];
+
+// Шкала "мощности" блоков питания — от слабого к мощному
+const PSU_TIER: Record<string, number> = {
+  '550W': 1,
+  '650W': 2,
+  '650W ATX 3.1': 3,
+  '750W ATX 3.1': 4,
+  '850W ATX 3.1': 5,
+  'NGDP 850W': 6,
+  'NGDP 1000W': 7,
+};
+
+// Минимально допустимый БП для каждой видеокарты
+const GPU_MIN_PSU_TIER: Record<string, number> = {
+  'GTX 1660 Super': 1,
+  'RTX 5050': 1,
+  'RTX 5060': 2,
+  'RTX 5060 Ti 8Gb': 2,
+  'RTX 5060 Ti 16Gb': 2,
+  'RTX 5070': 3,
+  'RTX 5070 Ti': 5,
+  'RTX 5080': 6,
+  'RX 9070XT': 5,
+};
+
+const CASE_DEFAULT_NAME = 'Черный аквариум на выбор';
+
+function minPsuTierFor(gpuName?: string): number {
+  if (!gpuName) return 0;
+  return GPU_MIN_PSU_TIER[gpuName] ?? 0;
+}
+
+function filterPsuByGpu(psus: Part[], gpuName?: string): Part[] {
+  const minTier = minPsuTierFor(gpuName);
+  if (!minTier) return psus;
+  const filtered = psus.filter((p) => (PSU_TIER[p.name] ?? 0) >= minTier);
+  return filtered.length ? filtered : psus;
+}
+
+function defaultCoolerFor(cpuName: string | undefined, coolers: Part[]): Part | undefined {
+  if (!coolers.length) return undefined;
+  if (cpuName && CPU_LIQUID_REQUIRED.includes(cpuName)) {
+    return coolers.find((c) => c.name.includes('СЖО')) ?? cheapestOf(coolers);
+  }
+  return coolers.find((c) => c.name.startsWith('SE-224')) ?? cheapestOf(coolers);
+}
+
 function filterByNames(parts: Part[], names: string[]): Part[] {
   return parts.filter((p) => names.includes(p.name));
 }
@@ -84,13 +133,19 @@ function cheapestOf(parts: Part[], key?: SelectKey): Part | undefined {
   return pool.length ? pool.reduce((min, p) => (p.price < min.price ? p : min), pool[0]) : undefined;
 }
 
-function filteredPartsFor(key: SelectKey, plat: Platform | null, comps: Components | null): Part[] {
+function filteredPartsFor(
+  key: SelectKey,
+  plat: Platform | null,
+  comps: Components | null,
+  selected?: Partial<Record<SelectKey, Part>>,
+): Part[] {
   if (!comps || !plat) return [];
   const info = PLATFORM_INFO[plat];
   const all = comps[key];
   if (key === 'cpu')         return filterByNames(all, info.cpuNames);
   if (key === 'motherboard') return filterByNames(all, info.moboNames);
   if (key === 'ram')         return filterByNames(all, info.ramNames);
+  if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.name);
   return all;
 }
 
@@ -124,12 +179,29 @@ export default function Calculator() {
 
   const selectPart = (category: SelectKey, part: Part) => {
     setSelected((prev) => {
+      let next: Partial<Record<SelectKey, Part>>;
       if (prev[category]?.id === part.id) {
-        const next = { ...prev };
+        next = { ...prev };
         delete next[category];
-        return next;
+      } else {
+        next = { ...prev, [category]: part };
       }
-      return { ...prev, [category]: part };
+
+      // При смене процессора — подобрать корректное охлаждение (СЖО для X3D)
+      if (category === 'cpu' && components) {
+        const cooler = defaultCoolerFor(next.cpu?.name, components.cooler);
+        if (cooler) next.cooler = cooler;
+      }
+
+      // При смене видеокарты — проверить, что БП тянет её, иначе подобрать минимально нужный
+      if (category === 'gpu' && components) {
+        const validPsus = filterPsuByGpu(components.psu, next.gpu?.name);
+        if (!next.psu || !validPsus.some((p) => p.id === next.psu!.id)) {
+          next.psu = cheapestOf(validPsus);
+        }
+      }
+
+      return next;
     });
   };
 
@@ -143,9 +215,19 @@ export default function Calculator() {
     setPlatform(p);
     const auto: Partial<Record<SelectKey, Part>> = {};
     STEPS.forEach((key) => {
+      if (key === 'cooler' || key === 'psu' || key === 'case') return;
       const cheapest = cheapestOf(filteredPartsFor(key, p, components), key);
       if (cheapest) auto[key] = cheapest;
     });
+    if (components) {
+      const cooler = defaultCoolerFor(auto.cpu?.name, components.cooler);
+      if (cooler) auto.cooler = cooler;
+      const validPsus = filterPsuByGpu(components.psu, auto.gpu?.name);
+      const psu = cheapestOf(validPsus);
+      if (psu) auto.psu = psu;
+      const defaultCase = components.case.find((c) => c.name === CASE_DEFAULT_NAME) ?? cheapestOf(components.case, 'case');
+      if (defaultCase) auto.case = defaultCase;
+    }
     setSelected(auto);
   };
 
@@ -180,7 +262,7 @@ export default function Calculator() {
 
   const pInfo = platform ? PLATFORM_INFO[platform] : null;
 
-  const filteredParts = (key: SelectKey): Part[] => filteredPartsFor(key, platform, components);
+  const filteredParts = (key: SelectKey): Part[] => filteredPartsFor(key, platform, components, selected);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -403,6 +485,12 @@ export default function Calculator() {
                       )}
                     </div>
                     <div className="p-4">
+                      {key === 'psu' && selected.gpu && (
+                        <div className="flex items-start gap-2 mb-3 p-3 rounded-lg bg-muted/40 text-xs text-muted-foreground">
+                          <Icon name="Info" size={14} className="text-primary shrink-0 mt-0.5" />
+                          <span>Список ограничен блоками питания, достаточными для видеокарты «{selected.gpu.name}».</span>
+                        </div>
+                      )}
                       <div className="relative">
                         <select
                           value={picked ? String(picked.id) : ''}
