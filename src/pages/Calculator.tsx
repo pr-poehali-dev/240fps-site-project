@@ -334,6 +334,10 @@ export default function Calculator() {
                         )}
                       </div>
                       <div className="p-4">
+                        <div className="flex items-start gap-2 mb-3 p-3 rounded-lg bg-muted/40 text-xs text-muted-foreground">
+                          <Icon name="Info" size={14} className="text-primary shrink-0 mt-0.5" />
+                          <span>Фото — примеры корпусов. Точную модель поможет выбрать менеджер после оформления заказа.</span>
+                        </div>
                         <div className="relative">
                           <select
                             value={picked ? String(picked.id) : ''}
