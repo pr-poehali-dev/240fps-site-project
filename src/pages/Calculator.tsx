@@ -49,7 +49,7 @@ const CPU_AM4     = ['Ryzen 5 5500', 'Ryzen 5 5600', 'Ryzen 7 5700', 'Ryzen 7 57
 const CPU_AM5     = ['Ryzen 5 7500F', 'Ryzen 7 7700', 'Ryzen 7 7800X3D', 'Ryzen 7 9800X3D', 'Ryzen 9 9950X', 'Ryzen 5 9600X'];
 
 const MB_LGA1700  = ['H610M', 'B660m D4'];
-const MB_LGA1851  = ['B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890M GAMING X', 'Z790 GAMING PLUS WIFI', 'B760m D4'];
+const MB_LGA1851  = ['B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890M GAMING X'];
 const MB_AM4      = ['A520M', 'B550M'];
 const MB_AM5      = ['A620M', 'B650M WiFi', 'B850M WiFi', 'B850M FORCE WIFI6E', 'B850M Gaming X AX', 'MSI B850 Gaming Plus WiFi6e'];
 
