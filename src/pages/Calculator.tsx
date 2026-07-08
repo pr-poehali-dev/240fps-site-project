@@ -371,10 +371,21 @@ export default function Calculator() {
                   </div>
                 )}
 
-                {keys.filter((k) => selected[k]).length === 0 && (
+                {keys.filter((k) => selected[k]).length === 0 ? (
                   <p className="text-muted-foreground text-sm text-center py-6">
                     {platform ? 'Выберите комплектующие' : 'Выберите платформу слева'}
                   </p>
+                ) : (
+                  <div className="space-y-3 mb-5">
+                    {keys.filter((k) => selected[k]).map((k) => (
+                      <div key={k} className="flex items-start justify-between gap-3 text-sm">
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-0.5">{LABELS[k].label}</div>
+                          <div className="font-500">{selected[k]!.name}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
 
                 <div className="border-t border-border pt-4 mt-4">
