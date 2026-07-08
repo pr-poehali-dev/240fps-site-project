@@ -48,13 +48,13 @@ const CPU_LGA1851 = ['Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
 const CPU_AM4     = ['Ryzen 5 5500', 'Ryzen 5 5600', 'Ryzen 7 5700', 'Ryzen 7 5700X'];
 const CPU_AM5     = ['Ryzen 5 7500F', 'Ryzen 7 7700', 'Ryzen 7 7800X3D', 'Ryzen 7 9800X3D', 'Ryzen 9 9950X', 'Ryzen 5 9600X'];
 
-const MB_LGA1700  = ['H610M', 'B660m D4'];
-const MB_LGA1851  = ['B860M', 'MAG B860 TOMAHAWK WIFI', 'Z890M GAMING X'];
+const MB_LGA1700  = ['H610M', 'B660m D4', 'B760m D4', 'Z790'];
+const MB_LGA1851  = ['B860M', 'Z890M'];
 const MB_AM4      = ['A520M', 'B550M'];
-const MB_AM5      = ['A620M', 'B650M WiFi', 'B850M WiFi', 'B850M FORCE WIFI6E', 'B850M Gaming X AX', 'MSI B850 Gaming Plus WiFi6e'];
+const MB_AM5      = ['A620M', 'B650M', 'B650M WiFi', 'B850M', 'B850M WiFi', 'MSI B850 ATX'];
 
 const RAM_DDR4     = ['DDR4 16GB', 'DDR4 32GB'];
-const RAM_DDR5     = ['DDR5 16GB 5600CH', 'DDR5 16GB 6000', 'DDR5 32GB 5600CH', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
+const RAM_DDR5     = ['DDR5 16GB 5600', 'DDR5 16GB 6000', 'DDR5 32GB 5600', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
 const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
 function filterByNames(parts: Part[], names: string[]): Part[] {
