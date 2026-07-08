@@ -1,0 +1,15 @@
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mv5-black.webp' WHERE name = '1STPLAYER Megaview MV5-T Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mv5-white.webp' WHERE name = '1STPLAYER Megaview MV5-T White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mv6-black.webp' WHERE name = '1STPLAYER Megaview MV6-T Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mv6-white.webp' WHERE name = '1STPLAYER Megaview MV6-T White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mv8-black.webp' WHERE name = '1STPLAYER Megaview MV8-TP Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mi5-black.webp' WHERE name = '1STPLAYER MIKU Mi5 Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mi5-white.webp' WHERE name = '1STPLAYER MIKU Mi5 White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/mi7a-black.webp' WHERE name = '1STPLAYER MIKU Mi7-A Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/au6-black.webp' WHERE name = '1STPLAYER STEAMPUNK Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/rt5-black.webp' WHERE name = '1STPLAYER Uview RT5-BK Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/rt5-white.webp' WHERE name = '1STPLAYER Uview RT5-WH White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/uv5-black.webp' WHERE name = '1STPLAYER Uview UV5 Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/uv5-white.webp' WHERE name = '1STPLAYER Uview UV5 White';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/uv6-black.webp' WHERE name = '1STPLAYER Uview UV6 Black';
+UPDATE t_p288352_240fps_site_project.components_case SET image_url = '/cases/uv6-white.webp' WHERE name = '1STPLAYER Uview UV6 White';
