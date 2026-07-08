@@ -70,6 +70,22 @@ const PLATFORM_INFO: Record<Platform, { label: string; moboNames: string[]; ramN
 
 type SelectKey = keyof Components;
 
+const STEPS: SelectKey[] = ['cpu', 'motherboard', 'ram', 'gpu', 'ssd', 'cooler', 'psu', 'case'];
+
+function cheapestOf(parts: Part[]): Part | undefined {
+  return parts.length ? parts.reduce((min, p) => (p.price < min.price ? p : min), parts[0]) : undefined;
+}
+
+function filteredPartsFor(key: SelectKey, plat: Platform | null, comps: Components | null): Part[] {
+  if (!comps || !plat) return [];
+  const info = PLATFORM_INFO[plat];
+  const all = comps[key];
+  if (key === 'cpu')         return filterByNames(all, info.cpuNames);
+  if (key === 'motherboard') return filterByNames(all, info.moboNames);
+  if (key === 'ram')         return filterByNames(all, info.ramNames);
+  return all;
+}
+
 export default function Calculator() {
   const [components, setComponents] = useState<Components | null>(null);
   const [loading, setLoading] = useState(true);
@@ -115,7 +131,12 @@ export default function Calculator() {
 
   const choosePlatform = (p: Platform) => {
     setPlatform(p);
-    setSelected({});
+    const auto: Partial<Record<SelectKey, Part>> = {};
+    STEPS.forEach((key) => {
+      const cheapest = cheapestOf(filteredPartsFor(key, p, components));
+      if (cheapest) auto[key] = cheapest;
+    });
+    setSelected(auto);
   };
 
   const reset = () => { setBrand(null); setPlatform(null); setSelected({}); };
@@ -149,16 +170,7 @@ export default function Calculator() {
 
   const pInfo = platform ? PLATFORM_INFO[platform] : null;
 
-  const filteredParts = (key: SelectKey): Part[] => {
-    if (!components || !pInfo) return [];
-    const all = components[key];
-    if (key === 'cpu')         return filterByNames(all, pInfo.cpuNames);
-    if (key === 'motherboard') return filterByNames(all, pInfo.moboNames);
-    if (key === 'ram')         return filterByNames(all, pInfo.ramNames);
-    return all;
-  };
-
-  const STEPS: SelectKey[] = ['cpu', 'motherboard', 'ram', 'gpu', 'ssd', 'cooler', 'psu', 'case'];
+  const filteredParts = (key: SelectKey): Part[] => filteredPartsFor(key, platform, components);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -305,7 +317,7 @@ export default function Calculator() {
                       <span className="font-600">{label}</span>
                       {picked && (
                         <Badge className="ml-auto bg-primary/15 text-primary border-primary/30 font-500 text-xs">
-                          {picked.name} — {fmt(picked.price)}
+                          {picked.name}
                         </Badge>
                       )}
                     </div>
@@ -325,11 +337,17 @@ export default function Calculator() {
                           className="w-full h-11 pl-4 pr-10 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors text-sm appearance-none cursor-pointer"
                         >
                           <option value="">— Выберите {label.toLowerCase()} —</option>
-                          {parts.map((p) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name} — {fmt(p.price)}
-                            </option>
-                          ))}
+                          {parts.map((p) => {
+                            const diff = picked ? p.price - picked.price : 0;
+                            const diffLabel = !picked || diff === 0
+                              ? ''
+                              : diff > 0 ? ` (+${fmt(diff)})` : ` (−${fmt(Math.abs(diff))})`;
+                            return (
+                              <option key={p.id} value={p.id}>
+                                {p.name}{diffLabel}
+                              </option>
+                            );
+                          })}
                         </select>
                         <Icon name="ChevronDown" size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                       </div>
@@ -353,39 +371,13 @@ export default function Calculator() {
                   </div>
                 )}
 
-                {keys.filter((k) => selected[k]).length === 0 ? (
+                {keys.filter((k) => selected[k]).length === 0 && (
                   <p className="text-muted-foreground text-sm text-center py-6">
                     {platform ? 'Выберите комплектующие' : 'Выберите платформу слева'}
                   </p>
-                ) : (
-                  <div className="space-y-3 mb-5">
-                    {keys.filter((k) => selected[k]).map((k) => (
-                      <div key={k} className="flex items-start justify-between gap-3 text-sm">
-                        <div>
-                          <div className="text-xs text-muted-foreground mb-0.5">{LABELS[k].label}</div>
-                          <div className="font-500">{selected[k]!.name}</div>
-                        </div>
-                        <div className="font-600 text-primary shrink-0">{fmt(selected[k]!.price)}</div>
-                      </div>
-                    ))}
-                  </div>
                 )}
 
                 <div className="border-t border-border pt-4 mt-4">
-                  {assemblyFee > 0 && (
-                    <div className="space-y-2 mb-4 text-sm">
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span>Комплектующие:</span>
-                        <span>{fmt(partsTotal)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                          <Icon name="Wrench" size={13} className="text-secondary" /> Услуга сборки:
-                        </span>
-                        <span className="text-secondary font-500">+ {fmt(assemblyFee)}</span>
-                      </div>
-                    </div>
-                  )}
                   <div className="flex items-center justify-between mb-5">
                     <span className="text-muted-foreground text-sm font-600">Итого:</span>
                     <span className="font-display font-700 text-2xl text-primary">{fmt(total)}</span>
