@@ -107,9 +107,6 @@ export default function Calculator() {
   const [sending, setSending] = useState(false);
   const [orderError, setOrderError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showAllCases, setShowAllCases] = useState(false);
-  const [caseBrandFilter, setCaseBrandFilter] = useState<string>('all');
-  const [caseColorFilter, setCaseColorFilter] = useState<string>('all');
   const [galleryPart, setGalleryPart] = useState<Part | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -325,11 +322,6 @@ export default function Calculator() {
                 const picked = selected[key];
 
                 if (key === 'case') {
-                  const brands = Array.from(new Set(parts.map((p) => p.brand).filter(Boolean))) as string[];
-                  brands.sort((a, b) => a.localeCompare(b));
-                  const brandFiltered = caseBrandFilter === 'all' ? parts : parts.filter((p) => p.brand === caseBrandFilter);
-                  const colorFiltered = caseColorFilter === 'all' ? brandFiltered : brandFiltered.filter((p) => p.color === caseColorFilter);
-                  const visibleParts = showAllCases ? colorFiltered : colorFiltered.slice(0, 12);
                   return (
                     <div key={key} className="rounded-xl bg-card border border-border overflow-hidden">
                       <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
@@ -342,35 +334,8 @@ export default function Calculator() {
                         )}
                       </div>
                       <div className="p-4">
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          <div className="relative">
-                            <select
-                              value={caseBrandFilter}
-                              onChange={(e) => { setCaseBrandFilter(e.target.value); setShowAllCases(false); }}
-                              className="h-9 pl-3 pr-8 rounded-lg bg-background border border-input focus:border-primary outline-none text-xs appearance-none cursor-pointer font-500"
-                            >
-                              <option value="all">Все бренды</option>
-                              {brands.map((b) => (
-                                <option key={b} value={b}>{b}</option>
-                              ))}
-                            </select>
-                            <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                          </div>
-                          <div className="relative">
-                            <select
-                              value={caseColorFilter}
-                              onChange={(e) => { setCaseColorFilter(e.target.value); setShowAllCases(false); }}
-                              className="h-9 pl-3 pr-8 rounded-lg bg-background border border-input focus:border-primary outline-none text-xs appearance-none cursor-pointer font-500"
-                            >
-                              <option value="all">Любой цвет</option>
-                              <option value="black">Чёрный</option>
-                              <option value="white">Белый</option>
-                            </select>
-                            <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {visibleParts.map((p) => {
+                        <div className="grid grid-cols-2 gap-3">
+                          {parts.map((p) => {
                             const isSelected = picked?.id === p.id;
                             return (
                               <div
@@ -404,17 +369,6 @@ export default function Calculator() {
                             );
                           })}
                         </div>
-                        {colorFiltered.length === 0 && (
-                          <p className="text-sm text-muted-foreground text-center py-6">Нет моделей по выбранным фильтрам</p>
-                        )}
-                        {colorFiltered.length > 12 && (
-                          <button
-                            onClick={() => setShowAllCases((v) => !v)}
-                            className="w-full mt-3 h-10 rounded-lg border border-border text-sm font-500 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
-                          >
-                            {showAllCases ? 'Скрыть' : `Показать все (${colorFiltered.length})`}
-                          </button>
-                        )}
                       </div>
                     </div>
                   );
@@ -488,17 +442,17 @@ export default function Calculator() {
                 ) : (
                   <div className="space-y-3 mb-5">
                     {selected.case && (
-                      <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 border border-border mb-1">
-                        <div className="w-14 h-14 rounded-md overflow-hidden bg-muted/50 shrink-0 flex items-center justify-center">
+                      <div className="rounded-xl bg-muted/30 border border-border overflow-hidden mb-1">
+                        <div className="aspect-square bg-muted/50 flex items-center justify-center overflow-hidden">
                           {selected.case.image ? (
-                            <img src={selected.case.image} alt={selected.case.name} className="w-full h-full object-contain" />
+                            <img src={selected.case.image} alt={selected.case.name} className="w-full h-full object-contain p-3" />
                           ) : (
-                            <Icon name="Box" size={20} className="text-muted-foreground" />
+                            <Icon name="Box" size={40} className="text-muted-foreground" />
                           )}
                         </div>
-                        <div className="min-w-0">
+                        <div className="p-3">
                           <div className="text-xs text-muted-foreground mb-0.5">Корпус</div>
-                          <div className="font-500 text-sm truncate">{selected.case.name}</div>
+                          <div className="font-500 text-sm">{selected.case.name}</div>
                           <div className="text-xs text-primary font-600">{fmt(selected.case.price)}</div>
                         </div>
                       </div>
