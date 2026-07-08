@@ -86,6 +86,17 @@ const GPU_MIN_PSU_TIER: Record<string, number> = {
 
 const CASE_DEFAULT_NAME = 'Черный аквариум на выбор';
 
+// Материнские платы, недопустимые для мощных X3D процессоров (слабые VRM)
+const MB_EXCLUDED_FOR_X3D = ['A620M'];
+
+function filterMotherboardByCpu(mobos: Part[], cpuName?: string): Part[] {
+  if (cpuName && CPU_LIQUID_REQUIRED.includes(cpuName)) {
+    const filtered = mobos.filter((m) => !MB_EXCLUDED_FOR_X3D.includes(m.name));
+    return filtered.length ? filtered : mobos;
+  }
+  return mobos;
+}
+
 function minPsuTierFor(gpuName?: string): number {
   if (!gpuName) return 0;
   return GPU_MIN_PSU_TIER[gpuName] ?? 0;
@@ -143,7 +154,7 @@ function filteredPartsFor(
   const info = PLATFORM_INFO[plat];
   const all = comps[key];
   if (key === 'cpu')         return filterByNames(all, info.cpuNames);
-  if (key === 'motherboard') return filterByNames(all, info.moboNames);
+  if (key === 'motherboard') return filterMotherboardByCpu(filterByNames(all, info.moboNames), selected?.cpu?.name);
   if (key === 'ram')         return filterByNames(all, info.ramNames);
   if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.name);
   return all;
@@ -187,10 +198,18 @@ export default function Calculator() {
         next = { ...prev, [category]: part };
       }
 
-      // При смене процессора — подобрать корректное охлаждение (СЖО для X3D)
+      // При смене процессора — подобрать корректное охлаждение (СЖО для X3D) и проверить плату
       if (category === 'cpu' && components) {
         const cooler = defaultCoolerFor(next.cpu?.name, components.cooler);
         if (cooler) next.cooler = cooler;
+
+        const validMobos = filterMotherboardByCpu(
+          filteredPartsFor('motherboard', platform, components),
+          next.cpu?.name,
+        );
+        if (!next.motherboard || !validMobos.some((m) => m.id === next.motherboard!.id)) {
+          next.motherboard = cheapestOf(validMobos);
+        }
       }
 
       // При смене видеокарты — проверить, что БП тянет её, иначе подобрать минимально нужный
@@ -215,11 +234,14 @@ export default function Calculator() {
     setPlatform(p);
     const auto: Partial<Record<SelectKey, Part>> = {};
     STEPS.forEach((key) => {
-      if (key === 'cooler' || key === 'psu' || key === 'case') return;
+      if (key === 'cooler' || key === 'psu' || key === 'case' || key === 'motherboard') return;
       const cheapest = cheapestOf(filteredPartsFor(key, p, components), key);
       if (cheapest) auto[key] = cheapest;
     });
     if (components) {
+      const validMobos = filterMotherboardByCpu(filteredPartsFor('motherboard', p, components), auto.cpu?.name);
+      const mobo = cheapestOf(validMobos);
+      if (mobo) auto.motherboard = mobo;
       const cooler = defaultCoolerFor(auto.cpu?.name, components.cooler);
       if (cooler) auto.cooler = cooler;
       const validPsus = filterPsuByGpu(components.psu, auto.gpu?.name);
