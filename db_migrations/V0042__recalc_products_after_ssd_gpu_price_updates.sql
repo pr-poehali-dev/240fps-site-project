@@ -1,0 +1,10 @@
+UPDATE t_p288352_240fps_site_project.products SET price = 129000, updated_at = now() WHERE id = 7;
+UPDATE t_p288352_240fps_site_project.products SET price = 153500, updated_at = now() WHERE id = 8;
+UPDATE t_p288352_240fps_site_project.products SET price = 97000, updated_at = now() WHERE id = 11;
+UPDATE t_p288352_240fps_site_project.products SET price = 115500, updated_at = now() WHERE id = 12;
+UPDATE t_p288352_240fps_site_project.products SET price = 143500, updated_at = now() WHERE id = 13;
+UPDATE t_p288352_240fps_site_project.products SET price = 307500, updated_at = now() WHERE id = 14;
+UPDATE t_p288352_240fps_site_project.products SET price = 172500, updated_at = now() WHERE id = 15;
+UPDATE t_p288352_240fps_site_project.products SET price = 180500, updated_at = now() WHERE id = 16;
+UPDATE t_p288352_240fps_site_project.products SET price = 213500, updated_at = now() WHERE id = 17;
+UPDATE t_p288352_240fps_site_project.products SET price = 172500, updated_at = now() WHERE id = 18;
