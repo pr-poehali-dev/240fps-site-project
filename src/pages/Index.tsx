@@ -630,7 +630,7 @@ const Index = () => {
             <p className="text-muted-foreground mb-8">Свяжитесь с нами любым удобным способом — поможем подобрать сборку.</p>
             <div className="space-y-5">
               {[
-                { i: 'Phone', t: '+7-913-149-82-40', s: 'Ежедневно 9:00–21:00', href: 'tel:+79131498240' },
+                { i: 'Phone', t: '+7-913-149-82-40', s: 'Ежедневно 10:00–19:00', href: 'tel:+79131498240' },
                 { i: 'Phone', t: '+7-999-456-09-06', s: 'Ежедневно 9:00–21:00', href: 'tel:+79994560906' },
                 { i: 'Send', t: 'Telegram: @Omsk_240FPS', s: 'Напишите нам в Telegram', href: 'https://t.me/Omsk_240FPS' },
                 { i: 'Users', t: 'ВКонтакте: vk.com/fps240', s: 'Наша группа ВКонтакте', href: 'https://vk.com/fps240' },
