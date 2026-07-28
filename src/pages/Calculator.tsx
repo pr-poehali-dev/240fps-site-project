@@ -54,7 +54,7 @@ const MB_AM4      = ['A520M', 'B550M'];
 const MB_AM5      = ['A620M', 'B650M', 'B650M WiFi', 'B850M', 'B850M WiFi', 'MSI B850 ATX'];
 
 const RAM_DDR4     = ['DDR4 16GB 3200', 'DDR4 32GB 3200'];
-const RAM_DDR5     = ['DDR5 16GB 5600', 'DDR5 16GB 6000', 'DDR5 32GB 5600', 'DDR5 32GB 6000', 'DDR5 32GB 6000 CL30', 'DDR5 64GB 5600', 'DDR5 64GB 6000'];
+const RAM_DDR5     = ['DDR5 16GB ', 'DDR5 32GB ', 'DDR5 32GB a-dai', 'DDR5 64GB '];
 const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
 // Процессоры, для которых обязательно СЖО (мощное тепловыделение, воздух не предлагаем)
