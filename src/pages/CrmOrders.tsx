@@ -16,18 +16,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Components, SelectKey, COMPONENTS_API_URL } from "@/lib/pcParts";
+import { Textarea } from "@/components/ui/textarea";
+import { Components, SelectKey, COMPONENTS_API_URL, calcAssemblyFee } from "@/lib/pcParts";
 import PcConfigurator, { ConfiguratorResult } from "@/components/PcConfigurator";
 
 const ORDERS_URL = "https://functions.poehali.dev/f37754c2-ef7c-40dc-991d-898c9d3732b4";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
 const WARRANTY_URL = "https://functions.poehali.dev/32335bd4-a46b-4a4c-b610-e02cc19f8e67";
+const SEND_LEAD_URL = "https://functions.poehali.dev/0417654c-b782-4720-851a-0c4f89751599";
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
 const ROLE_KEY = "admin_role";
 
 const CITIES = ["Омск", "Краснодар", "Тюмень"] as const;
 type City = (typeof CITIES)[number];
+
+const CITY_PREFIX: Record<City, string> = {
+  "Омск": "100-",
+  "Тюмень": "200-",
+  "Краснодар": "300-",
+};
 
 type Availability = "in_stock" | "wb" | "ozon" | "avito" | "dns" | "citilink";
 
@@ -79,6 +87,8 @@ type Order = {
   items: OrderItem[];
   warranty_number: string | null;
   warranty_url: string | null;
+  order_number: string | null;
+  comment: string;
 };
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " \u20bd";
@@ -88,6 +98,47 @@ function authHeaders() {
     "Content-Type": "application/json",
     "X-Admin-Password": sessionStorage.getItem(PWD_KEY) || "",
   };
+}
+
+// Дата без года в интерфейсе — год подставляется автоматически (текущий)
+function isoToDayMonth(iso: string | null): string {
+  if (!iso) return "";
+  const [, m, d] = iso.split("-");
+  if (!m || !d) return "";
+  return `${d}.${m}`;
+}
+
+function dayMonthToIso(value: string, prevIso: string | null): string | null {
+  const match = value.trim().match(/^(\d{1,2})[.\-/](\d{1,2})$/);
+  if (!match) return prevIso;
+  const day = match[1].padStart(2, "0");
+  const month = match[2].padStart(2, "0");
+  const year = prevIso ? prevIso.split("-")[0] : String(new Date().getFullYear());
+  return `${year}-${month}-${day}`;
+}
+
+function DayMonthInput({
+  value,
+  onCommit,
+  className,
+}: {
+  value: string | null;
+  onCommit: (iso: string | null) => void;
+  className?: string;
+}) {
+  const [text, setText] = useState(isoToDayMonth(value));
+
+  useEffect(() => setText(isoToDayMonth(value)), [value]);
+
+  return (
+    <Input
+      className={className}
+      placeholder="дд.мм"
+      value={text}
+      onChange={(e) => setText(e.target.value)}
+      onBlur={() => onCommit(dayMonthToIso(text, value))}
+    />
+  );
 }
 
 function NewOrderDialog({
@@ -105,11 +156,13 @@ function NewOrderDialog({
 }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [finalDate, setFinalDate] = useState("");
+  const [finalDate, setFinalDate] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState(CITY_PREFIX[city]);
+  const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
 
   const reset = () => {
-    setName(""); setPhone(""); setFinalDate("");
+    setName(""); setPhone(""); setFinalDate(null); setOrderNumber(CITY_PREFIX[city]); setComment("");
   };
 
   const handleDone = async (result: ConfiguratorResult) => {
@@ -136,10 +189,12 @@ function NewOrderDialog({
           city,
           customer_name: name,
           customer_phone: phone,
-          final_date: finalDate || null,
+          final_date: finalDate,
           total_price: result.total,
           assembly_cost: result.assemblyFee,
           parts_cost_price: 0,
+          order_number: orderNumber,
+          comment,
           items,
         }),
       });
@@ -169,7 +224,15 @@ function NewOrderDialog({
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Финальная дата</label>
-            <Input type="date" value={finalDate} onChange={(e) => setFinalDate(e.target.value)} />
+            <DayMonthInput value={finalDate} onCommit={setFinalDate} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Номер заказа</label>
+            <Input value={orderNumber} onChange={(e) => setOrderNumber(e.target.value)} placeholder={`${CITY_PREFIX[city]}...`} />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs text-muted-foreground mb-1 block">Комментарий</label>
+            <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Комментарий к сборке" className="min-h-[40px]" />
           </div>
         </div>
 
@@ -265,6 +328,7 @@ function OrderCard({
   const [local, setLocal] = useState(order);
   const [saving, setSaving] = useState(false);
   const [warrantyLoading, setWarrantyLoading] = useState(false);
+  const [tgSending, setTgSending] = useState(false);
 
   useEffect(() => setLocal(order), [order]);
 
@@ -349,6 +413,34 @@ function OrderCard({
     }
   };
 
+  const recalc = () => {
+    const partsTotal = local.items.reduce((sum, it) => sum + (it.price || 0), 0);
+    const costTotal = local.items.reduce((sum, it) => sum + (it.cost_price || 0), 0);
+    const assemblyCost = calcAssemblyFee(partsTotal);
+    const totalPrice = partsTotal + assemblyCost;
+    const patch = { total_price: totalPrice, assembly_cost: assemblyCost, parts_cost_price: costTotal };
+    setLocal((p) => ({ ...p, ...patch }));
+    saveOrderField(patch);
+  };
+
+  const sendToTelegram = async () => {
+    setTgSending(true);
+    try {
+      const partsLines = local.items
+        .map((it) => `${it.component_name || "—"} — ${fmt(it.price)}`)
+        .join("\n");
+      const dateLabel = local.final_date ? isoToDayMonth(local.final_date) : "—";
+      const text = `🖥 Заказ ${local.order_number || ""} — ${local.city}\n\n${partsLines}\n\n🔧 Сборка: ${fmt(local.assembly_cost)}\n💰 Итого: ${fmt(local.total_price)}\n\n👤 ${local.customer_name}\n📞 ${local.customer_phone}\n📅 ${dateLabel}${local.comment ? `\n\n💬 ${local.comment}` : ""}`;
+      await fetch(SEND_LEAD_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+    } finally {
+      setTgSending(false);
+    }
+  };
+
   return (
     <div className="bg-card border border-border rounded-xl p-4 space-y-3">
       <div className="grid grid-cols-2 gap-2">
@@ -372,14 +464,24 @@ function OrderCard({
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Финальная дата</label>
-          <Input
-            type="date"
+          <DayMonthInput
             className="h-8 text-sm"
-            value={local.final_date || ""}
-            onChange={(e) => setLocal((p) => ({ ...p, final_date: e.target.value }))}
-            onBlur={() => saveOrderField({ final_date: local.final_date })}
+            value={local.final_date}
+            onCommit={(iso) => { setLocal((p) => ({ ...p, final_date: iso })); saveOrderField({ final_date: iso }); }}
           />
         </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Номер заказа</label>
+          <Input
+            className="h-8 text-sm"
+            value={local.order_number || ""}
+            onChange={(e) => setLocal((p) => ({ ...p, order_number: e.target.value }))}
+            onBlur={() => saveOrderField({ order_number: local.order_number })}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 items-end">
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Итоговая стоимость</label>
           <Input
@@ -388,19 +490,6 @@ function OrderCard({
             value={local.total_price}
             onChange={(e) => setLocal((p) => ({ ...p, total_price: Number(e.target.value) || 0 }))}
             onBlur={() => saveOrderField({ total_price: local.total_price })}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Стоимость сборки</label>
-          <Input
-            type="number"
-            className="h-8 text-sm"
-            value={local.assembly_cost}
-            onChange={(e) => setLocal((p) => ({ ...p, assembly_cost: Number(e.target.value) || 0 }))}
-            onBlur={() => saveOrderField({ assembly_cost: local.assembly_cost })}
           />
         </div>
         <div>
@@ -414,6 +503,24 @@ function OrderCard({
           />
         </div>
       </div>
+
+      <div>
+        <label className="text-xs text-muted-foreground mb-1 block">Комментарий</label>
+        <Textarea
+          className="min-h-[40px] text-sm"
+          value={local.comment}
+          onChange={(e) => setLocal((p) => ({ ...p, comment: e.target.value }))}
+          onBlur={() => saveOrderField({ comment: local.comment })}
+          placeholder="Комментарий к сборке"
+        />
+      </div>
+
+      <button
+        onClick={recalc}
+        className="text-xs text-primary hover:underline flex items-center gap-1"
+      >
+        <Icon name="Calculator" size={14} /> Рассчитать
+      </button>
 
       <div className="overflow-x-auto -mx-1">
         <table className="w-full text-xs">
@@ -463,6 +570,9 @@ function OrderCard({
               Гарантийка №{local.warranty_number}
             </a>
           )}
+          <Button size="sm" variant="outline" disabled={tgSending} onClick={sendToTelegram}>
+            <Icon name="Send" size={14} className="mr-1" /> {tgSending ? "Отправка..." : "Отправить в Telegram"}
+          </Button>
           <Button size="sm" variant="outline" disabled={warrantyLoading} onClick={createWarranty}>
             <Icon name="FileText" size={14} className="mr-1" /> {warrantyLoading ? "Создание..." : "Создать гарантийку"}
           </Button>

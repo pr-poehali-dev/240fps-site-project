@@ -7,7 +7,7 @@ import psycopg2
 ORDERS_TABLE = 't_p288352_240fps_site_project.orders'
 ITEMS_TABLE = 't_p288352_240fps_site_project.order_items'
 
-ORDER_FIELDS = ['city', 'customer_name', 'customer_phone', 'final_date', 'total_price', 'assembly_cost', 'parts_cost_price', 'sort_order']
+ORDER_FIELDS = ['city', 'customer_name', 'customer_phone', 'final_date', 'total_price', 'assembly_cost', 'parts_cost_price', 'sort_order', 'order_number', 'comment']
 ITEM_FIELDS = ['component_name', 'price', 'cost_price', 'availability', 'delivery_date', 'sort_order', 'received', 'category']
 
 
@@ -33,6 +33,8 @@ def order_to_dict(row):
         'parts_cost_price': row[10],
         'warranty_number': row[11],
         'warranty_url': row[12],
+        'order_number': row[13],
+        'comment': row[14],
     }
 
 
@@ -95,7 +97,7 @@ def handler(event: dict, context) -> dict:
         if method == 'GET':
             status = params.get('status', 'active')
             cur.execute(
-                f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price, warranty_number, warranty_url '
+                f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price, warranty_number, warranty_url, order_number, comment '
                 f'FROM {ORDERS_TABLE} WHERE status = %s ORDER BY city, sort_order, id',
                 (status,)
             )
@@ -125,12 +127,12 @@ def handler(event: dict, context) -> dict:
             cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ORDERS_TABLE} WHERE city = %s', (body.get('city', ''),))
             sort_order = cur.fetchone()[0]
             cur.execute(
-                f'INSERT INTO {ORDERS_TABLE} (city, customer_name, customer_phone, final_date, total_price, assembly_cost, parts_cost_price, sort_order) '
-                f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
+                f'INSERT INTO {ORDERS_TABLE} (city, customer_name, customer_phone, final_date, total_price, assembly_cost, parts_cost_price, sort_order, order_number, comment) '
+                f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
                 (
                     body.get('city', ''), body.get('customer_name', ''), body.get('customer_phone', ''),
                     body.get('final_date'), body.get('total_price', 0), body.get('assembly_cost', 0),
-                    body.get('parts_cost_price', 0), sort_order,
+                    body.get('parts_cost_price', 0), sort_order, body.get('order_number'), body.get('comment', ''),
                 )
             )
             new_id = cur.fetchone()[0]

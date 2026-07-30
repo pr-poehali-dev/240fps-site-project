@@ -21,6 +21,7 @@ import {
   filteredPartsFor,
   autoSelectForPlatform,
   defaultCoolerFor,
+  calcAssemblyFee,
 } from '@/lib/pcParts';
 
 const SEND_LEAD_URL = 'https://functions.poehali.dev/0417654c-b782-4720-851a-0c4f89751599';
@@ -57,7 +58,7 @@ export default function Calculator() {
   }, []);
 
   const partsTotal = Object.values(selected).reduce((sum, p) => sum + (p?.price ?? 0), 0);
-  const assemblyFee = partsTotal === 0 ? 0 : partsTotal > 150000 ? 6000 : 5000;
+  const assemblyFee = calcAssemblyFee(partsTotal);
   const total = partsTotal + assemblyFee;
   const keys = Object.keys(LABELS) as SelectKey[];
 

@@ -19,6 +19,7 @@ import {
   filteredPartsFor,
   autoSelectForPlatform,
   defaultCoolerFor,
+  calcAssemblyFee,
 } from '@/lib/pcParts';
 
 export type ConfiguratorResult = {
@@ -46,7 +47,7 @@ export default function PcConfigurator({
 
   const keys = Object.keys(LABELS) as SelectKey[];
   const partsTotal = Object.values(selected).reduce((sum, p) => sum + (p?.price ?? 0), 0);
-  const assemblyFee = partsTotal === 0 ? 0 : partsTotal > 150000 ? 6000 : 5000;
+  const assemblyFee = calcAssemblyFee(partsTotal);
   const total = partsTotal + assemblyFee;
   const pInfo = platform ? PLATFORM_INFO[platform] : null;
 

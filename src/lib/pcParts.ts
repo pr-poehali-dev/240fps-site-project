@@ -173,6 +173,10 @@ export function filteredPartsFor(
   return all;
 }
 
+export function calcAssemblyFee(partsTotal: number): number {
+  return partsTotal === 0 ? 0 : partsTotal > 150000 ? 6000 : 5000;
+}
+
 export function autoSelectForPlatform(p: Platform, components: Components | null): Partial<Record<SelectKey, Part>> {
   const auto: Partial<Record<SelectKey, Part>> = {};
   STEPS.forEach((key) => {
