@@ -8,7 +8,7 @@ ORDERS_TABLE = 't_p288352_240fps_site_project.orders'
 ITEMS_TABLE = 't_p288352_240fps_site_project.order_items'
 
 ORDER_FIELDS = ['city', 'customer_name', 'customer_phone', 'final_date', 'total_price', 'assembly_cost', 'parts_cost_price', 'sort_order']
-ITEM_FIELDS = ['component_name', 'price', 'cost_price', 'availability', 'delivery_date', 'sort_order']
+ITEM_FIELDS = ['component_name', 'price', 'cost_price', 'availability', 'delivery_date', 'sort_order', 'received', 'category']
 
 
 def check_password(event: dict) -> bool:
@@ -44,11 +44,25 @@ def item_to_dict(row):
         'availability': row[5],
         'delivery_date': row[6].isoformat() if row[6] else None,
         'sort_order': row[7],
+        'received': row[8],
+        'category': row[9],
     }
 
 
+def insert_item(cur, order_id, item, sort_order):
+    cur.execute(
+        f'INSERT INTO {ITEMS_TABLE} (order_id, component_name, price, cost_price, availability, delivery_date, sort_order, received, category) '
+        f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+        (
+            order_id, item.get('component_name', ''), item.get('price', 0), item.get('cost_price', 0),
+            item.get('availability', 'in_stock'), item.get('delivery_date'), sort_order,
+            item.get('received', False), item.get('category'),
+        )
+    )
+
+
 def handler(event: dict, context) -> dict:
-    """CRM управление заказами на сборку ПК: списки заказов по городам, комплектующие в заказе, выдача ПК."""
+    """CRM управление заказами на сборку ПК: списки заказов по городам, комплектующие в заказе, приёмка на склад, выдача ПК."""
     cors = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -89,7 +103,7 @@ def handler(event: dict, context) -> dict:
             if order_ids:
                 ids_str = ','.join(str(i) for i in order_ids)
                 cur.execute(
-                    f'SELECT id, order_id, component_name, price, cost_price, availability, delivery_date, sort_order '
+                    f'SELECT id, order_id, component_name, price, cost_price, availability, delivery_date, sort_order, received, category '
                     f'FROM {ITEMS_TABLE} WHERE order_id IN ({ids_str}) ORDER BY order_id, sort_order, id'
                 )
                 for r in cur.fetchall():
@@ -109,14 +123,20 @@ def handler(event: dict, context) -> dict:
             cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ORDERS_TABLE} WHERE city = %s', (body.get('city', ''),))
             sort_order = cur.fetchone()[0]
             cur.execute(
-                f'INSERT INTO {ORDERS_TABLE} (city, customer_name, customer_phone, final_date, total_price, assembly_cost, sort_order) '
-                f'VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id',
+                f'INSERT INTO {ORDERS_TABLE} (city, customer_name, customer_phone, final_date, total_price, assembly_cost, parts_cost_price, sort_order) '
+                f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
                 (
                     body.get('city', ''), body.get('customer_name', ''), body.get('customer_phone', ''),
-                    body.get('final_date'), body.get('total_price', 0), body.get('assembly_cost', 0), sort_order,
+                    body.get('final_date'), body.get('total_price', 0), body.get('assembly_cost', 0),
+                    body.get('parts_cost_price', 0), sort_order,
                 )
             )
             new_id = cur.fetchone()[0]
+
+            items = body.get('items') or []
+            for idx, item in enumerate(items):
+                insert_item(cur, new_id, item, idx)
+
             conn.commit()
             return {
                 'statusCode': 200,
@@ -128,20 +148,12 @@ def handler(event: dict, context) -> dict:
             order_id = body.get('order_id')
             cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ITEMS_TABLE} WHERE order_id = %s', (order_id,))
             sort_order = cur.fetchone()[0]
-            cur.execute(
-                f'INSERT INTO {ITEMS_TABLE} (order_id, component_name, price, cost_price, availability, delivery_date, sort_order) '
-                f'VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id',
-                (
-                    order_id, body.get('component_name', ''), body.get('price', 0), body.get('cost_price', 0),
-                    body.get('availability', 'in_stock'), body.get('delivery_date'), sort_order,
-                )
-            )
-            new_id = cur.fetchone()[0]
+            insert_item(cur, order_id, body, sort_order)
             conn.commit()
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
-                'body': json.dumps({'ok': True, 'id': new_id}),
+                'body': json.dumps({'ok': True}),
             }
 
         if method == 'PUT' and resource == 'orders':

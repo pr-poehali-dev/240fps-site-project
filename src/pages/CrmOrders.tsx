@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -15,9 +16,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Components, Part, SelectKey, COMPONENTS_API_URL } from "@/lib/pcParts";
+import PcConfigurator, { ConfiguratorResult } from "@/components/PcConfigurator";
 
 const ORDERS_URL = "https://functions.poehali.dev/f37754c2-ef7c-40dc-991d-898c9d3732b4";
-const COMPONENTS_URL = "https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
@@ -55,6 +57,8 @@ type OrderItem = {
   availability: Availability;
   delivery_date: string | null;
   sort_order: number;
+  received: boolean;
+  category: string | null;
 };
 
 type Order = {
@@ -72,18 +76,6 @@ type Order = {
   items: OrderItem[];
 };
 
-type ComponentPart = { id: number; name: string; price: number };
-type ComponentsData = {
-  cpu: ComponentPart[];
-  motherboard: ComponentPart[];
-  ram: ComponentPart[];
-  gpu: ComponentPart[];
-  ssd: ComponentPart[];
-  cooler: ComponentPart[];
-  psu: ComponentPart[];
-  case: ComponentPart[];
-};
-
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " \u20bd";
 
 function authHeaders() {
@@ -93,7 +85,7 @@ function authHeaders() {
   };
 }
 
-function allParts(comps: ComponentsData | null): ComponentPart[] {
+function allParts(comps: Components | null): Part[] {
   if (!comps) return [];
   return [
     ...comps.cpu, ...comps.motherboard, ...comps.ram, ...comps.gpu,
@@ -106,28 +98,40 @@ function NewOrderDialog({
   open,
   onOpenChange,
   onCreated,
+  components,
 }: {
   city: City;
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onCreated: () => void;
+  components: Components | null;
 }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [finalDate, setFinalDate] = useState("");
-  const [totalPrice, setTotalPrice] = useState("");
-  const [assemblyCost, setAssemblyCost] = useState("");
-  const [partsCost, setPartsCost] = useState("");
   const [saving, setSaving] = useState(false);
 
   const reset = () => {
     setName(""); setPhone(""); setFinalDate("");
-    setTotalPrice(""); setAssemblyCost(""); setPartsCost("");
   };
 
-  const save = async () => {
+  const handleDone = async (result: ConfiguratorResult) => {
     setSaving(true);
     try {
+      const keys = Object.keys(result.selected) as SelectKey[];
+      const items = keys
+        .filter((k) => result.selected[k])
+        .map((k) => {
+          const part = result.selected[k]!;
+          return {
+            component_name: part.name,
+            price: part.price,
+            cost_price: 0,
+            availability: "in_stock" as Availability,
+            category: k,
+          };
+        });
+
       await fetch(`${ORDERS_URL}?resource=orders`, {
         method: "POST",
         headers: authHeaders(),
@@ -136,9 +140,10 @@ function NewOrderDialog({
           customer_name: name,
           customer_phone: phone,
           final_date: finalDate || null,
-          total_price: Number(totalPrice) || 0,
-          assembly_cost: Number(assemblyCost) || 0,
-          parts_cost_price: Number(partsCost) || 0,
+          total_price: result.total,
+          assembly_cost: result.assemblyFee,
+          parts_cost_price: 0,
+          items,
         }),
       });
       reset();
@@ -151,11 +156,12 @@ function NewOrderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-6xl w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Новая сборка — {city}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-3">
+
+        <div className="grid sm:grid-cols-3 gap-3 mb-2">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">Имя заказчика</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Иван Иванов" />
@@ -168,22 +174,13 @@ function NewOrderDialog({
             <label className="text-xs text-muted-foreground mb-1 block">Финальная дата</label>
             <Input type="date" value={finalDate} onChange={(e) => setFinalDate(e.target.value)} />
           </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Итоговая стоимость</label>
-            <Input type="number" value={totalPrice} onChange={(e) => setTotalPrice(e.target.value)} placeholder="0" />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Стоимость сборки</label>
-            <Input type="number" value={assemblyCost} onChange={(e) => setAssemblyCost(e.target.value)} placeholder="0" />
-          </div>
-          <div>
-            <label className="text-xs text-muted-foreground mb-1 block">Себестоимость запчастей</label>
-            <Input type="number" value={partsCost} onChange={(e) => setPartsCost(e.target.value)} placeholder="0" />
-          </div>
-          <Button className="w-full" disabled={saving} onClick={save}>
-            {saving ? "Сохранение..." : "Создать сборку"}
-          </Button>
         </div>
+
+        {components ? (
+          <PcConfigurator components={components} onDone={handleDone} doneLabel={saving ? "Сохранение..." : "Готово"} />
+        ) : (
+          <div className="text-muted-foreground text-sm py-10 text-center">Загрузка комплектующих...</div>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -196,20 +193,25 @@ function ItemRow({
   onRemove,
 }: {
   item: OrderItem;
-  parts: ComponentPart[];
+  parts: Part[];
   onChange: (patch: Partial<OrderItem>) => void;
   onRemove: () => void;
 }) {
   const rowClass = AVAILABILITY_ROW_CLASS[item.availability] || "";
 
   const handleSelectPart = (val: string) => {
-    if (val === "__custom__") return;
     const part = parts.find((p) => String(p.id) === val);
     if (part) onChange({ component_name: part.name, price: part.price });
   };
 
   return (
     <tr className={rowClass}>
+      <td className="p-1.5 w-10 text-center">
+        <Checkbox
+          checked={item.received}
+          onCheckedChange={(v) => onChange({ received: v === true })}
+        />
+      </td>
       <td className="p-1.5 min-w-[220px]">
         <div className="flex flex-col gap-1">
           <Select onValueChange={handleSelectPart}>
@@ -283,7 +285,7 @@ function OrderCard({
   onRefresh,
 }: {
   order: Order;
-  parts: ComponentPart[];
+  parts: Part[];
   onRefresh: () => void;
 }) {
   const [local, setLocal] = useState(order);
@@ -304,7 +306,7 @@ function OrderCard({
     await fetch(`${ORDERS_URL}?resource=items`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ order_id: order.id, component_name: "", price: 0, cost_price: 0, availability: "in_stock" }),
+      body: JSON.stringify({ order_id: order.id, component_name: "", price: 0, cost_price: 0, availability: "in_stock", received: false }),
     });
     onRefresh();
   };
@@ -424,6 +426,7 @@ function OrderCard({
         <table className="w-full text-xs">
           <thead>
             <tr className="text-muted-foreground text-left">
+              <th className="p-1.5 font-medium">Принято</th>
               <th className="p-1.5 font-medium">Комплектующее</th>
               <th className="p-1.5 font-medium">Цена</th>
               <th className="p-1.5 font-medium">Себест.</th>
@@ -469,27 +472,29 @@ function CityColumn({
   city,
   orders,
   parts,
+  components,
   onRefresh,
 }: {
   city: City;
   orders: Order[];
-  parts: ComponentPart[];
+  parts: Part[];
+  components: Components | null;
   onRefresh: () => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const cityOrders = orders.filter((o) => o.city === city);
 
   return (
-    <div className="flex-1 min-w-[340px] flex flex-col gap-3">
+    <div className="w-full flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-xl font-bold uppercase">{city}</h2>
         <Button size="sm" onClick={() => setDialogOpen(true)}>
           <Icon name="Plus" size={14} className="mr-1" /> Добавить сборку
         </Button>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {cityOrders.length === 0 && (
-          <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-xl">
+          <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-xl md:col-span-2 xl:col-span-3">
             Нет активных сборок
           </div>
         )}
@@ -497,7 +502,7 @@ function CityColumn({
           <OrderCard key={order.id} order={order} parts={parts} onRefresh={onRefresh} />
         ))}
       </div>
-      <NewOrderDialog city={city} open={dialogOpen} onOpenChange={setDialogOpen} onCreated={onRefresh} />
+      <NewOrderDialog city={city} open={dialogOpen} onOpenChange={setDialogOpen} onCreated={onRefresh} components={components} />
     </div>
   );
 }
@@ -569,7 +574,7 @@ function LoginScreen({ onLogin }: { onLogin: (role: string) => void }) {
 
 function CrmBoard() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [components, setComponents] = useState<ComponentsData | null>(null);
+  const [components, setComponents] = useState<Components | null>(null);
   const [loading, setLoading] = useState(true);
 
   const load = () => {
@@ -581,7 +586,7 @@ function CrmBoard() {
 
   useEffect(() => {
     load();
-    fetch(COMPONENTS_URL)
+    fetch(COMPONENTS_API_URL)
       .then((r) => r.json())
       .then(setComponents)
       .catch(() => {});
@@ -603,9 +608,9 @@ function CrmBoard() {
       {loading ? (
         <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>
       ) : (
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col gap-10">
           {CITIES.map((city) => (
-            <CityColumn key={city} city={city} orders={orders} parts={parts} onRefresh={load} />
+            <CityColumn key={city} city={city} orders={orders} parts={parts} components={components} onRefresh={load} />
           ))}
         </div>
       )}
