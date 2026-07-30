@@ -3,6 +3,7 @@ import os
 import hmac
 import io
 import uuid
+import urllib.request
 from copy import deepcopy
 from datetime import datetime
 
@@ -14,7 +15,12 @@ import docx
 ORDERS_TABLE = 't_p288352_240fps_site_project.orders'
 ITEMS_TABLE = 't_p288352_240fps_site_project.order_items'
 
-TEMPLATE_PATH = os.path.join(os.path.dirname(__file__), 'template.docx')
+TEMPLATE_URL = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/5b380494-3d7f-4404-913a-310b78f1817f.docx'
+
+
+def load_template() -> io.BytesIO:
+    with urllib.request.urlopen(TEMPLATE_URL, timeout=15) as resp:
+        return io.BytesIO(resp.read())
 
 CATEGORY_ORDER = ['cpu', 'motherboard', 'ram', 'gpu', 'ssd', 'cooler', 'psu', 'case']
 CATEGORY_LABELS = {
@@ -51,7 +57,7 @@ def format_price(value: int) -> str:
 
 
 def build_docx(order: dict, items: list) -> bytes:
-    d = docx.Document(TEMPLATE_PATH)
+    d = docx.Document(load_template())
 
     p0 = d.paragraphs[0]
     p0.runs[6].text = f"{order['warranty_number']} "
