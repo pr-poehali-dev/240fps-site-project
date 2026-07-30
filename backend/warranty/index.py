@@ -1,8 +1,8 @@
 import json
 import os
+import re
 import hmac
 import io
-import uuid
 import urllib.request
 from copy import deepcopy
 from datetime import datetime
@@ -60,8 +60,8 @@ def build_docx(order: dict, items: list) -> bytes:
     d = docx.Document(load_template())
 
     p0 = d.paragraphs[0]
-    p0.runs[6].text = f"{order['warranty_number']} "
-    date_str = order['final_date'].strftime('%d.%m.%y') if order.get('final_date') else datetime.now().strftime('%d.%m.%y')
+    p0.runs[6].text = f"{order['display_number']} "
+    date_str = datetime.now().strftime('%d.%m.%y')
     p0.runs[8].text = date_str
     for i in (9, 10, 11, 12, 13):
         p0.runs[i].text = ''
@@ -98,6 +98,8 @@ def build_docx(order: dict, items: list) -> bytes:
 
     tbl2 = d.tables[1]
     set_cell_text(tbl2.rows[1].cells[0], f"ФИО {order['customer_name']}")
+    set_cell_text(tbl2.rows[1].cells[1], "ФИО Шуляков А.Ю.")
+    set_cell_text(tbl2.rows[3].cells[0], "")
     set_cell_text(tbl2.rows[4].cells[0], f"Телефон {order['customer_phone']}")
 
     buf = io.BytesIO()
@@ -138,7 +140,7 @@ def handler(event: dict, context) -> dict:
 
     try:
         cur.execute(
-            f'SELECT id, city, customer_name, customer_phone, final_date, total_price, warranty_number '
+            f'SELECT id, city, customer_name, customer_phone, final_date, total_price, warranty_number, order_number '
             f'FROM {ORDERS_TABLE} WHERE id = %s',
             (order_id,)
         )
@@ -154,6 +156,7 @@ def handler(event: dict, context) -> dict:
             'final_date': row[4],
             'total_price': row[5],
             'warranty_number': row[6],
+            'order_number': row[7],
         }
 
         if not order['warranty_number']:
@@ -165,6 +168,8 @@ def handler(event: dict, context) -> dict:
                 (order['warranty_number'], order_id)
             )
 
+        order['display_number'] = order['order_number'] or order['warranty_number']
+
         cur.execute(
             f'SELECT component_name, category, sort_order FROM {ITEMS_TABLE} WHERE order_id = %s ORDER BY sort_order, id',
             (order_id,)
@@ -173,7 +178,8 @@ def handler(event: dict, context) -> dict:
 
         docx_bytes = build_docx(order, items)
 
-        file_key = f"warranty/{order_id}-{uuid.uuid4()}.docx"
+        safe_name = re.sub(r'[^A-Za-z0-9._-]+', '_', order['display_number']).strip('_') or str(order_id)
+        file_key = f"warranty/{safe_name}.docx"
         s3 = boto3.client(
             's3',
             endpoint_url='https://bucket.poehali.dev',
@@ -185,6 +191,7 @@ def handler(event: dict, context) -> dict:
             Key=file_key,
             Body=docx_bytes,
             ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ContentDisposition=f'attachment; filename="{safe_name}.docx"',
         )
         warranty_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{file_key}"
 
