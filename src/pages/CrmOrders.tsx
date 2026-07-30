@@ -431,11 +431,17 @@ function OrderCard({
         .join("\n");
       const dateLabel = local.final_date ? isoToDayMonth(local.final_date) : "—";
       const text = `🖥 Заказ ${local.order_number || ""} — ${local.city}\n\n${partsLines}\n\n🔧 Сборка: ${fmt(local.assembly_cost)}\n💰 Итого: ${fmt(local.total_price)}\n\n👤 ${local.customer_name}\n📞 ${local.customer_phone}\n📅 ${dateLabel}${local.comment ? `\n\n💬 ${local.comment}` : ""}`;
-      await fetch(SEND_LEAD_URL, {
+      const res = await fetch(SEND_LEAD_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        alert("Не удалось отправить в Telegram. Попробуйте ещё раз.");
+      }
+    } catch {
+      alert("Не удалось отправить в Telegram. Проверьте соединение и попробуйте снова.");
     } finally {
       setTgSending(false);
     }
