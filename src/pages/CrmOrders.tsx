@@ -21,6 +21,7 @@ import PcConfigurator, { ConfiguratorResult } from "@/components/PcConfigurator"
 
 const ORDERS_URL = "https://functions.poehali.dev/f37754c2-ef7c-40dc-991d-898c9d3732b4";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
+const WARRANTY_URL = "https://functions.poehali.dev/32335bd4-a46b-4a4c-b610-e02cc19f8e67";
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
 const ROLE_KEY = "admin_role";
@@ -76,6 +77,8 @@ type Order = {
   sort_order: number;
   created_at: string | null;
   items: OrderItem[];
+  warranty_number: string | null;
+  warranty_url: string | null;
 };
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " \u20bd";
@@ -261,6 +264,7 @@ function OrderCard({
 }) {
   const [local, setLocal] = useState(order);
   const [saving, setSaving] = useState(false);
+  const [warrantyLoading, setWarrantyLoading] = useState(false);
 
   useEffect(() => setLocal(order), [order]);
 
@@ -325,6 +329,24 @@ function OrderCard({
       body: JSON.stringify({ id: order.id }),
     });
     onRefresh();
+  };
+
+  const createWarranty = async () => {
+    setWarrantyLoading(true);
+    try {
+      const res = await fetch(WARRANTY_URL, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ order_id: order.id }),
+      });
+      const data = await res.json();
+      if (data.ok && data.url) {
+        window.open(data.url, "_blank");
+        onRefresh();
+      }
+    } finally {
+      setWarrantyLoading(false);
+    }
   };
 
   return (
@@ -430,9 +452,24 @@ function OrderCard({
         <button onClick={removeOrder} className="text-xs text-muted-foreground hover:text-destructive transition-colors">
           Удалить
         </button>
-        <Button size="sm" disabled={saving} onClick={issue}>
-          <Icon name="Check" size={14} className="mr-1" /> Выдать ПК
-        </Button>
+        <div className="flex items-center gap-2">
+          {local.warranty_url && (
+            <a
+              href={local.warranty_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline"
+            >
+              Гарантийка №{local.warranty_number}
+            </a>
+          )}
+          <Button size="sm" variant="outline" disabled={warrantyLoading} onClick={createWarranty}>
+            <Icon name="FileText" size={14} className="mr-1" /> {warrantyLoading ? "Создание..." : "Создать гарантийку"}
+          </Button>
+          <Button size="sm" disabled={saving} onClick={issue}>
+            <Icon name="Check" size={14} className="mr-1" /> Выдать ПК
+          </Button>
+        </div>
       </div>
     </div>
   );

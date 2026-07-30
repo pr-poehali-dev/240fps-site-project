@@ -1,0 +1,17 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "POST without password should be unauthorized",
+      "method": "POST",
+      "path": "/",
+      "body": {"order_id": 1},
+      "expectedStatus": 401
+    }
+  ]
+}

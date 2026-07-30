@@ -31,6 +31,8 @@ def order_to_dict(row):
         'sort_order': row[8],
         'created_at': row[9].isoformat() if row[9] else None,
         'parts_cost_price': row[10],
+        'warranty_number': row[11],
+        'warranty_url': row[12],
     }
 
 
@@ -93,7 +95,7 @@ def handler(event: dict, context) -> dict:
         if method == 'GET':
             status = params.get('status', 'active')
             cur.execute(
-                f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price '
+                f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price, warranty_number, warranty_url '
                 f'FROM {ORDERS_TABLE} WHERE status = %s ORDER BY city, sort_order, id',
                 (status,)
             )
