@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Components, Part, SelectKey, COMPONENTS_API_URL } from "@/lib/pcParts";
+import { Components, SelectKey, COMPONENTS_API_URL } from "@/lib/pcParts";
 import PcConfigurator, { ConfiguratorResult } from "@/components/PcConfigurator";
 
 const ORDERS_URL = "https://functions.poehali.dev/f37754c2-ef7c-40dc-991d-898c9d3732b4";
@@ -39,13 +39,15 @@ const AVAILABILITY_LABELS: Record<Availability, string> = {
   citilink: "Ситилинк",
 };
 
+const IN_STOCK_CLASS = "bg-violet-700/40";
+
 const AVAILABILITY_ROW_CLASS: Record<Availability, string> = {
-  in_stock: "bg-green-100 dark:bg-green-950/40",
+  in_stock: IN_STOCK_CLASS,
   wb: "bg-purple-100 dark:bg-purple-950/40",
-  ozon: "bg-pink-100 dark:bg-pink-950/40",
-  avito: "bg-lime-100 dark:bg-lime-950/40",
-  dns: "bg-orange-100 dark:bg-orange-950/40",
-  citilink: "bg-amber-100/70 dark:bg-amber-950/30",
+  ozon: "bg-blue-600/30",
+  avito: "bg-cyan-400/30",
+  dns: "bg-orange-500/30",
+  citilink: "bg-[#8b5e34]/40",
 };
 
 type OrderItem = {
@@ -83,14 +85,6 @@ function authHeaders() {
     "Content-Type": "application/json",
     "X-Admin-Password": sessionStorage.getItem(PWD_KEY) || "",
   };
-}
-
-function allParts(comps: Components | null): Part[] {
-  if (!comps) return [];
-  return [
-    ...comps.cpu, ...comps.motherboard, ...comps.ram, ...comps.gpu,
-    ...comps.ssd, ...comps.cooler, ...comps.psu, ...comps.case,
-  ];
 }
 
 function NewOrderDialog({
@@ -188,21 +182,14 @@ function NewOrderDialog({
 
 function ItemRow({
   item,
-  parts,
   onChange,
   onRemove,
 }: {
   item: OrderItem;
-  parts: Part[];
   onChange: (patch: Partial<OrderItem>) => void;
   onRemove: () => void;
 }) {
-  const rowClass = AVAILABILITY_ROW_CLASS[item.availability] || "";
-
-  const handleSelectPart = (val: string) => {
-    const part = parts.find((p) => String(p.id) === val);
-    if (part) onChange({ component_name: part.name, price: part.price });
-  };
+  const rowClass = item.received ? IN_STOCK_CLASS : (AVAILABILITY_ROW_CLASS[item.availability] || "");
 
   return (
     <tr className={rowClass}>
@@ -213,26 +200,12 @@ function ItemRow({
         />
       </td>
       <td className="p-1.5 min-w-[220px]">
-        <div className="flex flex-col gap-1">
-          <Select onValueChange={handleSelectPart}>
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Выбрать из базы..." />
-            </SelectTrigger>
-            <SelectContent>
-              {parts.map((p) => (
-                <SelectItem key={p.id} value={String(p.id)}>
-                  {p.name} — {fmt(p.price)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Input
-            className="h-8 text-xs"
-            value={item.component_name}
-            onChange={(e) => onChange({ component_name: e.target.value })}
-            placeholder="Название комплектующего"
-          />
-        </div>
+        <Input
+          className="h-8 text-xs"
+          value={item.component_name}
+          onChange={(e) => onChange({ component_name: e.target.value })}
+          placeholder="Название комплектующего"
+        />
       </td>
       <td className="p-1.5 w-28">
         <Input
@@ -281,11 +254,9 @@ function ItemRow({
 
 function OrderCard({
   order,
-  parts,
   onRefresh,
 }: {
   order: Order;
-  parts: Part[];
   onRefresh: () => void;
 }) {
   const [local, setLocal] = useState(order);
@@ -440,7 +411,6 @@ function OrderCard({
               <ItemRow
                 key={item.id}
                 item={item}
-                parts={parts}
                 onChange={(patch) => updateItem(item.id, patch)}
                 onRemove={() => removeItem(item.id)}
               />
@@ -471,13 +441,11 @@ function OrderCard({
 function CityColumn({
   city,
   orders,
-  parts,
   components,
   onRefresh,
 }: {
   city: City;
   orders: Order[];
-  parts: Part[];
   components: Components | null;
   onRefresh: () => void;
 }) {
@@ -499,7 +467,7 @@ function CityColumn({
           </div>
         )}
         {cityOrders.map((order) => (
-          <OrderCard key={order.id} order={order} parts={parts} onRefresh={onRefresh} />
+          <OrderCard key={order.id} order={order} onRefresh={onRefresh} />
         ))}
       </div>
       <NewOrderDialog city={city} open={dialogOpen} onOpenChange={setDialogOpen} onCreated={onRefresh} components={components} />
@@ -592,8 +560,6 @@ function CrmBoard() {
       .catch(() => {});
   }, []);
 
-  const parts = allParts(components);
-
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="flex items-center justify-between mb-6">
@@ -610,7 +576,7 @@ function CrmBoard() {
       ) : (
         <div className="flex flex-col gap-10">
           {CITIES.map((city) => (
-            <CityColumn key={city} city={city} orders={orders} parts={parts} components={components} onRefresh={load} />
+            <CityColumn key={city} city={city} orders={orders} components={components} onRefresh={load} />
           ))}
         </div>
       )}
