@@ -60,7 +60,9 @@ def build_docx(order: dict, items: list) -> bytes:
     d = docx.Document(load_template())
 
     p0 = d.paragraphs[0]
-    p0.runs[6].text = f"{order['display_number']} "
+    p0.runs[0].text = f"Гарантийный талон {order['display_number']}"
+    p0.runs[5].text = ''
+    p0.runs[6].text = ''
     date_str = datetime.now().strftime('%d.%m.%y')
     p0.runs[8].text = date_str
     for i in (9, 10, 11, 12, 13):
