@@ -475,12 +475,20 @@ function Dashboard({ role }: { role: string }) {
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl font-bold uppercase">Админ-панель</h1>
-        <button
-          onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Выйти
-        </button>
+        <div className="flex items-center gap-4">
+          <a
+            href="/admin/crm"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            CRM заказов
+          </a>
+          <button
+            onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Выйти
+          </button>
+        </div>
       </div>
 
       {isAdmin && (

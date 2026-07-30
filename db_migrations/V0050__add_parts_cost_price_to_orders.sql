@@ -1,0 +1,1 @@
+ALTER TABLE t_p288352_240fps_site_project.orders ADD COLUMN IF NOT EXISTS parts_cost_price INTEGER NOT NULL DEFAULT 0;
