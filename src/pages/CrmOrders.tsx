@@ -42,8 +42,8 @@ const AVAILABILITY_LABELS: Record<Availability, string> = {
 const AVAILABILITY_ROW_CLASS: Record<Availability, string> = {
   in_stock: "bg-green-100 dark:bg-green-950/40",
   wb: "bg-purple-100 dark:bg-purple-950/40",
-  ozon: "bg-blue-100 dark:bg-blue-950/40",
-  avito: "bg-sky-100 dark:bg-sky-950/40",
+  ozon: "bg-pink-100 dark:bg-pink-950/40",
+  avito: "bg-lime-100 dark:bg-lime-950/40",
   dns: "bg-orange-100 dark:bg-orange-950/40",
   citilink: "bg-amber-100/70 dark:bg-amber-950/30",
 };
@@ -492,9 +492,9 @@ function CityColumn({
           <Icon name="Plus" size={14} className="mr-1" /> Добавить сборку
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-4">
         {cityOrders.length === 0 && (
-          <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-xl md:col-span-2 xl:col-span-3">
+          <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-xl">
             Нет активных сборок
           </div>
         )}
