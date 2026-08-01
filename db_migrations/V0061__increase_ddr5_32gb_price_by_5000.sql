@@ -1,0 +1,1 @@
+UPDATE t_p288352_240fps_site_project.components_ram SET price = 45000 WHERE id = 6;
