@@ -1,0 +1,1 @@
+UPDATE t_p288352_240fps_site_project.components_gpu SET price = 43000 WHERE id = 4;
