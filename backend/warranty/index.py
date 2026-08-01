@@ -101,6 +101,7 @@ def build_docx(order: dict, items: list) -> bytes:
     tbl2 = d.tables[1]
     set_cell_text(tbl2.rows[1].cells[0], f"ФИО {order['customer_name']}")
     set_cell_text(tbl2.rows[1].cells[1], "ФИО Шуляков А.Ю.")
+    set_cell_text(tbl2.rows[2].cells[0], f"Дата покупки {date_str}")
     set_cell_text(tbl2.rows[3].cells[0], "")
     set_cell_text(tbl2.rows[4].cells[0], f"Телефон {order['customer_phone']}")
 
