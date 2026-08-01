@@ -15,7 +15,7 @@ import docx
 ORDERS_TABLE = 't_p288352_240fps_site_project.orders'
 ITEMS_TABLE = 't_p288352_240fps_site_project.order_items'
 
-TEMPLATE_URL = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/5b380494-3d7f-4404-913a-310b78f1817f.docx'
+TEMPLATE_URL = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/c09f7277-ccad-46f2-b509-fec7dd1c4c4b.docx'
 
 
 def load_template() -> io.BytesIO:
@@ -61,12 +61,8 @@ def build_docx(order: dict, items: list) -> bytes:
 
     p0 = d.paragraphs[0]
     p0.runs[0].text = f"Гарантийный талон {order['display_number']}"
-    p0.runs[5].text = ''
-    p0.runs[6].text = ''
     date_str = datetime.now().strftime('%d.%m.%y')
-    p0.runs[8].text = date_str
-    for i in (9, 10, 11, 12, 13):
-        p0.runs[i].text = ''
+    p0.runs[len(p0.runs) - 1].text = date_str
 
     tbl = d.tables[0]
     rows = list(tbl.rows)
