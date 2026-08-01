@@ -745,16 +745,6 @@ function CrmBoard() {
       .catch(() => {});
   }, []);
 
-  const resetIssuedStats = async () => {
-    if (!confirm("Обнулить статистику по выданным заказам? Старые выдачи не будут учитываться в отчётах, но сами заказы останутся в системе.")) return;
-    await fetch(`${ORDERS_URL}?resource=settings`, {
-      method: "PUT",
-      headers: authHeaders(),
-      body: JSON.stringify({ key: "issued_reset_at", value: new Date().toISOString() }),
-    });
-    alert("Статистика обнулена — новый отсчёт начинается с сегодняшнего дня.");
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="flex items-center justify-between mb-6">
@@ -763,12 +753,6 @@ function CrmBoard() {
           <Link to="/admin/crm/issued" className="text-sm text-primary hover:underline flex items-center gap-1">
             <Icon name="PackageCheck" size={16} /> Выданные заказы
           </Link>
-          <button
-            onClick={resetIssuedStats}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-          >
-            <Icon name="RotateCcw" size={14} /> Обнулить статистику
-          </button>
           <button
             onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
