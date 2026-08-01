@@ -17,6 +17,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Link } from "react-router-dom";
 import { Components, SelectKey, COMPONENTS_API_URL, calcAssemblyFee } from "@/lib/pcParts";
 import PcConfigurator, { ConfiguratorResult } from "@/components/PcConfigurator";
 
@@ -89,6 +91,7 @@ type Order = {
   warranty_url: string | null;
   order_number: string | null;
   comment: string;
+  issued_at: string | null;
 };
 
 const fmt = (n: number) => n.toLocaleString("ru-RU") + " \u20bd";
@@ -178,6 +181,7 @@ function NewOrderDialog({
             price: part.price,
             cost_price: 0,
             availability: "in_stock" as Availability,
+            received: true,
             category: k,
           };
         });
@@ -290,7 +294,10 @@ function ItemRow({
         />
       </td>
       <td className="p-1.5 w-36">
-        <Select value={item.availability} onValueChange={(v) => onChange({ availability: v as Availability })}>
+        <Select
+          value={item.availability}
+          onValueChange={(v) => onChange(v === "in_stock" ? { availability: v as Availability, received: true } : { availability: v as Availability })}
+        >
           <SelectTrigger className="h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
@@ -447,8 +454,21 @@ function OrderCard({
     }
   };
 
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+    <Collapsible open={expanded} onOpenChange={setExpanded} className="bg-card border border-border rounded-xl">
+      <CollapsibleTrigger asChild>
+        <button className="w-full flex items-center justify-between p-4 text-left">
+          <div className="flex items-center gap-2 min-w-0">
+            <Icon name={expanded ? "ChevronDown" : "ChevronRight"} size={16} className="text-muted-foreground shrink-0" />
+            <span className="font-semibold text-sm truncate">{local.order_number || "Без номера"}</span>
+            <span className="text-sm text-muted-foreground truncate">{local.customer_name}</span>
+          </div>
+          <span className="text-sm font-medium shrink-0 ml-2">{fmt(local.total_price)}</span>
+        </button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="p-4 pt-0 space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Заказчик</label>
@@ -587,7 +607,8 @@ function OrderCard({
           </Button>
         </div>
       </div>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -603,26 +624,37 @@ function CityColumn({
   onRefresh: () => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const cityOrders = orders.filter((o) => o.city === city);
 
   return (
     <div className="w-full flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="font-display text-xl font-bold uppercase">{city}</h2>
-        <Button size="sm" onClick={() => setDialogOpen(true)}>
-          <Icon name="Plus" size={14} className="mr-1" /> Добавить сборку
-        </Button>
-      </div>
-      <div className="flex flex-col gap-4">
-        {cityOrders.length === 0 && (
-          <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-xl">
-            Нет активных сборок
+      <Collapsible open={expanded} onOpenChange={setExpanded}>
+        <div className="flex items-center justify-between">
+          <CollapsibleTrigger asChild>
+            <button className="flex items-center gap-2">
+              <Icon name={expanded ? "ChevronDown" : "ChevronRight"} size={18} className="text-muted-foreground" />
+              <h2 className="font-display text-xl font-bold uppercase">{city}</h2>
+              <span className="text-sm text-muted-foreground">({cityOrders.length})</span>
+            </button>
+          </CollapsibleTrigger>
+          <Button size="sm" onClick={() => setDialogOpen(true)}>
+            <Icon name="Plus" size={14} className="mr-1" /> Добавить сборку
+          </Button>
+        </div>
+        <CollapsibleContent>
+          <div className="flex flex-col gap-4 mt-3">
+            {cityOrders.length === 0 && (
+              <div className="text-sm text-muted-foreground text-center py-10 border border-dashed border-border rounded-xl">
+                Нет активных сборок
+              </div>
+            )}
+            {cityOrders.map((order) => (
+              <OrderCard key={order.id} order={order} onRefresh={onRefresh} />
+            ))}
           </div>
-        )}
-        {cityOrders.map((order) => (
-          <OrderCard key={order.id} order={order} onRefresh={onRefresh} />
-        ))}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
       <NewOrderDialog city={city} open={dialogOpen} onOpenChange={setDialogOpen} onCreated={onRefresh} components={components} />
     </div>
   );
@@ -713,16 +745,37 @@ function CrmBoard() {
       .catch(() => {});
   }, []);
 
+  const resetIssuedStats = async () => {
+    if (!confirm("Обнулить статистику по выданным заказам? Старые выдачи не будут учитываться в отчётах, но сами заказы останутся в системе.")) return;
+    await fetch(`${ORDERS_URL}?resource=settings`, {
+      method: "PUT",
+      headers: authHeaders(),
+      body: JSON.stringify({ key: "issued_reset_at", value: new Date().toISOString() }),
+    });
+    alert("Статистика обнулена — новый отсчёт начинается с сегодняшнего дня.");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl font-bold uppercase">CRM — Заказы на сборку</h1>
-        <button
-          onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Выйти
-        </button>
+        <div className="flex items-center gap-4">
+          <Link to="/admin/crm/issued" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Icon name="PackageCheck" size={16} /> Выданные заказы
+          </Link>
+          <button
+            onClick={resetIssuedStats}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            <Icon name="RotateCcw" size={14} /> Обнулить статистику
+          </button>
+          <button
+            onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Выйти
+          </button>
+        </div>
       </div>
       {loading ? (
         <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>

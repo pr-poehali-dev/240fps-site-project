@@ -6,6 +6,7 @@ import psycopg2
 
 ORDERS_TABLE = 't_p288352_240fps_site_project.orders'
 ITEMS_TABLE = 't_p288352_240fps_site_project.order_items'
+SETTINGS_TABLE = 't_p288352_240fps_site_project.app_settings'
 
 ORDER_FIELDS = ['city', 'customer_name', 'customer_phone', 'final_date', 'total_price', 'assembly_cost', 'parts_cost_price', 'sort_order', 'order_number', 'comment']
 ITEM_FIELDS = ['component_name', 'price', 'cost_price', 'availability', 'delivery_date', 'sort_order', 'received', 'category']
@@ -35,6 +36,7 @@ def order_to_dict(row):
         'warranty_url': row[12],
         'order_number': row[13],
         'comment': row[14],
+        'issued_at': row[15].isoformat() if row[15] else None,
     }
 
 
@@ -94,13 +96,28 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     try:
+        if method == 'GET' and resource == 'settings':
+            cur.execute(f'SELECT value FROM {SETTINGS_TABLE} WHERE key = %s', ('issued_reset_at',))
+            row = cur.fetchone()
+            return {
+                'statusCode': 200,
+                'headers': {**cors, 'Content-Type': 'application/json'},
+                'body': json.dumps({'issued_reset_at': row[0] if row else None}),
+            }
+
         if method == 'GET':
             status = params.get('status', 'active')
-            cur.execute(
-                f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price, warranty_number, warranty_url, order_number, comment '
-                f'FROM {ORDERS_TABLE} WHERE status = %s ORDER BY city, sort_order, id',
-                (status,)
-            )
+            query = f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price, warranty_number, warranty_url, order_number, comment, issued_at ' \
+                    f'FROM {ORDERS_TABLE} WHERE status = %s'
+            query_params = [status]
+            if status == 'issued':
+                cur.execute(f'SELECT value FROM {SETTINGS_TABLE} WHERE key = %s', ('issued_reset_at',))
+                reset_row = cur.fetchone()
+                if reset_row and reset_row[0]:
+                    query += ' AND issued_at >= %s'
+                    query_params.append(reset_row[0])
+            query += ' ORDER BY issued_at DESC, city, sort_order, id' if status == 'issued' else ' ORDER BY city, sort_order, id'
+            cur.execute(query, query_params)
             orders = [order_to_dict(r) for r in cur.fetchall()]
             order_ids = [o['id'] for o in orders]
             items_by_order = {}
@@ -122,6 +139,23 @@ def handler(event: dict, context) -> dict:
             }
 
         body = json.loads(event.get('body') or '{}')
+
+        if method == 'PUT' and resource == 'settings':
+            key = body.get('key')
+            value = body.get('value')
+            if not key:
+                return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'key обязателен'})}
+            cur.execute(
+                f'INSERT INTO {SETTINGS_TABLE} (key, value) VALUES (%s, %s) '
+                f'ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+                (key, value)
+            )
+            conn.commit()
+            return {
+                'statusCode': 200,
+                'headers': {**cors, 'Content-Type': 'application/json'},
+                'body': json.dumps({'ok': True}),
+            }
 
         if method == 'POST' and resource == 'orders':
             cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ORDERS_TABLE} WHERE city = %s', (body.get('city', ''),))

@@ -161,7 +161,13 @@ def handler(event: dict, context) -> dict:
             'order_number': row[7],
         }
 
-        if not order['warranty_number']:
+        if order['order_number']:
+            order['warranty_number'] = order['order_number']
+            cur.execute(
+                f'UPDATE {ORDERS_TABLE} SET warranty_number = %s WHERE id = %s',
+                (order['warranty_number'], order_id)
+            )
+        elif not order['warranty_number']:
             cur.execute("SELECT nextval('t_p288352_240fps_site_project.warranty_number_seq')")
             num = cur.fetchone()[0]
             order['warranty_number'] = f'{num:03d}'
@@ -170,7 +176,7 @@ def handler(event: dict, context) -> dict:
                 (order['warranty_number'], order_id)
             )
 
-        order['display_number'] = order['order_number'] or order['warranty_number']
+        order['display_number'] = order['warranty_number']
 
         cur.execute(
             f'SELECT component_name, category, sort_order FROM {ITEMS_TABLE} WHERE order_id = %s ORDER BY sort_order, id',
