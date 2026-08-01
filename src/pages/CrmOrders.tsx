@@ -753,6 +753,9 @@ function CrmBoard() {
           <Link to="/admin/crm/issued" className="text-sm text-primary hover:underline flex items-center gap-1">
             <Icon name="PackageCheck" size={16} /> Выданные заказы
           </Link>
+          <Link to="/admin/crm/prices" className="text-sm text-primary hover:underline flex items-center gap-1">
+            <Icon name="Tags" size={16} /> Цены на комплектующие
+          </Link>
           <button
             onClick={() => { sessionStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(PWD_KEY); sessionStorage.removeItem(ROLE_KEY); window.location.reload(); }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
