@@ -26,8 +26,8 @@ function CategoryCard({ categoryKey, components }: { categoryKey: SelectKey; com
             )}
             {parts.map((p, i) => (
               <tr key={p.id} className={i % 2 === 0 ? "" : "bg-muted/20"}>
-                <td className="p-1.5 pl-3 truncate max-w-0" title={p.name}>{p.name}</td>
-                <td className="p-1.5 pr-3 text-right font-medium whitespace-nowrap">{fmt(p.price)}</td>
+                <td className="p-1.5 pl-3 break-words">{p.name}</td>
+                <td className="p-1.5 pr-3 text-right font-medium whitespace-nowrap align-top">{fmt(p.price)}</td>
               </tr>
             ))}
           </tbody>
@@ -64,7 +64,7 @@ function PricesBoard() {
       ) : !components ? (
         <div className="text-muted-foreground text-sm py-10 text-center">Не удалось загрузить данные</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {STEPS.map((key) => (
             <CategoryCard key={key} categoryKey={key} components={components} />
           ))}
