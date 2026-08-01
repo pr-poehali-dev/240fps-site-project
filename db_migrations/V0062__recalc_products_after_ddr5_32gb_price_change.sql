@@ -1,0 +1,1 @@
+UPDATE t_p288352_240fps_site_project.products SET price = price + 5000, updated_at = now() WHERE ram = 32;
