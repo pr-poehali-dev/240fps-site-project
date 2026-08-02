@@ -266,11 +266,11 @@ function ProductForm({
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Оперативная память (ГБ)</label>
-          <input type="number" value={form.ram} onChange={e => set("ram", Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <input type="number" value={form.ram === 0 ? "" : form.ram} onChange={e => set("ram", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">SSD (ГБ)</label>
-          <input type="number" value={form.storage} onChange={e => set("storage", Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <input type="number" value={form.storage === 0 ? "" : form.storage} onChange={e => set("storage", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Цена (₽)</label>
