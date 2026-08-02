@@ -281,16 +281,16 @@ function ItemRow({
         <Input
           type="number"
           className="h-8 text-xs"
-          value={item.price}
-          onChange={(e) => onChange({ price: Number(e.target.value) || 0 })}
+          value={item.price === 0 ? "" : item.price}
+          onChange={(e) => onChange({ price: e.target.value === "" ? 0 : Number(e.target.value) })}
         />
       </td>
       <td className="p-1.5 w-28">
         <Input
           type="number"
           className="h-8 text-xs"
-          value={item.cost_price}
-          onChange={(e) => onChange({ cost_price: Number(e.target.value) || 0 })}
+          value={item.cost_price === 0 ? "" : item.cost_price}
+          onChange={(e) => onChange({ cost_price: e.target.value === "" ? 0 : Number(e.target.value) })}
         />
       </td>
       <td className="p-1.5 w-36">
@@ -513,8 +513,8 @@ function OrderCard({
           <Input
             type="number"
             className="h-8 text-sm"
-            value={local.total_price}
-            onChange={(e) => setLocal((p) => ({ ...p, total_price: Number(e.target.value) || 0 }))}
+            value={local.total_price === 0 ? "" : local.total_price}
+            onChange={(e) => setLocal((p) => ({ ...p, total_price: e.target.value === "" ? 0 : Number(e.target.value) }))}
             onBlur={() => saveOrderField({ total_price: local.total_price })}
           />
         </div>
@@ -523,8 +523,8 @@ function OrderCard({
           <Input
             type="number"
             className="h-8 text-sm"
-            value={local.parts_cost_price}
-            onChange={(e) => setLocal((p) => ({ ...p, parts_cost_price: Number(e.target.value) || 0 }))}
+            value={local.parts_cost_price === 0 ? "" : local.parts_cost_price}
+            onChange={(e) => setLocal((p) => ({ ...p, parts_cost_price: e.target.value === "" ? 0 : Number(e.target.value) }))}
             onBlur={() => saveOrderField({ parts_cost_price: local.parts_cost_price })}
           />
         </div>
