@@ -32,8 +32,8 @@ def handler(event: dict, context) -> dict:
             'role': 'catalog',
         },
         {
-            'login': os.environ.get('TYUMEN_LOGIN', ''),
-            'password': os.environ.get('TYUMEN_PASSWORD', ''),
+            'login': os.environ.get('TUMEN_LOGIN', ''),
+            'password': os.environ.get('TUMEN_PASSWORD', ''),
             'role': 'tyumen',
         },
     ]

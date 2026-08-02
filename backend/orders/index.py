@@ -18,7 +18,7 @@ def get_role(event: dict):
     accounts = [
         (os.environ.get('ADMIN_PASSWORD', ''), 'admin'),
         (os.environ.get('CATALOG_PASSWORD', ''), 'catalog'),
-        (os.environ.get('TYUMEN_PASSWORD', ''), 'tyumen'),
+        (os.environ.get('TUMEN_PASSWORD', ''), 'tyumen'),
     ]
     for pwd, role in accounts:
         if pwd and hmac.compare_digest(password, pwd):
