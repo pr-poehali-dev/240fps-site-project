@@ -31,6 +31,11 @@ def handler(event: dict, context) -> dict:
             'password': os.environ.get('CATALOG_PASSWORD', ''),
             'role': 'catalog',
         },
+        {
+            'login': os.environ.get('TYUMEN_LOGIN', ''),
+            'password': os.environ.get('TYUMEN_PASSWORD', ''),
+            'role': 'tyumen',
+        },
     ]
 
     for acc in accounts:

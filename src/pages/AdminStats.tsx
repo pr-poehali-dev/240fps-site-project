@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
 const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b7407b194";
@@ -633,5 +634,6 @@ export default function AdminStats() {
   const [role, setRole] = useState(() => sessionStorage.getItem(ROLE_KEY) || "admin");
 
   if (!authed) return <LoginScreen onLogin={(r) => { setRole(r); setAuthed(true); }} />;
+  if (role === "tyumen") return <Navigate to="/admin/crm" replace />;
   return <Dashboard role={role} />;
 }

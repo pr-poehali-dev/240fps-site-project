@@ -20,8 +20,13 @@ import {
 const ORDERS_URL = "https://functions.poehali.dev/f37754c2-ef7c-40dc-991d-898c9d3732b4";
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
+const ROLE_KEY = "admin_role";
 
 const CITIES = ["Омск", "Краснодар", "Тюмень"] as const;
+
+const ROLE_CITY: Record<string, string> = {
+  tyumen: "Тюмень",
+};
 
 const MONTH_LABELS = [
   "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
@@ -170,6 +175,8 @@ function OrderDetailsDialog({
 
 export default function CrmIssuedOrders() {
   const authed = sessionStorage.getItem(AUTH_KEY) === "1";
+  const role = sessionStorage.getItem(ROLE_KEY) || "admin";
+  const visibleCities = ROLE_CITY[role] ? [ROLE_CITY[role]] : CITIES;
   const [orders, setOrders] = useState<IssuedOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [cityFilter, setCityFilter] = useState<string>("all");
@@ -249,17 +256,19 @@ export default function CrmIssuedOrders() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <Select value={cityFilter} onValueChange={setCityFilter}>
-          <SelectTrigger className="w-44 h-9 text-sm">
-            <SelectValue placeholder="Город" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Все города</SelectItem>
-            {CITIES.map((c) => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {visibleCities.length > 1 && (
+          <Select value={cityFilter} onValueChange={setCityFilter}>
+            <SelectTrigger className="w-44 h-9 text-sm">
+              <SelectValue placeholder="Город" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все города</SelectItem>
+              {visibleCities.map((c) => (
+                <SelectItem key={c} value={c}>{c}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Select value={monthFilter} onValueChange={setMonthFilter}>
           <SelectTrigger className="w-48 h-9 text-sm">

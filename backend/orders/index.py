@@ -12,11 +12,21 @@ ORDER_FIELDS = ['city', 'customer_name', 'customer_phone', 'final_date', 'total_
 ITEM_FIELDS = ['component_name', 'price', 'cost_price', 'availability', 'delivery_date', 'sort_order', 'received', 'category']
 
 
-def check_password(event: dict) -> bool:
+def get_role(event: dict):
     headers = event.get('headers', {}) or {}
     password = headers.get('X-Admin-Password') or headers.get('x-admin-password') or ''
-    valid_passwords = [os.environ.get('ADMIN_PASSWORD', ''), os.environ.get('CATALOG_PASSWORD', '')]
-    return any(p and hmac.compare_digest(password, p) for p in valid_passwords)
+    accounts = [
+        (os.environ.get('ADMIN_PASSWORD', ''), 'admin'),
+        (os.environ.get('CATALOG_PASSWORD', ''), 'catalog'),
+        (os.environ.get('TYUMEN_PASSWORD', ''), 'tyumen'),
+    ]
+    for pwd, role in accounts:
+        if pwd and hmac.compare_digest(password, pwd):
+            return role
+    return None
+
+
+ROLE_CITY = {'tyumen': 'Тюмень'}
 
 
 def order_to_dict(row):
@@ -81,12 +91,14 @@ def handler(event: dict, context) -> dict:
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': cors, 'body': ''}
 
-    if not check_password(event):
+    role = get_role(event)
+    if not role:
         return {
             'statusCode': 401,
             'headers': {**cors, 'Content-Type': 'application/json'},
             'body': json.dumps({'error': 'Неверный пароль'}),
         }
+    allowed_city = ROLE_CITY.get(role)
 
     dsn = os.environ['DATABASE_URL']
     params = event.get('queryStringParameters') or {}
@@ -94,6 +106,22 @@ def handler(event: dict, context) -> dict:
 
     conn = psycopg2.connect(dsn)
     cur = conn.cursor()
+
+    def order_city(order_id):
+        cur.execute(f'SELECT city FROM {ORDERS_TABLE} WHERE id = %s', (order_id,))
+        r = cur.fetchone()
+        return r[0] if r else None
+
+    def item_order_city(item_id):
+        cur.execute(f'SELECT o.city FROM {ITEMS_TABLE} i JOIN {ORDERS_TABLE} o ON o.id = i.order_id WHERE i.id = %s', (item_id,))
+        r = cur.fetchone()
+        return r[0] if r else None
+
+    forbidden = {
+        'statusCode': 403,
+        'headers': {**cors, 'Content-Type': 'application/json'},
+        'body': json.dumps({'error': 'Нет доступа к этому городу'}),
+    }
 
     try:
         if method == 'GET' and resource == 'settings':
@@ -116,6 +144,9 @@ def handler(event: dict, context) -> dict:
                 if reset_row and reset_row[0]:
                     query += ' AND issued_at >= %s'
                     query_params.append(reset_row[0])
+            if allowed_city:
+                query += ' AND city = %s'
+                query_params.append(allowed_city)
             query += ' ORDER BY issued_at DESC, city, sort_order, id' if status == 'issued' else ' ORDER BY city, sort_order, id'
             cur.execute(query, query_params)
             orders = [order_to_dict(r) for r in cur.fetchall()]
@@ -141,6 +172,8 @@ def handler(event: dict, context) -> dict:
         body = json.loads(event.get('body') or '{}')
 
         if method == 'PUT' and resource == 'settings':
+            if allowed_city:
+                return forbidden
             key = body.get('key')
             value = body.get('value')
             if not key:
@@ -158,6 +191,8 @@ def handler(event: dict, context) -> dict:
             }
 
         if method == 'POST' and resource == 'orders':
+            if allowed_city and body.get('city', '') != allowed_city:
+                return forbidden
             cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ORDERS_TABLE} WHERE city = %s', (body.get('city', ''),))
             sort_order = cur.fetchone()[0]
             cur.execute(
@@ -184,6 +219,8 @@ def handler(event: dict, context) -> dict:
 
         if method == 'POST' and resource == 'items':
             order_id = body.get('order_id')
+            if allowed_city and order_city(order_id) != allowed_city:
+                return forbidden
             cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ITEMS_TABLE} WHERE order_id = %s', (order_id,))
             sort_order = cur.fetchone()[0]
             insert_item(cur, order_id, body, sort_order)
@@ -198,6 +235,8 @@ def handler(event: dict, context) -> dict:
             order_id = body.get('id')
             if not order_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
+            if allowed_city and (order_city(order_id) != allowed_city or body.get('city', allowed_city) != allowed_city):
+                return forbidden
             updates = []
             values = []
             for f in ORDER_FIELDS:
@@ -223,6 +262,8 @@ def handler(event: dict, context) -> dict:
             item_id = body.get('id')
             if not item_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
+            if allowed_city and item_order_city(item_id) != allowed_city:
+                return forbidden
             updates = []
             values = []
             for f in ITEM_FIELDS:
@@ -244,6 +285,8 @@ def handler(event: dict, context) -> dict:
             order_id = body.get('id')
             if not order_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
+            if allowed_city and order_city(order_id) != allowed_city:
+                return forbidden
             cur.execute(f'DELETE FROM {ITEMS_TABLE} WHERE order_id = %s', (order_id,))
             cur.execute(f'DELETE FROM {ORDERS_TABLE} WHERE id = %s', (order_id,))
             conn.commit()
@@ -257,6 +300,8 @@ def handler(event: dict, context) -> dict:
             item_id = body.get('id')
             if not item_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
+            if allowed_city and item_order_city(item_id) != allowed_city:
+                return forbidden
             cur.execute(f'DELETE FROM {ITEMS_TABLE} WHERE id = %s', (item_id,))
             conn.commit()
             return {

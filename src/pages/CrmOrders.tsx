@@ -725,10 +725,16 @@ function LoginScreen({ onLogin }: { onLogin: (role: string) => void }) {
   );
 }
 
-function CrmBoard() {
+const ROLE_CITY: Record<string, City> = {
+  tyumen: "Тюмень",
+};
+
+function CrmBoard({ role }: { role: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [components, setComponents] = useState<Components | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const visibleCities = ROLE_CITY[role] ? [ROLE_CITY[role]] : CITIES;
 
   const load = () => {
     fetch(`${ORDERS_URL}?resource=orders&status=active`, { headers: authHeaders() })
@@ -768,7 +774,7 @@ function CrmBoard() {
         <div className="text-muted-foreground text-sm py-10 text-center">Загрузка...</div>
       ) : (
         <div className="flex flex-col gap-10">
-          {CITIES.map((city) => (
+          {visibleCities.map((city) => (
             <CityColumn key={city} city={city} orders={orders} components={components} onRefresh={load} />
           ))}
         </div>
@@ -779,7 +785,8 @@ function CrmBoard() {
 
 export default function CrmOrders() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem(AUTH_KEY) === "1");
+  const [role, setRole] = useState(() => sessionStorage.getItem(ROLE_KEY) || "admin");
 
-  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
-  return <CrmBoard />;
+  if (!authed) return <LoginScreen onLogin={(r) => { setRole(r); setAuthed(true); }} />;
+  return <CrmBoard role={role} />;
 }
