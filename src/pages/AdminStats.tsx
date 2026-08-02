@@ -274,7 +274,7 @@ function ProductForm({
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Цена (₽)</label>
-          <input type="number" value={form.price} onChange={e => set("price", Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <input type="number" value={form.price === 0 ? "" : form.price} onChange={e => set("price", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">FPS (например 240+ FPS)</label>
