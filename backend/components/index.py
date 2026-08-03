@@ -118,6 +118,7 @@ def handler(event: dict, context) -> dict:
                     name=name, price=price,
                 )
             new_id = row[0][0]
+            con.run('COMMIT')
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
@@ -140,6 +141,7 @@ def handler(event: dict, context) -> dict:
             if not updates:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'Нет полей для обновления'})}
             con.run(f'UPDATE {table} SET {", ".join(updates)} WHERE id = :id', **params)
+            con.run('COMMIT')
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
@@ -151,6 +153,7 @@ def handler(event: dict, context) -> dict:
             if not item_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
             con.run(f'UPDATE {table} SET active = false WHERE id = :id', id=item_id)
+            con.run('COMMIT')
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
