@@ -15,6 +15,61 @@ CATEGORIES = {
     'case': 'components_case',
 }
 
+PRODUCTS_TABLE = 't_p288352_240fps_site_project.products'
+
+LINK_FIELD = {
+    'cpu': 'cpu_id',
+    'gpu': 'gpu_id',
+    'ram': 'ram_id',
+    'ssd': 'ssd_id',
+    'motherboard': 'motherboard_id',
+    'cooler': 'cooler_id',
+    'psu': 'psu_id',
+    'case': 'case_id',
+}
+
+COMPONENT_TABLE_BY_LINK = {
+    'cpu_id': 'components_cpu',
+    'gpu_id': 'components_gpu',
+    'ram_id': 'components_ram',
+    'ssd_id': 'components_ssd',
+    'motherboard_id': 'components_motherboard',
+    'cooler_id': 'components_cooler',
+    'psu_id': 'components_psu',
+    'case_id': 'components_case',
+}
+
+
+def recalc_products_using(cur, category: str, component_id: int):
+    """Пересчитывает цену всех сборок в каталоге, которые используют изменённую комплектующую и считают цену автоматически."""
+    link_field = LINK_FIELD.get(category)
+    if not link_field:
+        return
+    cur.execute(
+        f'SELECT id, cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, markup '
+        f'FROM {PRODUCTS_TABLE} WHERE auto_price = true AND {link_field} = %s',
+        (component_id,),
+    )
+    products = cur.fetchall()
+    if not products:
+        return
+    link_fields = ['cpu_id', 'gpu_id', 'ram_id', 'ssd_id', 'motherboard_id', 'cooler_id', 'psu_id', 'case_id']
+    for row in products:
+        product_id = row[0]
+        links = dict(zip(link_fields, row[1:9]))
+        markup = row[9] or 0
+        total = 0
+        for field, comp_id in links.items():
+            if not comp_id:
+                continue
+            comp_table = f"t_p288352_240fps_site_project.{COMPONENT_TABLE_BY_LINK[field]}"
+            cur.execute(f'SELECT price FROM {comp_table} WHERE id = %s', (comp_id,))
+            comp_row = cur.fetchone()
+            if comp_row:
+                total += comp_row[0]
+        new_price = total + markup
+        cur.execute(f'UPDATE {PRODUCTS_TABLE} SET price = %s, updated_at = NOW() WHERE id = %s', (new_price, product_id))
+
 
 def check_password(event: dict) -> bool:
     headers = event.get('headers', {}) or {}
@@ -134,6 +189,8 @@ def handler(event: dict, context) -> dict:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'Нет полей для обновления'})}
             values.append(item_id)
             cur.execute(f'UPDATE {table} SET {", ".join(updates)} WHERE id = %s', values)
+            if 'price' in body:
+                recalc_products_using(cur, category, item_id)
             conn.commit()
             return {
                 'statusCode': 200,

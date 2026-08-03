@@ -32,126 +32,122 @@ export const LABELS: Record<SelectKey, { label: string; icon: string }> = {
 
 export const STEPS: SelectKey[] = ['cpu', 'motherboard', 'ram', 'gpu', 'ssd', 'cooler', 'psu', 'case'];
 
-// Фильтры совместимости по имени компонента
-const CPU_LGA1700 = ['i5 12400F', 'i5 14400F', 'i5 14600KF', 'i7 14700KF', 'i5 12400'];
-const CPU_LGA1851 = ['Ultra 5 245KF', 'Ultra 7 265KF', 'Ultra 9 285K'];
-const CPU_AM4     = ['Ryzen 5 5500', 'Ryzen 5 5500X3D', 'Ryzen 5 5600', 'Ryzen 7 5700', 'Ryzen 7 5700X'];
-const CPU_AM5     = ['Ryzen 5 7500F', 'Ryzen 7 7700', 'Ryzen 7 7800X3D', 'Ryzen 7 9800X3D', 'Ryzen 9 9950X', 'Ryzen 5 9600X'];
+// Фильтры совместимости по ID компонента (id стабилен, в отличие от названия, которое можно менять)
+const CPU_LGA1700 = [1, 2, 3, 4, 18];
+const CPU_LGA1851 = [11, 12, 14];
+const CPU_AM4     = [5, 19, 6, 15, 13];
+const CPU_AM5     = [7, 8, 9, 10, 16, 17];
 
-const MB_LGA1700  = ['H610M', 'B660m D4', 'B760m D4', 'Z790'];
-const MB_LGA1851  = ['B860M', 'Z890M'];
-const MB_AM4      = ['A520M', 'B550M'];
-const MB_AM5      = ['A620M', 'B650M', 'B650M WiFi', 'B850M', 'B850M WiFi', 'MSI B850 ATX'];
+const MB_LGA1700  = [9, 14, 15, 13];
+const MB_LGA1851  = [8, 12];
+const MB_AM4      = [1, 3];
+const MB_AM5      = [2, 7, 4, 6, 5, 10];
 
-const RAM_DDR4     = ['DDR4 16GB 3200', 'DDR4 32GB 3200'];
-const RAM_DDR5     = ['DDR5 16GB ', 'DDR5 32GB ', 'DDR5 32GB a-dai', 'DDR5 64GB '];
+const RAM_DDR4     = [1, 2];
+const RAM_DDR5     = [4, 6, 7, 9];
 const RAM_DDR4_DDR5 = [...RAM_DDR4, ...RAM_DDR5];
 
 // Процессоры, для которых обязательно СЖО (мощное тепловыделение, воздух не предлагаем)
-const CPU_LIQUID_REQUIRED = [
-  'Ryzen 7 7800X3D',
-  'Ryzen 7 9800X3D',
-  'Ryzen 9 9950X',
-  'i5 14600KF',
-  'i7 14700KF',
-  'Ultra 7 265KF',
-  'Ultra 9 285K',
-];
+const CPU_LIQUID_REQUIRED = [9, 10, 16, 3, 4, 12, 14];
 
 // Воздушные системы охлаждения, недоступные для процессоров из CPU_LIQUID_REQUIRED
-const AIR_COOLERS = ['SE-224 B', 'SE-224 W'];
+const AIR_COOLERS = [1, 2, 5];
 
-export function filterCoolerByCpu(coolers: Part[], cpuName?: string): Part[] {
-  if (cpuName && CPU_LIQUID_REQUIRED.includes(cpuName)) {
-    const filtered = coolers.filter((c) => !AIR_COOLERS.includes(c.name));
+export function filterCoolerByCpu(coolers: Part[], cpuId?: number): Part[] {
+  if (cpuId && CPU_LIQUID_REQUIRED.includes(cpuId)) {
+    const filtered = coolers.filter((c) => !AIR_COOLERS.includes(c.id));
     return filtered.length ? filtered : coolers;
   }
   return coolers;
 }
 
-// Шкала "мощности" блоков питания — от слабого к мощному
-const PSU_TIER: Record<string, number> = {
-  '550W': 1,
-  '650W': 2,
-  '650W ATX 3.1': 3,
-  '750W ATX 3.1': 4,
-  '850W ATX 3.1': 5,
-  'NGDP 850W': 6,
-  'NGDP 1000W': 7,
+// Шкала "мощности" блоков питания — от слабого к мощному (по id)
+const PSU_TIER: Record<number, number> = {
+  1: 1, // 550W
+  2: 2, // 650W
+  3: 3, // 650W ATX 3.1
+  4: 4, // 750W ATX 3.1
+  5: 5, // 850W ATX 3.1
+  6: 6, // NGDP 850W
+  7: 7, // NGDP 1000W
 };
 
-// Минимально допустимый БП для каждой видеокарты
-const GPU_MIN_PSU_TIER: Record<string, number> = {
-  'GTX 1660 Super': 1,
-  'RTX 5050': 1,
-  'RTX 5060': 2,
-  'RTX 5060 Ti 8Gb': 2,
-  'RTX 5060 Ti 16Gb': 2,
-  'RTX 5070': 3,
-  'RTX 5070 Ti': 5,
-  'RTX 5080': 6,
-  'RX 9070XT': 5,
+// Минимально допустимый БП для каждой видеокарты (по id)
+const GPU_MIN_PSU_TIER: Record<number, number> = {
+  9: 1, // GTX 1660 Super
+  1: 1, // RTX 5050
+  2: 2, // RTX 5060
+  4: 2, // RTX 5060 Ti 8Gb
+  3: 2, // RTX 5060 Ti 16Gb
+  5: 3, // RTX 5070
+  6: 5, // RTX 5070 Ti
+  7: 6, // RTX 5080
+  8: 5, // RX 9070XT
 };
 
-export const CASE_DEFAULT_NAME = 'Черный аквариум на выбор';
+export const CASE_DEFAULT_ID = 2; // "Черный аквариум на выбор"
 
-// Материнские платы, недопустимые для конкретных мощных процессоров (слабые VRM)
-const MB_EXCLUDED_BY_CPU: Record<string, string[]> = {
-  'Ryzen 7 7800X3D': ['A620M'],
-  'Ryzen 7 9800X3D': ['A620M'],
-  'Ryzen 9 9950X': ['A620M'],
-  'i5 14600KF': ['H610M'],
-  'i7 14700KF': ['H610M'],
+// Материнские платы, недопустимые для конкретных мощных процессоров (слабые VRM), по id
+const MB_EXCLUDED_BY_CPU: Record<number, number[]> = {
+  9: [2],  // Ryzen 7 7800X3D -> A620M
+  10: [2], // Ryzen 7 9800X3D -> A620M
+  16: [2], // Ryzen 9 9950X -> A620M
+  3: [9],  // i5 14600KF -> H610M
+  4: [9],  // i7 14700KF -> H610M
 };
 
-export function filterMotherboardByCpu(mobos: Part[], cpuName?: string): Part[] {
-  const excluded = cpuName ? MB_EXCLUDED_BY_CPU[cpuName] : undefined;
+export function filterMotherboardByCpu(mobos: Part[], cpuId?: number): Part[] {
+  const excluded = cpuId ? MB_EXCLUDED_BY_CPU[cpuId] : undefined;
   if (excluded) {
-    const filtered = mobos.filter((m) => !excluded.includes(m.name));
+    const filtered = mobos.filter((m) => !excluded.includes(m.id));
     return filtered.length ? filtered : mobos;
   }
   return mobos;
 }
 
-function minPsuTierFor(gpuName?: string): number {
-  if (!gpuName) return 0;
-  return GPU_MIN_PSU_TIER[gpuName] ?? 0;
+function minPsuTierFor(gpuId?: number): number {
+  if (!gpuId) return 0;
+  return GPU_MIN_PSU_TIER[gpuId] ?? 0;
 }
 
-export function filterPsuByGpu(psus: Part[], gpuName?: string): Part[] {
-  const minTier = minPsuTierFor(gpuName);
+export function filterPsuByGpu(psus: Part[], gpuId?: number): Part[] {
+  const minTier = minPsuTierFor(gpuId);
   if (!minTier) return psus;
-  const filtered = psus.filter((p) => (PSU_TIER[p.name] ?? 0) >= minTier);
+  const filtered = psus.filter((p) => (PSU_TIER[p.id] ?? 0) >= minTier);
   return filtered.length ? filtered : psus;
 }
 
-export function defaultCoolerFor(cpuName: string | undefined, coolers: Part[]): Part | undefined {
+// Охладители СЖО и воздушные, определяемые по id (не зависят от названия)
+const LIQUID_COOLER_IDS = [3, 4];
+const DEFAULT_AIR_COOLER_IDS = [1, 2, 5];
+
+export function defaultCoolerFor(cpuId: number | undefined, coolers: Part[]): Part | undefined {
   if (!coolers.length) return undefined;
-  if (cpuName && CPU_LIQUID_REQUIRED.includes(cpuName)) {
-    return coolers.find((c) => c.name.includes('СЖО')) ?? cheapestOf(coolers);
+  if (cpuId && CPU_LIQUID_REQUIRED.includes(cpuId)) {
+    return coolers.find((c) => LIQUID_COOLER_IDS.includes(c.id)) ?? cheapestOf(coolers);
   }
-  return coolers.find((c) => c.name.startsWith('SE-224')) ?? cheapestOf(coolers);
+  return coolers.find((c) => DEFAULT_AIR_COOLER_IDS.includes(c.id)) ?? cheapestOf(coolers);
 }
 
-function filterByNames(parts: Part[], names: string[]): Part[] {
-  return parts.filter((p) => names.includes(p.name));
+function filterByIds(parts: Part[], ids: number[]): Part[] {
+  return parts.filter((p) => ids.includes(p.id));
 }
 
-export const PLATFORM_INFO: Record<Platform, { label: string; moboNames: string[]; ramNames: string[]; cpuNames: string[] }> = {
-  lga1700: { label: 'Intel LGA1700 (DDR4/DDR5)', moboNames: MB_LGA1700, ramNames: RAM_DDR4_DDR5, cpuNames: CPU_LGA1700 },
-  lga1851: { label: 'Intel LGA1851 (DDR5)',       moboNames: MB_LGA1851, ramNames: RAM_DDR5,      cpuNames: CPU_LGA1851 },
-  am4:     { label: 'AMD AM4 (DDR4)',             moboNames: MB_AM4,     ramNames: RAM_DDR4,      cpuNames: CPU_AM4     },
-  am5:     { label: 'AMD AM5 (DDR5)',             moboNames: MB_AM5,     ramNames: RAM_DDR5,      cpuNames: CPU_AM5     },
+export const PLATFORM_INFO: Record<Platform, { label: string; moboIds: number[]; ramIds: number[]; cpuIds: number[] }> = {
+  lga1700: { label: 'Intel LGA1700 (DDR4/DDR5)', moboIds: MB_LGA1700, ramIds: RAM_DDR4_DDR5, cpuIds: CPU_LGA1700 },
+  lga1851: { label: 'Intel LGA1851 (DDR5)',       moboIds: MB_LGA1851, ramIds: RAM_DDR5,      cpuIds: CPU_LGA1851 },
+  am4:     { label: 'AMD AM4 (DDR4)',             moboIds: MB_AM4,     ramIds: RAM_DDR4,      cpuIds: CPU_AM4     },
+  am5:     { label: 'AMD AM5 (DDR5)',             moboIds: MB_AM5,     ramIds: RAM_DDR5,      cpuIds: CPU_AM5     },
 };
 
-// Комплектующие, которые не должны подставляться по умолчанию (доступны только для ручного выбора)
-const DEFAULT_EXCLUDED: Partial<Record<SelectKey, string[]>> = {
-  gpu: ['GTX 1660 Super'],
+// Комплектующие, которые не должны подставляться по умолчанию (доступны только для ручного выбора), по id
+const DEFAULT_EXCLUDED: Partial<Record<SelectKey, number[]>> = {
+  gpu: [9], // GTX 1660 Super
 };
 
 export function cheapestOf(parts: Part[], key?: SelectKey): Part | undefined {
   const excluded = key ? DEFAULT_EXCLUDED[key] : undefined;
-  const candidates = excluded ? parts.filter((p) => !excluded.includes(p.name)) : parts;
+  const candidates = excluded ? parts.filter((p) => !excluded.includes(p.id)) : parts;
   const pool = candidates.length ? candidates : parts;
   return pool.length ? pool.reduce((min, p) => (p.price < min.price ? p : min), pool[0]) : undefined;
 }
@@ -165,11 +161,11 @@ export function filteredPartsFor(
   if (!comps || !plat) return [];
   const info = PLATFORM_INFO[plat];
   const all = comps[key];
-  if (key === 'cpu')         return filterByNames(all, info.cpuNames);
-  if (key === 'motherboard') return filterMotherboardByCpu(filterByNames(all, info.moboNames), selected?.cpu?.name);
-  if (key === 'ram')         return filterByNames(all, info.ramNames);
-  if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.name);
-  if (key === 'cooler')      return filterCoolerByCpu(all, selected?.cpu?.name);
+  if (key === 'cpu')         return filterByIds(all, info.cpuIds);
+  if (key === 'motherboard') return filterMotherboardByCpu(filterByIds(all, info.moboIds), selected?.cpu?.id);
+  if (key === 'ram')         return filterByIds(all, info.ramIds);
+  if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.id);
+  if (key === 'cooler')      return filterCoolerByCpu(all, selected?.cpu?.id);
   return all;
 }
 
@@ -189,15 +185,15 @@ export function autoSelectForPlatform(p: Platform, components: Components | null
     if (cheapest) auto[key] = cheapest;
   });
   if (components) {
-    const validMobos = filterMotherboardByCpu(filteredPartsFor('motherboard', p, components), auto.cpu?.name);
+    const validMobos = filterMotherboardByCpu(filteredPartsFor('motherboard', p, components), auto.cpu?.id);
     const mobo = cheapestOf(validMobos);
     if (mobo) auto.motherboard = mobo;
-    const cooler = defaultCoolerFor(auto.cpu?.name, components.cooler);
+    const cooler = defaultCoolerFor(auto.cpu?.id, components.cooler);
     if (cooler) auto.cooler = cooler;
-    const validPsus = filterPsuByGpu(components.psu, auto.gpu?.name);
+    const validPsus = filterPsuByGpu(components.psu, auto.gpu?.id);
     const psu = cheapestOf(validPsus);
     if (psu) auto.psu = psu;
-    const defaultCase = components.case.find((c) => c.name === CASE_DEFAULT_NAME) ?? cheapestOf(components.case, 'case');
+    const defaultCase = components.case.find((c) => c.id === CASE_DEFAULT_ID) ?? cheapestOf(components.case, 'case');
     if (defaultCase) auto.case = defaultCase;
   }
   return auto;

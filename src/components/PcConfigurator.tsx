@@ -64,13 +64,13 @@ export default function PcConfigurator({
       }
 
       if (category === 'cpu') {
-        const validCoolers = filterCoolerByCpu(components.cooler, next.cpu?.name);
+        const validCoolers = filterCoolerByCpu(components.cooler, next.cpu?.id);
         if (!next.cooler || !validCoolers.some((c) => c.id === next.cooler!.id)) {
-          next.cooler = defaultCoolerFor(next.cpu?.name, components.cooler);
+          next.cooler = defaultCoolerFor(next.cpu?.id, components.cooler);
         }
         const validMobos = filterMotherboardByCpu(
           filteredPartsFor('motherboard', platform, components),
-          next.cpu?.name,
+          next.cpu?.id,
         );
         if (!next.motherboard || !validMobos.some((m) => m.id === next.motherboard!.id)) {
           next.motherboard = cheapestOf(validMobos);
@@ -78,7 +78,7 @@ export default function PcConfigurator({
       }
 
       if (category === 'gpu') {
-        const validPsus = filterPsuByGpu(components.psu, next.gpu?.name);
+        const validPsus = filterPsuByGpu(components.psu, next.gpu?.id);
         if (!next.psu || !validPsus.some((p) => p.id === next.psu!.id)) {
           next.psu = cheapestOf(validPsus);
         }
