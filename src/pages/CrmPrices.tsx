@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Components, SelectKey, Part, COMPONENTS_API_URL, LABELS, STEPS } from "@/lib/pcParts";
 
 const AUTH_KEY = "admin_authed";
@@ -94,15 +104,23 @@ function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () 
 function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: SelectKey; components: Components; onChanged: () => void }) {
   const info = LABELS[categoryKey];
   const parts = components[categoryKey];
+  const [pendingDelete, setPendingDelete] = useState<Part | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const remove = async (id: number) => {
-    if (!confirm("Удалить позицию из справочника?")) return;
-    await fetch(COMPONENTS_API_URL, {
-      method: "DELETE",
-      headers: authHeaders(),
-      body: JSON.stringify({ category: categoryKey, id }),
-    });
-    onChanged();
+  const confirmRemove = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "DELETE",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, id: pendingDelete.id }),
+      });
+      onChanged();
+    } finally {
+      setDeleting(false);
+      setPendingDelete(null);
+    }
   };
 
   return (
@@ -126,7 +144,7 @@ function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: Sel
                 <td className="p-1.5 pr-3">
                   <div className="flex items-center gap-2 justify-end">
                     <PriceCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
-                    <button onClick={() => remove(p.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                    <button onClick={() => setPendingDelete(p)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
                       <Icon name="Trash2" size={16} />
                     </button>
                   </div>
@@ -137,6 +155,23 @@ function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: Sel
           </tbody>
         </table>
       </div>
+
+      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => { if (!open) setPendingDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить позицию?</AlertDialogTitle>
+            <AlertDialogDescription>
+              «{pendingDelete?.name}» будет удалена из справочника. Это действие нельзя отменить.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Отмена</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemove} disabled={deleting}>
+              {deleting ? "Удаление..." : "Удалить"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
