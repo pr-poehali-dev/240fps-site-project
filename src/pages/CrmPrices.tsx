@@ -181,7 +181,7 @@ function PricesBoard() {
   const [loading, setLoading] = useState(true);
 
   const load = () => {
-    fetch(`${COMPONENTS_API_URL}?all=1`, { headers: authHeaders() })
+    fetch(COMPONENTS_API_URL)
       .then((r) => r.json())
       .then(setComponents)
       .finally(() => setLoading(false));
