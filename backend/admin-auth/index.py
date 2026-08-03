@@ -27,6 +27,11 @@ def handler(event: dict, context) -> dict:
             'role': 'admin',
         },
         {
+            'login': os.environ.get('ADMIN2_LOGIN', ''),
+            'password': os.environ.get('ADMIN2_PASSWORD', ''),
+            'role': 'admin',
+        },
+        {
             'login': os.environ.get('CATALOG_LOGIN', ''),
             'password': os.environ.get('CATALOG_PASSWORD', ''),
             'role': 'catalog',
