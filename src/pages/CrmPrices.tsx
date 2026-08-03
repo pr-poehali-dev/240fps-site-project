@@ -62,6 +62,43 @@ function PriceCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: Se
   );
 }
 
+function NameCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: SelectKey; onSaved: () => void }) {
+  const [value, setValue] = useState(part.name);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => setValue(part.name), [part.name]);
+
+  const commit = async () => {
+    const name = value.trim();
+    if (!name || name === part.name) {
+      setValue(part.name);
+      return;
+    }
+    setSaving(true);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, id: part.id, name }),
+      });
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Input
+      value={value}
+      disabled={saving}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      className="h-8 text-base border-transparent bg-transparent hover:border-border focus:border-primary px-2 -ml-2"
+    />
+  );
+}
+
 function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () => void }) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -140,7 +177,9 @@ function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: Sel
             )}
             {parts.map((p, i) => (
               <tr key={p.id} className={i % 2 === 0 ? "" : "bg-muted/20"}>
-                <td className="p-1.5 pl-3 break-words">{p.name}</td>
+                <td className="p-1.5 pl-3">
+                  <NameCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
+                </td>
                 <td className="p-1.5 pr-3">
                   <div className="flex items-center gap-2 justify-end">
                     <PriceCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
