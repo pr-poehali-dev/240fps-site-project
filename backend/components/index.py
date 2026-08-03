@@ -1,8 +1,7 @@
 import json
 import os
 import hmac
-import urllib.parse
-import pg8000.native
+import psycopg2
 
 
 CATEGORIES = {
@@ -24,30 +23,18 @@ def check_password(event: dict) -> bool:
     return any(p and hmac.compare_digest(password, p) for p in valid_passwords)
 
 
-def get_connection():
-    dsn = os.environ['DATABASE_URL']
-    p = urllib.parse.urlparse(dsn)
-    return pg8000.native.Connection(
-        user=p.username,
-        password=p.password,
-        host=p.hostname,
-        port=p.port or 5432,
-        database=p.path.lstrip('/'),
-    )
-
-
-def fetch_all(con, include_inactive: bool):
+def fetch_all(cur, include_inactive: bool):
     result = {}
     for key, table in CATEGORIES.items():
         where = '' if include_inactive else 'WHERE active = true'
         if key == 'case':
-            rows = con.run(f'SELECT id, name, price, image_url, brand, color, active FROM {table} {where} ORDER BY price')
+            cur.execute(f'SELECT id, name, price, image_url, brand, color, active FROM {table} {where} ORDER BY price')
+            rows = cur.fetchall()
             case_ids = [r[0] for r in rows]
             gallery_map = {}
             if case_ids:
-                ids_str = ','.join(str(i) for i in case_ids)
-                gallery_rows = con.run(f'SELECT case_id, image_url FROM components_case_images WHERE case_id IN ({ids_str}) ORDER BY case_id, sort_order')
-                for cid, img in gallery_rows:
+                cur.execute('SELECT case_id, image_url FROM components_case_images WHERE case_id = ANY(%s) ORDER BY case_id, sort_order', (case_ids,))
+                for cid, img in cur.fetchall():
                     gallery_map.setdefault(cid, []).append(img)
             result[key] = [
                 {
@@ -57,8 +44,8 @@ def fetch_all(con, include_inactive: bool):
                 for r in rows
             ]
         else:
-            rows = con.run(f'SELECT id, name, price, active FROM {table} {where} ORDER BY price')
-            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3]} for r in rows]
+            cur.execute(f'SELECT id, name, price, active FROM {table} {where} ORDER BY price')
+            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3]} for r in cur.fetchall()]
     return result
 
 
@@ -76,12 +63,16 @@ def handler(event: dict, context) -> dict:
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': cors, 'body': ''}
 
+    dsn = os.environ['DATABASE_URL']
+
     if method == 'GET':
         params = event.get('queryStringParameters') or {}
         include_inactive = params.get('all') == '1' and check_password(event)
-        con = get_connection()
-        result = fetch_all(con, include_inactive)
-        con.close()
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor()
+        result = fetch_all(cur, include_inactive)
+        cur.close()
+        conn.close()
         return {
             'statusCode': 200,
             'headers': {**cors, 'Content-Type': 'application/json'},
@@ -101,24 +92,25 @@ def handler(event: dict, context) -> dict:
         return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'Неизвестная категория'})}
     table = CATEGORIES[category]
 
-    con = get_connection()
+    conn = psycopg2.connect(dsn)
+    cur = conn.cursor()
 
     try:
         if method == 'POST':
             name = body.get('name', '')
             price = body.get('price', 0)
             if category == 'case':
-                row = con.run(
-                    f'INSERT INTO {table} (name, price, image_url, brand, color, active) VALUES (:name, :price, :image, :brand, :color, true) RETURNING id',
-                    name=name, price=price, image=body.get('image'), brand=body.get('brand'), color=body.get('color'),
+                cur.execute(
+                    f'INSERT INTO {table} (name, price, image_url, brand, color, active) VALUES (%s, %s, %s, %s, %s, true) RETURNING id',
+                    (name, price, body.get('image'), body.get('brand'), body.get('color')),
                 )
             else:
-                row = con.run(
-                    f'INSERT INTO {table} (name, price, active) VALUES (:name, :price, true) RETURNING id',
-                    name=name, price=price,
+                cur.execute(
+                    f'INSERT INTO {table} (name, price, active) VALUES (%s, %s, true) RETURNING id',
+                    (name, price),
                 )
-            new_id = row[0][0]
-            con.run('COMMIT')
+            new_id = cur.fetchone()[0]
+            conn.commit()
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
@@ -132,16 +124,17 @@ def handler(event: dict, context) -> dict:
             fields = ['name', 'price', 'active'] + (['image_url', 'brand', 'color'] if category == 'case' else [])
             body_keys = {'image_url': 'image'}
             updates = []
-            params = {'id': item_id}
+            values = []
             for f in fields:
                 src_key = body_keys.get(f, f)
                 if src_key in body:
-                    updates.append(f'{f} = :{f}')
-                    params[f] = body[src_key]
+                    updates.append(f'{f} = %s')
+                    values.append(body[src_key])
             if not updates:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'Нет полей для обновления'})}
-            con.run(f'UPDATE {table} SET {", ".join(updates)} WHERE id = :id', **params)
-            con.run('COMMIT')
+            values.append(item_id)
+            cur.execute(f'UPDATE {table} SET {", ".join(updates)} WHERE id = %s', values)
+            conn.commit()
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
@@ -152,8 +145,8 @@ def handler(event: dict, context) -> dict:
             item_id = body.get('id')
             if not item_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
-            con.run(f'UPDATE {table} SET active = false WHERE id = :id', id=item_id)
-            con.run('COMMIT')
+            cur.execute(f'UPDATE {table} SET active = false WHERE id = %s', (item_id,))
+            conn.commit()
             return {
                 'statusCode': 200,
                 'headers': {**cors, 'Content-Type': 'application/json'},
@@ -166,4 +159,5 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'error': 'Метод не поддерживается'}),
         }
     finally:
-        con.close()
+        cur.close()
+        conn.close()
