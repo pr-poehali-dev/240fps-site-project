@@ -12,12 +12,12 @@ function CategoryCard({ categoryKey, components }: { categoryKey: SelectKey; com
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/40">
-        <Icon name={info.icon} size={16} className="text-primary shrink-0" />
-        <h2 className="font-semibold text-sm">{info.label}</h2>
-        <span className="text-xs text-muted-foreground ml-auto">{parts.length}</span>
+        <Icon name={info.icon} size={20} className="text-primary shrink-0" />
+        <h2 className="font-semibold text-[1.3125rem]">{info.label}</h2>
+        <span className="text-lg text-muted-foreground ml-auto">{parts.length}</span>
       </div>
       <div className="overflow-y-auto max-h-[420px]">
-        <table className="w-full text-xs">
+        <table className="w-full text-lg">
           <tbody>
             {parts.length === 0 && (
               <tr>
