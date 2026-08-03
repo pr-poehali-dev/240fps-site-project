@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { Components, SelectKey, COMPONENTS_API_URL, fmt } from "@/lib/pcParts";
 
 const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b7407b194";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
@@ -108,6 +109,16 @@ interface ProductItem {
   imgs: string[] | null;
   active: boolean;
   sort_order: number;
+  cpu_id: number | null;
+  gpu_id: number | null;
+  ram_id: number | null;
+  ssd_id: number | null;
+  motherboard_id: number | null;
+  cooler_id: number | null;
+  psu_id: number | null;
+  case_id: number | null;
+  markup: number;
+  auto_price: boolean;
 }
 
 const EMPTY_PRODUCT: Omit<ProductItem, "id" | "img" | "imgs"> = {
@@ -123,6 +134,16 @@ const EMPTY_PRODUCT: Omit<ProductItem, "id" | "img" | "imgs"> = {
   tag: null,
   active: true,
   sort_order: 0,
+  cpu_id: null,
+  gpu_id: null,
+  ram_id: null,
+  ssd_id: null,
+  motherboard_id: null,
+  cooler_id: null,
+  psu_id: null,
+  case_id: null,
+  markup: 5000,
+  auto_price: true,
 };
 
 function authHeaders() {
@@ -154,23 +175,51 @@ function ProductForm({
     name: initial?.name ?? EMPTY_PRODUCT.name,
     brand: initial?.brand ?? EMPTY_PRODUCT.brand,
     cpu_brand: initial?.cpu_brand ?? EMPTY_PRODUCT.cpu_brand,
-    cpu: initial?.cpu ?? EMPTY_PRODUCT.cpu,
-    gpu: initial?.gpu ?? EMPTY_PRODUCT.gpu,
     ram: initial?.ram ?? EMPTY_PRODUCT.ram,
     storage: initial?.storage ?? EMPTY_PRODUCT.storage,
     price: initial?.price ?? EMPTY_PRODUCT.price,
     fps: initial?.fps ?? EMPTY_PRODUCT.fps,
     tag: initial?.tag ?? "",
+    cpu_id: initial?.cpu_id ?? null,
+    gpu_id: initial?.gpu_id ?? null,
+    ram_id: initial?.ram_id ?? null,
+    ssd_id: initial?.ssd_id ?? null,
+    motherboard_id: initial?.motherboard_id ?? null,
+    cooler_id: initial?.cooler_id ?? null,
+    psu_id: initial?.psu_id ?? null,
+    case_id: initial?.case_id ?? null,
+    markup: initial?.markup ?? EMPTY_PRODUCT.markup,
+    auto_price: initial?.auto_price ?? EMPTY_PRODUCT.auto_price,
   });
+  const [components, setComponents] = useState<Components | null>(null);
   const [existingImgs, setExistingImgs] = useState<string[]>(initial?.imgs?.length ? initial.imgs : (initial?.img ? [initial.img] : []));
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    fetch(COMPONENTS_API_URL)
+      .then(r => r.json())
+      .then(setComponents)
+      .catch(() => {});
+  }, []);
+
   const totalPhotos = existingImgs.length + newFiles.length;
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
+
+  const findPrice = (key: SelectKey, id: number | null): number => {
+    if (!id || !components) return 0;
+    return components[key].find(p => p.id === id)?.price ?? 0;
+  };
+
+  const previewPrice = form.auto_price
+    ? findPrice("cpu", form.cpu_id) + findPrice("gpu", form.gpu_id) + findPrice("ram", form.ram_id) +
+      findPrice("ssd", form.ssd_id) + findPrice("motherboard", form.motherboard_id) +
+      findPrice("cooler", form.cooler_id) + findPrice("psu", form.psu_id) + findPrice("case", form.case_id) +
+      (form.markup || 0)
+    : form.price;
 
   const addFiles = (files: FileList | null) => {
     if (!files) return;
@@ -245,7 +294,10 @@ function ProductForm({
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Процессор</label>
-          <input value={form.cpu} onChange={e => set("cpu", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <select value={form.cpu_id ?? ""} onChange={e => set("cpu_id", e.target.value ? Number(e.target.value) : null)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="">— выбрать —</option>
+            {components?.cpu.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Бренд процессора</label>
@@ -256,7 +308,10 @@ function ProductForm({
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Видеокарта</label>
-          <input value={form.gpu} onChange={e => set("gpu", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <select value={form.gpu_id ?? ""} onChange={e => set("gpu_id", e.target.value ? Number(e.target.value) : null)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="">— выбрать —</option>
+            {components?.gpu.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">Бренд видеокарты</label>
@@ -266,21 +321,96 @@ function ProductForm({
           </select>
         </div>
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Оперативная память (ГБ)</label>
-          <input type="number" value={form.ram === 0 ? "" : form.ram} onChange={e => set("ram", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <label className="text-xs text-muted-foreground mb-1 block">Оперативная память</label>
+          <select
+            value={form.ram_id ?? ""}
+            onChange={e => {
+              const id = e.target.value ? Number(e.target.value) : null;
+              set("ram_id", id);
+              const match = components?.ram.find(p => p.id === id)?.name.match(/(\d+)\s*GB/i);
+              if (match) set("ram", Number(match[1]));
+            }}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="">— выбрать —</option>
+            {components?.ram.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
         </div>
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">SSD (ГБ)</label>
-          <input type="number" value={form.storage === 0 ? "" : form.storage} onChange={e => set("storage", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <label className="text-xs text-muted-foreground mb-1 block">SSD</label>
+          <select
+            value={form.ssd_id ?? ""}
+            onChange={e => {
+              const id = e.target.value ? Number(e.target.value) : null;
+              set("ssd_id", id);
+              const name = components?.ssd.find(p => p.id === id)?.name || "";
+              const tb = name.match(/(\d+)\s*Tb/i);
+              const gb = name.match(/(\d+)\s*GB/i);
+              if (tb) set("storage", Number(tb[1]) * 1000);
+              else if (gb) set("storage", Number(gb[1]));
+            }}
+            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="">— выбрать —</option>
+            {components?.ssd.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
         </div>
         <div>
-          <label className="text-xs text-muted-foreground mb-1 block">Цена (₽)</label>
-          <input type="number" value={form.price === 0 ? "" : form.price} onChange={e => set("price", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          <label className="text-xs text-muted-foreground mb-1 block">Материнская плата</label>
+          <select value={form.motherboard_id ?? ""} onChange={e => set("motherboard_id", e.target.value ? Number(e.target.value) : null)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="">— выбрать —</option>
+            {components?.motherboard.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Охлаждение</label>
+          <select value={form.cooler_id ?? ""} onChange={e => set("cooler_id", e.target.value ? Number(e.target.value) : null)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="">— выбрать —</option>
+            {components?.cooler.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Блок питания</label>
+          <select value={form.psu_id ?? ""} onChange={e => set("psu_id", e.target.value ? Number(e.target.value) : null)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="">— выбрать —</option>
+            {components?.psu.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">Корпус</label>
+          <select value={form.case_id ?? ""} onChange={e => set("case_id", e.target.value ? Number(e.target.value) : null)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary">
+            <option value="">— выбрать —</option>
+            {components?.case.map(p => <option key={p.id} value={p.id}>{p.name} · {fmt(p.price)}</option>)}
+          </select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">FPS (например 240+ FPS)</label>
           <input value={form.fps} onChange={e => set("fps", e.target.value)} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
         </div>
+      </div>
+
+      <div className="bg-muted/40 border border-border rounded-lg p-4 space-y-3">
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="checkbox" checked={form.auto_price} onChange={e => set("auto_price", e.target.checked)} />
+          Считать цену автоматически из выбранных комплектующих
+        </label>
+        {form.auto_price ? (
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Наценка за сборку (₽, можно отрицательную)</label>
+              <input type="number" value={form.markup} onChange={e => set("markup", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+            </div>
+            <div>
+              <label className="text-xs text-muted-foreground mb-1 block">Итоговая цена</label>
+              <div className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm font-semibold text-primary">{fmt(previewPrice)}</div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Цена (₽)</label>
+            <input type="number" value={form.price === 0 ? "" : form.price} onChange={e => set("price", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+          </div>
+        )}
       </div>
 
       <div>

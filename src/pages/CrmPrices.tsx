@@ -1,13 +1,109 @@
 import { useEffect, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { Components, SelectKey, COMPONENTS_API_URL, LABELS, STEPS, fmt } from "@/lib/pcParts";
+import { Input } from "@/components/ui/input";
+import { Components, SelectKey, Part, COMPONENTS_API_URL, LABELS, STEPS } from "@/lib/pcParts";
 
 const AUTH_KEY = "admin_authed";
+const PWD_KEY = "admin_pwd";
 
-function CategoryCard({ categoryKey, components }: { categoryKey: SelectKey; components: Components }) {
+function authHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "X-Admin-Password": sessionStorage.getItem(PWD_KEY) || "",
+  };
+}
+
+function PriceCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: SelectKey; onSaved: () => void }) {
+  const [value, setValue] = useState(String(part.price));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => setValue(String(part.price)), [part.price]);
+
+  const commit = async () => {
+    const price = Number(value);
+    if (!Number.isFinite(price) || price === part.price) {
+      setValue(String(part.price));
+      return;
+    }
+    setSaving(true);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, id: part.id, price }),
+      });
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Input
+      type="number"
+      value={value}
+      disabled={saving}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      className="h-8 w-28 text-right text-base"
+    />
+  );
+}
+
+function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () => void }) {
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const add = async () => {
+    if (!name.trim() || !price) return;
+    setSaving(true);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, name: name.trim(), price: Number(price) }),
+      });
+      setName("");
+      setPrice("");
+      onAdded();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <tr className="border-t border-border">
+      <td className="p-1.5 pl-3">
+        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Название" className="h-8 text-base" />
+      </td>
+      <td className="p-1.5 pr-3">
+        <div className="flex items-center gap-2 justify-end">
+          <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Цена" className="h-8 w-24 text-right text-base" />
+          <button onClick={add} disabled={saving || !name.trim() || !price} className="text-primary hover:opacity-70 transition-opacity disabled:opacity-30 shrink-0">
+            <Icon name="Plus" size={20} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: SelectKey; components: Components; onChanged: () => void }) {
   const info = LABELS[categoryKey];
   const parts = components[categoryKey];
+
+  const remove = async (id: number) => {
+    if (!confirm("Удалить позицию из справочника?")) return;
+    await fetch(COMPONENTS_API_URL, {
+      method: "DELETE",
+      headers: authHeaders(),
+      body: JSON.stringify({ category: categoryKey, id }),
+    });
+    onChanged();
+  };
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
@@ -27,9 +123,17 @@ function CategoryCard({ categoryKey, components }: { categoryKey: SelectKey; com
             {parts.map((p, i) => (
               <tr key={p.id} className={i % 2 === 0 ? "" : "bg-muted/20"}>
                 <td className="p-1.5 pl-3 break-words">{p.name}</td>
-                <td className="p-1.5 pr-3 text-right font-medium whitespace-nowrap align-top">{fmt(p.price)}</td>
+                <td className="p-1.5 pr-3">
+                  <div className="flex items-center gap-2 justify-end">
+                    <PriceCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
+                    <button onClick={() => remove(p.id)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                      <Icon name="Trash2" size={16} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
+            <AddRow categoryKey={categoryKey} onAdded={onChanged} />
           </tbody>
         </table>
       </div>
@@ -41,12 +145,14 @@ function PricesBoard() {
   const [components, setComponents] = useState<Components | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(COMPONENTS_API_URL)
+  const load = () => {
+    fetch(`${COMPONENTS_API_URL}?all=1`, { headers: authHeaders() })
       .then((r) => r.json())
       .then(setComponents)
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
@@ -66,7 +172,7 @@ function PricesBoard() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {STEPS.map((key) => (
-            <CategoryCard key={key} categoryKey={key} components={components} />
+            <CategoryCard key={key} categoryKey={key} components={components} onChanged={load} />
           ))}
         </div>
       )}

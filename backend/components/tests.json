@@ -5,6 +5,18 @@
       "method": "GET",
       "path": "/",
       "expectedStatus": 200
+    },
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "POST without password should be unauthorized",
+      "method": "POST",
+      "path": "/",
+      "expectedStatus": 401
     }
   ]
 }

@@ -9,7 +9,25 @@ import boto3
 
 TABLE = 't_p288352_240fps_site_project.products'
 
-FIELDS = ['name', 'brand', 'cpu_brand', 'cpu', 'gpu', 'ram', 'storage', 'price', 'fps', 'tag', 'active', 'sort_order']
+FIELDS = ['name', 'brand', 'cpu_brand', 'ram', 'storage', 'fps', 'tag', 'active', 'sort_order', 'markup', 'auto_price']
+LINK_FIELDS = ['cpu_id', 'gpu_id', 'ram_id', 'ssd_id', 'motherboard_id', 'cooler_id', 'psu_id', 'case_id']
+
+COMPONENT_TABLES = {
+    'cpu_id': 't_p288352_240fps_site_project.components_cpu',
+    'gpu_id': 't_p288352_240fps_site_project.components_gpu',
+    'ram_id': 't_p288352_240fps_site_project.components_ram',
+    'ssd_id': 't_p288352_240fps_site_project.components_ssd',
+    'motherboard_id': 't_p288352_240fps_site_project.components_motherboard',
+    'cooler_id': 't_p288352_240fps_site_project.components_cooler',
+    'psu_id': 't_p288352_240fps_site_project.components_psu',
+    'case_id': 't_p288352_240fps_site_project.components_case',
+}
+
+SELECT_COLS = [
+    'id', 'name', 'brand', 'cpu_brand', 'cpu', 'gpu', 'ram', 'storage', 'price', 'fps', 'tag',
+    'img', 'imgs', 'active', 'sort_order', 'cpu_id', 'gpu_id', 'ram_id', 'ssd_id',
+    'motherboard_id', 'cooler_id', 'psu_id', 'case_id', 'markup', 'auto_price',
+]
 
 
 def row_to_dict(row, cols):
@@ -41,8 +59,37 @@ def upload_image(file_base64: str, content_type: str) -> str:
     return f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{file_key}"
 
 
+def compute_auto_price(cur, link_values: dict, markup: int):
+    """Считает цену из связанных комплектующих + наценка. link_values: {cpu_id: 5, ...}"""
+    total = 0
+    for field, comp_table in COMPONENT_TABLES.items():
+        comp_id = link_values.get(field)
+        if not comp_id:
+            continue
+        cur.execute(f'SELECT price FROM {comp_table} WHERE id = %s', (comp_id,))
+        row = cur.fetchone()
+        if row:
+            total += row[0]
+    return total + (markup or 0)
+
+
+def get_component_names(cur, link_values: dict):
+    """Возвращает {cpu_id_field: name} для проставления текстовых cpu/gpu полей."""
+    names = {}
+    for field in ('cpu_id', 'gpu_id'):
+        comp_id = link_values.get(field)
+        if not comp_id:
+            continue
+        table = COMPONENT_TABLES[field]
+        cur.execute(f'SELECT name FROM {table} WHERE id = %s', (comp_id,))
+        row = cur.fetchone()
+        if row:
+            names[field] = row[0]
+    return names
+
+
 def handler(event: dict, context) -> dict:
-    """Управление каталогом сборок ПК: список, создание, редактирование, удаление и загрузка фото."""
+    """Управление каталогом сборок ПК: список, создание, редактирование, удаление, загрузка фото и автопересчёт цены из связанных комплектующих."""
     cors = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -62,12 +109,12 @@ def handler(event: dict, context) -> dict:
         is_admin = check_password(event)
         conn = psycopg2.connect(dsn)
         cur = conn.cursor()
+        cols_str = ', '.join(SELECT_COLS)
         if is_admin and params.get('all') == '1':
-            cur.execute(f'SELECT id, name, brand, cpu_brand, cpu, gpu, ram, storage, price, fps, tag, img, imgs, active, sort_order FROM {TABLE} ORDER BY sort_order')
+            cur.execute(f'SELECT {cols_str} FROM {TABLE} ORDER BY sort_order')
         else:
-            cur.execute(f'SELECT id, name, brand, cpu_brand, cpu, gpu, ram, storage, price, fps, tag, img, imgs, active, sort_order FROM {TABLE} WHERE active = true ORDER BY sort_order')
-        cols = ['id', 'name', 'brand', 'cpu_brand', 'cpu', 'gpu', 'ram', 'storage', 'price', 'fps', 'tag', 'img', 'imgs', 'active', 'sort_order']
-        rows = [row_to_dict(r, cols) for r in cur.fetchall()]
+            cur.execute(f'SELECT {cols_str} FROM {TABLE} WHERE active = true ORDER BY sort_order')
+        rows = [row_to_dict(r, SELECT_COLS) for r in cur.fetchall()]
         cur.close()
         conn.close()
         return {
@@ -98,15 +145,27 @@ def handler(event: dict, context) -> dict:
 
         conn = psycopg2.connect(dsn)
         cur = conn.cursor()
+
+        link_values = {f: body.get(f) for f in LINK_FIELDS}
+        auto_price = body.get('auto_price', True)
+        markup = body.get('markup', 5000)
+        comp_names = get_component_names(cur, link_values)
+        price = compute_auto_price(cur, link_values, markup) if auto_price else body.get('price', 0)
+
         cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {TABLE}')
         sort_order = cur.fetchone()[0]
         cur.execute(
-            f'INSERT INTO {TABLE} (name, brand, cpu_brand, cpu, gpu, ram, storage, price, fps, tag, img, imgs, sort_order) '
-            f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
+            f'INSERT INTO {TABLE} (name, brand, cpu_brand, cpu, gpu, ram, storage, price, fps, tag, img, imgs, sort_order, '
+            f'cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, markup, auto_price) '
+            f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
             (
                 body.get('name', ''), body.get('brand', 'NVIDIA'), body.get('cpu_brand', 'Intel'),
-                body.get('cpu', ''), body.get('gpu', ''), body.get('ram', 16), body.get('storage', 500),
-                body.get('price', 0), body.get('fps', ''), body.get('tag'), img, imgs, sort_order,
+                comp_names.get('cpu_id', body.get('cpu', '')), comp_names.get('gpu_id', body.get('gpu', '')),
+                body.get('ram', 16), body.get('storage', 500),
+                price, body.get('fps', ''), body.get('tag'), img, imgs, sort_order,
+                link_values.get('cpu_id'), link_values.get('gpu_id'), link_values.get('ram_id'), link_values.get('ssd_id'),
+                link_values.get('motherboard_id'), link_values.get('cooler_id'), link_values.get('psu_id'), link_values.get('case_id'),
+                markup, auto_price,
             )
         )
         new_id = cur.fetchone()[0]
@@ -116,7 +175,7 @@ def handler(event: dict, context) -> dict:
         return {
             'statusCode': 200,
             'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': True, 'id': new_id, 'img': img, 'imgs': imgs}),
+            'body': json.dumps({'ok': True, 'id': new_id, 'img': img, 'imgs': imgs, 'price': price}),
         }
 
     if method == 'PUT':
@@ -128,12 +187,47 @@ def handler(event: dict, context) -> dict:
                 'body': json.dumps({'error': 'id обязателен'}),
             }
 
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor()
+
         updates = []
         values = []
         for f in FIELDS:
             if f in body:
                 updates.append(f'{f} = %s')
                 values.append(body[f])
+
+        link_touched = any(f in body for f in LINK_FIELDS)
+        if link_touched:
+            for f in LINK_FIELDS:
+                if f in body:
+                    updates.append(f'{f} = %s')
+                    values.append(body[f])
+
+        should_recalc = body.get('auto_price', True) and (link_touched or 'markup' in body)
+        if should_recalc:
+            cur.execute(f'SELECT cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, markup FROM {TABLE} WHERE id = %s', (product_id,))
+            row = cur.fetchone()
+            if row:
+                current_links = dict(zip(LINK_FIELDS, row[:8]))
+                current_markup = row[8]
+                for f in LINK_FIELDS:
+                    if f in body:
+                        current_links[f] = body[f]
+                markup = body.get('markup', current_markup)
+                new_price = compute_auto_price(cur, current_links, markup)
+                updates.append('price = %s')
+                values.append(new_price)
+                comp_names = get_component_names(cur, current_links)
+                if 'cpu_id' in comp_names:
+                    updates.append('cpu = %s')
+                    values.append(comp_names['cpu_id'])
+                if 'gpu_id' in comp_names:
+                    updates.append('gpu = %s')
+                    values.append(comp_names['gpu_id'])
+        elif 'price' in body:
+            updates.append('price = %s')
+            values.append(body['price'])
 
         final_imgs = None
 
@@ -161,6 +255,8 @@ def handler(event: dict, context) -> dict:
             values.append(body['img'])
 
         if not updates:
+            cur.close()
+            conn.close()
             return {
                 'statusCode': 400,
                 'headers': {**cors, 'Content-Type': 'application/json'},
@@ -170,8 +266,6 @@ def handler(event: dict, context) -> dict:
         updates.append('updated_at = NOW()')
         values.append(product_id)
 
-        conn = psycopg2.connect(dsn)
-        cur = conn.cursor()
         cur.execute(f'UPDATE {TABLE} SET {", ".join(updates)} WHERE id = %s', values)
         conn.commit()
         cur.close()
