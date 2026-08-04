@@ -352,7 +352,7 @@ const Index = () => {
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-600 glow-yellow" asChild>
                 <a href="#catalog"><Icon name="Cpu" size={18} /> Выбрать компьютер</a>
               </Button>
-              <Button size="lg" variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-600" asChild>
+              <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-600 glow-purple" asChild>
                 <a href="/calculator"><Icon name="Calculator" size={18} /> Собрать свой ПК</a>
               </Button>
             </div>
