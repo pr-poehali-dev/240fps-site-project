@@ -229,7 +229,6 @@ export default function CrmIssuedOrders() {
       "Заказчик": o.customer_name,
       "Телефон": o.customer_phone,
       "Дата выдачи": o.issued_at ? formatDate(o.issued_at) : "",
-      "Комплектующие": o.parts_cost_price,
       "Сборка": o.assembly_cost,
       "Итого": o.total_price,
       "Гарантийный номер": o.warranty_number || "",
