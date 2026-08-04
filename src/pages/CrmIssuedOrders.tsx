@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import Icon from "@/components/ui/icon";
@@ -209,7 +209,6 @@ export default function CrmIssuedOrders() {
   const totals = {
     count: filtered.length,
     revenue: filtered.reduce((sum, o) => sum + (o.total_price || 0), 0),
-    profit: filtered.reduce((sum, o) => sum + (o.total_price || 0) - (o.parts_cost_price || 0) - (o.assembly_cost || 0), 0),
   };
 
   const removeOrder = async (order: IssuedOrder) => {
@@ -282,7 +281,7 @@ export default function CrmIssuedOrders() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="text-xs text-muted-foreground mb-1">Выдано заказов</div>
           <div className="text-2xl font-bold">{totals.count}</div>
@@ -290,10 +289,6 @@ export default function CrmIssuedOrders() {
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="text-xs text-muted-foreground mb-1">Выручка</div>
           <div className="text-2xl font-bold">{fmt(totals.revenue)}</div>
-        </div>
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="text-xs text-muted-foreground mb-1">Прибыль (оценочно)</div>
-          <div className="text-2xl font-bold">{fmt(totals.profit)}</div>
         </div>
       </div>
 
