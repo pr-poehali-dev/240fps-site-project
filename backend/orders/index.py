@@ -17,6 +17,7 @@ def get_role(event: dict):
     password = headers.get('X-Admin-Password') or headers.get('x-admin-password') or ''
     accounts = [
         (os.environ.get('ADMIN_PASSWORD', ''), 'admin'),
+        (os.environ.get('ADMIN2_PASSWORD', ''), 'admin'),
         (os.environ.get('CATALOG_PASSWORD', ''), 'catalog'),
         (os.environ.get('TUMEN_PASSWORD', ''), 'tyumen'),
     ]
