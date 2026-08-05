@@ -164,6 +164,15 @@ function NewOrderDialog({
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+    fetch(`${ORDERS_URL}?resource=next_order_number&city=${encodeURIComponent(city)}`, { headers: authHeaders() })
+      .then((r) => r.json())
+      .then((data) => { if (data.order_number) setOrderNumber(data.order_number); })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, city]);
+
   const reset = () => {
     setName(""); setPhone(""); setFinalDate(null); setOrderNumber(CITY_PREFIX[city]); setComment("");
   };

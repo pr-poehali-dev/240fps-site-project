@@ -29,6 +29,21 @@ def get_role(event: dict):
 
 ROLE_CITY = {'tyumen': 'Тюмень'}
 
+CITY_ORDER_PREFIX = {'Омск': '100', 'Тюмень': '200', 'Краснодар': '300'}
+
+
+def next_order_number(cur, city):
+    prefix = CITY_ORDER_PREFIX.get(city)
+    if not prefix:
+        return None
+    cur.execute(f"SELECT order_number FROM {ORDERS_TABLE} WHERE city = %s AND order_number LIKE %s", (city, f'{prefix}-%'))
+    max_num = 0
+    for (order_number,) in cur.fetchall():
+        suffix = (order_number or '').split('-', 1)[-1]
+        if suffix.isdigit():
+            max_num = max(max_num, int(suffix))
+    return f'{prefix}-{max_num + 1:03d}'
+
 
 def order_to_dict(row):
     return {
@@ -134,6 +149,16 @@ def handler(event: dict, context) -> dict:
                 'body': json.dumps({'issued_reset_at': row[0] if row else None}),
             }
 
+        if method == 'GET' and resource == 'next_order_number':
+            city = params.get('city', '')
+            if allowed_city and city != allowed_city:
+                return forbidden
+            return {
+                'statusCode': 200,
+                'headers': {**cors, 'Content-Type': 'application/json'},
+                'body': json.dumps({'order_number': next_order_number(cur, city)}, ensure_ascii=False),
+            }
+
         if method == 'GET':
             status = params.get('status', 'active')
             query = f'SELECT id, city, customer_name, customer_phone, final_date, total_price, assembly_cost, status, sort_order, created_at, parts_cost_price, warranty_number, warranty_url, order_number, comment, issued_at ' \
@@ -194,15 +219,20 @@ def handler(event: dict, context) -> dict:
         if method == 'POST' and resource == 'orders':
             if allowed_city and body.get('city', '') != allowed_city:
                 return forbidden
-            cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ORDERS_TABLE} WHERE city = %s', (body.get('city', ''),))
+            city = body.get('city', '')
+            cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {ORDERS_TABLE} WHERE city = %s', (city,))
             sort_order = cur.fetchone()[0]
+            order_number = body.get('order_number')
+            prefix = CITY_ORDER_PREFIX.get(city)
+            if prefix and (not order_number or order_number.strip() in ('', prefix, f'{prefix}-')):
+                order_number = next_order_number(cur, city)
             cur.execute(
                 f'INSERT INTO {ORDERS_TABLE} (city, customer_name, customer_phone, final_date, total_price, assembly_cost, parts_cost_price, sort_order, order_number, comment) '
                 f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
                 (
-                    body.get('city', ''), body.get('customer_name', ''), body.get('customer_phone', ''),
+                    city, body.get('customer_name', ''), body.get('customer_phone', ''),
                     body.get('final_date'), body.get('total_price', 0), body.get('assembly_cost', 0),
-                    body.get('parts_cost_price', 0), sort_order, body.get('order_number'), body.get('comment', ''),
+                    body.get('parts_cost_price', 0), sort_order, order_number, body.get('comment', ''),
                 )
             )
             new_id = cur.fetchone()[0]
