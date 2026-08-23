@@ -36,7 +36,7 @@ export const STEPS: SelectKey[] = ['cpu', 'motherboard', 'ram', 'gpu', 'ssd', 'c
 const CPU_LGA1700 = [1, 2, 3, 4, 18];
 const CPU_LGA1851 = [11, 12, 14];
 const CPU_AM4     = [5, 19, 6, 15, 13];
-const CPU_AM5     = [7, 8, 9, 10, 16, 17];
+const CPU_AM5     = [7, 8, 9, 10, 16, 17, 20];
 
 const MB_LGA1700  = [9, 14, 15, 13];
 const MB_LGA1851  = [8, 12];
