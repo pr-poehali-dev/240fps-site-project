@@ -14,6 +14,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Components, SelectKey, Part, COMPONENTS_API_URL, LABELS, STEPS } from "@/lib/pcParts";
 
+const SOCKET_OPTIONS = [
+  { value: "lga1700", label: "LGA1700" },
+  { value: "lga1851", label: "LGA1851" },
+  { value: "am4", label: "AM4" },
+  { value: "am5", label: "AM5" },
+];
+
+const RAM_TYPE_OPTIONS = [
+  { value: "ddr4", label: "DDR4" },
+  { value: "ddr5", label: "DDR5" },
+];
+
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
 
@@ -99,22 +111,112 @@ function NameCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: Sel
   );
 }
 
+function SocketSelect({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0"
+    >
+      <option value="">{placeholder}</option>
+      {SOCKET_OPTIONS.map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  );
+}
+
+function RamTypeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0"
+    >
+      <option value="">Тип памяти</option>
+      {RAM_TYPE_OPTIONS.map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  );
+}
+
+function SocketCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: SelectKey; onSaved: () => void }) {
+  const [value, setValue] = useState(part.socket || "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => setValue(part.socket || ""), [part.socket]);
+
+  const commit = async (next: string) => {
+    if (next === (part.socket || "")) return;
+    setSaving(true);
+    setValue(next);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, id: part.id, socket: next || null }),
+      });
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <SocketSelect value={value} onChange={commit} placeholder="Сокет" />;
+}
+
+function RamTypeCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: SelectKey; onSaved: () => void }) {
+  const [value, setValue] = useState(part.ram_type || "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => setValue(part.ram_type || ""), [part.ram_type]);
+
+  const commit = async (next: string) => {
+    if (next === (part.ram_type || "")) return;
+    setSaving(true);
+    setValue(next);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, id: part.id, ram_type: next || null }),
+      });
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <RamTypeSelect value={value} onChange={commit} />;
+}
+
 function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () => void }) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
+  const [socket, setSocket] = useState("");
+  const [ramType, setRamType] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const needsSocket = categoryKey === "cpu" || categoryKey === "motherboard";
+  const needsRamType = categoryKey === "ram";
 
   const add = async () => {
     if (!name.trim() || !price) return;
     setSaving(true);
     try {
+      const body: Record<string, unknown> = { category: categoryKey, name: name.trim(), price: Number(price) };
+      if (needsSocket && socket) body.socket = socket;
+      if (needsRamType && ramType) body.ram_type = ramType;
       await fetch(COMPONENTS_API_URL, {
         method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ category: categoryKey, name: name.trim(), price: Number(price) }),
+        body: JSON.stringify(body),
       });
       setName("");
       setPrice("");
+      setSocket("");
+      setRamType("");
       onAdded();
     } finally {
       setSaving(false);
@@ -128,6 +230,8 @@ function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () 
       </td>
       <td className="p-1.5 pr-3">
         <div className="flex items-center gap-2 justify-end">
+          {needsSocket && <SocketSelect value={socket} onChange={setSocket} placeholder="Сокет" />}
+          {needsRamType && <RamTypeSelect value={ramType} onChange={setRamType} />}
           <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Цена" className="h-8 w-24 text-right text-base" />
           <button onClick={add} disabled={saving || !name.trim() || !price} className="text-primary hover:opacity-70 transition-opacity disabled:opacity-30 shrink-0">
             <Icon name="Plus" size={20} />
@@ -182,6 +286,10 @@ function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: Sel
                 </td>
                 <td className="p-1.5 pr-3">
                   <div className="flex items-center gap-2 justify-end">
+                    {(categoryKey === "cpu" || categoryKey === "motherboard") && (
+                      <SocketCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
+                    )}
+                    {categoryKey === "ram" && <RamTypeCell part={p} categoryKey={categoryKey} onSaved={onChanged} />}
                     <PriceCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
                     <button onClick={() => setPendingDelete(p)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
                       <Icon name="Trash2" size={16} />

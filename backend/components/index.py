@@ -98,6 +98,12 @@ def fetch_all(cur, include_inactive: bool):
                 }
                 for r in rows
             ]
+        elif key == 'cpu' or key == 'motherboard':
+            cur.execute(f'SELECT id, name, price, active, socket FROM {table} {where} ORDER BY price')
+            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3], 'socket': r[4]} for r in cur.fetchall()]
+        elif key == 'ram':
+            cur.execute(f'SELECT id, name, price, active, ram_type FROM {table} {where} ORDER BY price')
+            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3], 'ram_type': r[4]} for r in cur.fetchall()]
         else:
             cur.execute(f'SELECT id, name, price, active FROM {table} {where} ORDER BY price')
             result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3]} for r in cur.fetchall()]
@@ -159,6 +165,16 @@ def handler(event: dict, context) -> dict:
                     f'INSERT INTO {table} (name, price, image_url, brand, color, active) VALUES (%s, %s, %s, %s, %s, true) RETURNING id',
                     (name, price, body.get('image'), body.get('brand'), body.get('color')),
                 )
+            elif category in ('cpu', 'motherboard'):
+                cur.execute(
+                    f'INSERT INTO {table} (name, price, active, socket) VALUES (%s, %s, true, %s) RETURNING id',
+                    (name, price, body.get('socket')),
+                )
+            elif category == 'ram':
+                cur.execute(
+                    f'INSERT INTO {table} (name, price, active, ram_type) VALUES (%s, %s, true, %s) RETURNING id',
+                    (name, price, body.get('ram_type')),
+                )
             else:
                 cur.execute(
                     f'INSERT INTO {table} (name, price, active) VALUES (%s, %s, true) RETURNING id',
@@ -176,7 +192,14 @@ def handler(event: dict, context) -> dict:
             item_id = body.get('id')
             if not item_id:
                 return {'statusCode': 400, 'headers': {**cors, 'Content-Type': 'application/json'}, 'body': json.dumps({'error': 'id обязателен'})}
-            fields = ['name', 'price', 'active'] + (['image_url', 'brand', 'color'] if category == 'case' else [])
+            extra_fields = []
+            if category == 'case':
+                extra_fields = ['image_url', 'brand', 'color']
+            elif category in ('cpu', 'motherboard'):
+                extra_fields = ['socket']
+            elif category == 'ram':
+                extra_fields = ['ram_type']
+            fields = ['name', 'price', 'active'] + extra_fields
             body_keys = {'image_url': 'image'}
             updates = []
             values = []

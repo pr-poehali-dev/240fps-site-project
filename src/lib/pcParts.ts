@@ -1,6 +1,6 @@
 export const COMPONENTS_API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
 
-export type Part = { id: number; name: string; price: number; image?: string; brand?: string; color?: string; gallery?: string[] };
+export type Part = { id: number; name: string; price: number; image?: string; brand?: string; color?: string; gallery?: string[]; socket?: string; ram_type?: string };
 
 export type Components = {
   cpu: Part[];
@@ -133,6 +133,33 @@ function filterByIds(parts: Part[], ids: number[]): Part[] {
   return parts.filter((p) => ids.includes(p.id));
 }
 
+// Сокет/тип платформы — используется для автоматической совместимости новых комплектующих,
+// добавленных через админку с указанием сокета. Если у детали сокет не указан (старые записи),
+// используется резервный список ID выше.
+const PLATFORM_SOCKET: Record<Platform, string> = {
+  lga1700: 'lga1700',
+  lga1851: 'lga1851',
+  am4: 'am4',
+  am5: 'am5',
+};
+
+const PLATFORM_RAM_TYPES: Record<Platform, string[]> = {
+  lga1700: ['ddr4', 'ddr5'],
+  lga1851: ['ddr5'],
+  am4: ['ddr4'],
+  am5: ['ddr5'],
+};
+
+function filterBySocket(parts: Part[], plat: Platform, fallbackIds: number[]): Part[] {
+  const socket = PLATFORM_SOCKET[plat];
+  return parts.filter((p) => (p.socket ? p.socket === socket : fallbackIds.includes(p.id)));
+}
+
+function filterByRamType(parts: Part[], plat: Platform, fallbackIds: number[]): Part[] {
+  const types = PLATFORM_RAM_TYPES[plat];
+  return parts.filter((p) => (p.ram_type ? types.includes(p.ram_type) : fallbackIds.includes(p.id)));
+}
+
 export const PLATFORM_INFO: Record<Platform, { label: string; moboIds: number[]; ramIds: number[]; cpuIds: number[] }> = {
   lga1700: { label: 'Intel LGA1700 (DDR4/DDR5)', moboIds: MB_LGA1700, ramIds: RAM_DDR4_DDR5, cpuIds: CPU_LGA1700 },
   lga1851: { label: 'Intel LGA1851 (DDR5)',       moboIds: MB_LGA1851, ramIds: RAM_DDR5,      cpuIds: CPU_LGA1851 },
@@ -161,9 +188,9 @@ export function filteredPartsFor(
   if (!comps || !plat) return [];
   const info = PLATFORM_INFO[plat];
   const all = comps[key];
-  if (key === 'cpu')         return filterByIds(all, info.cpuIds);
-  if (key === 'motherboard') return filterMotherboardByCpu(filterByIds(all, info.moboIds), selected?.cpu?.id);
-  if (key === 'ram')         return filterByIds(all, info.ramIds);
+  if (key === 'cpu')         return filterBySocket(all, plat, info.cpuIds);
+  if (key === 'motherboard') return filterMotherboardByCpu(filterBySocket(all, plat, info.moboIds), selected?.cpu?.id);
+  if (key === 'ram')         return filterByRamType(all, plat, info.ramIds);
   if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.id);
   if (key === 'cooler')      return filterCoolerByCpu(all, selected?.cpu?.id);
   return all;
