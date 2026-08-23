@@ -1,6 +1,6 @@
 export const COMPONENTS_API_URL = 'https://functions.poehali.dev/5cfc8ecc-4c82-4e93-b6a3-36c98ad09e79';
 
-export type Part = { id: number; name: string; price: number; image?: string; brand?: string; color?: string; gallery?: string[]; socket?: string; ram_type?: string };
+export type Part = { id: number; name: string; price: number; image?: string; brand?: string; color?: string; gallery?: string[]; socket?: string; ram_type?: string; power_tier?: number; min_power_tier?: number };
 
 export type Components = {
   cpu: Part[];
@@ -105,15 +105,19 @@ export function filterMotherboardByCpu(mobos: Part[], cpuId?: number): Part[] {
   return mobos;
 }
 
-function minPsuTierFor(gpuId?: number): number {
-  if (!gpuId) return 0;
-  return GPU_MIN_PSU_TIER[gpuId] ?? 0;
+function minPsuTierFor(gpu?: Part): number {
+  if (!gpu) return 0;
+  return gpu.min_power_tier ?? GPU_MIN_PSU_TIER[gpu.id] ?? 0;
 }
 
-export function filterPsuByGpu(psus: Part[], gpuId?: number): Part[] {
-  const minTier = minPsuTierFor(gpuId);
+function psuTierOf(psu: Part): number {
+  return psu.power_tier ?? PSU_TIER[psu.id] ?? 0;
+}
+
+export function filterPsuByGpu(psus: Part[], gpu?: Part): Part[] {
+  const minTier = minPsuTierFor(gpu);
   if (!minTier) return psus;
-  const filtered = psus.filter((p) => (PSU_TIER[p.id] ?? 0) >= minTier);
+  const filtered = psus.filter((p) => psuTierOf(p) >= minTier);
   return filtered.length ? filtered : psus;
 }
 
@@ -127,10 +131,6 @@ export function defaultCoolerFor(cpuId: number | undefined, coolers: Part[]): Pa
     return coolers.find((c) => LIQUID_COOLER_IDS.includes(c.id)) ?? cheapestOf(coolers);
   }
   return coolers.find((c) => DEFAULT_AIR_COOLER_IDS.includes(c.id)) ?? cheapestOf(coolers);
-}
-
-function filterByIds(parts: Part[], ids: number[]): Part[] {
-  return parts.filter((p) => ids.includes(p.id));
 }
 
 // Сокет/тип платформы — используется для автоматической совместимости новых комплектующих,
@@ -191,7 +191,7 @@ export function filteredPartsFor(
   if (key === 'cpu')         return filterBySocket(all, plat, info.cpuIds);
   if (key === 'motherboard') return filterMotherboardByCpu(filterBySocket(all, plat, info.moboIds), selected?.cpu?.id);
   if (key === 'ram')         return filterByRamType(all, plat, info.ramIds);
-  if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu?.id);
+  if (key === 'psu')         return filterPsuByGpu(all, selected?.gpu);
   if (key === 'cooler')      return filterCoolerByCpu(all, selected?.cpu?.id);
   return all;
 }
@@ -217,7 +217,7 @@ export function autoSelectForPlatform(p: Platform, components: Components | null
     if (mobo) auto.motherboard = mobo;
     const cooler = defaultCoolerFor(auto.cpu?.id, components.cooler);
     if (cooler) auto.cooler = cooler;
-    const validPsus = filterPsuByGpu(components.psu, auto.gpu?.id);
+    const validPsus = filterPsuByGpu(components.psu, auto.gpu);
     const psu = cheapestOf(validPsus);
     if (psu) auto.psu = psu;
     const defaultCase = components.case.find((c) => c.id === CASE_DEFAULT_ID) ?? cheapestOf(components.case, 'case');

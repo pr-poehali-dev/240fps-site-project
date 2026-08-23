@@ -90,7 +90,7 @@ export default function Calculator() {
 
       // При смене видеокарты — проверить, что БП тянет её, иначе подобрать минимально нужный
       if (category === 'gpu' && components) {
-        const validPsus = filterPsuByGpu(components.psu, next.gpu?.id);
+        const validPsus = filterPsuByGpu(components.psu, next.gpu);
         if (!next.psu || !validPsus.some((p) => p.id === next.psu!.id)) {
           next.psu = cheapestOf(validPsus);
         }

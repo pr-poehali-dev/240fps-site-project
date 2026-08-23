@@ -26,6 +26,8 @@ const RAM_TYPE_OPTIONS = [
   { value: "ddr5", label: "DDR5" },
 ];
 
+const POWER_TIER_OPTIONS = [1, 2, 3, 4, 5, 6, 7].map((n) => ({ value: String(n), label: `Уровень ${n}` }));
+
 const AUTH_KEY = "admin_authed";
 const PWD_KEY = "admin_pwd";
 
@@ -111,12 +113,13 @@ function NameCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: Sel
   );
 }
 
-function SocketSelect({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+function SocketSelect({ value, onChange, placeholder, disabled }: { value: string; onChange: (v: string) => void; placeholder: string; disabled?: boolean }) {
   return (
     <select
       value={value}
+      disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0"
+      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0 disabled:opacity-50"
     >
       <option value="">{placeholder}</option>
       {SOCKET_OPTIONS.map((o) => (
@@ -126,15 +129,32 @@ function SocketSelect({ value, onChange, placeholder }: { value: string; onChang
   );
 }
 
-function RamTypeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function RamTypeSelect({ value, onChange, disabled }: { value: string; onChange: (v: string) => void; disabled?: boolean }) {
   return (
     <select
       value={value}
+      disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
-      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0"
+      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0 disabled:opacity-50"
     >
       <option value="">Тип памяти</option>
       {RAM_TYPE_OPTIONS.map((o) => (
+        <option key={o.value} value={o.value}>{o.label}</option>
+      ))}
+    </select>
+  );
+}
+
+function PowerTierSelect({ value, onChange, placeholder, disabled }: { value: string; onChange: (v: string) => void; placeholder: string; disabled?: boolean }) {
+  return (
+    <select
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+      className="h-8 rounded-md border border-input bg-background px-2 text-sm shrink-0 disabled:opacity-50"
+    >
+      <option value="">{placeholder}</option>
+      {POWER_TIER_OPTIONS.map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>
       ))}
     </select>
@@ -163,7 +183,7 @@ function SocketCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: S
     }
   };
 
-  return <SocketSelect value={value} onChange={commit} placeholder="Сокет" />;
+  return <SocketSelect value={value} onChange={commit} placeholder="Сокет" disabled={saving} />;
 }
 
 function RamTypeCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: SelectKey; onSaved: () => void }) {
@@ -188,7 +208,33 @@ function RamTypeCell({ part, categoryKey, onSaved }: { part: Part; categoryKey: 
     }
   };
 
-  return <RamTypeSelect value={value} onChange={commit} />;
+  return <RamTypeSelect value={value} onChange={commit} disabled={saving} />;
+}
+
+function PowerTierCell({ part, categoryKey, field, onSaved }: { part: Part; categoryKey: SelectKey; field: "power_tier" | "min_power_tier"; onSaved: () => void }) {
+  const current = part[field];
+  const [value, setValue] = useState(current != null ? String(current) : "");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => setValue(current != null ? String(current) : ""), [current]);
+
+  const commit = async (next: string) => {
+    if (next === (current != null ? String(current) : "")) return;
+    setSaving(true);
+    setValue(next);
+    try {
+      await fetch(COMPONENTS_API_URL, {
+        method: "PUT",
+        headers: authHeaders(),
+        body: JSON.stringify({ category: categoryKey, id: part.id, [field]: next ? Number(next) : null }),
+      });
+      onSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return <PowerTierSelect value={value} onChange={commit} placeholder={field === "power_tier" ? "Мощность БП" : "Мин. БП"} disabled={saving} />;
 }
 
 function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () => void }) {
@@ -196,10 +242,13 @@ function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () 
   const [price, setPrice] = useState("");
   const [socket, setSocket] = useState("");
   const [ramType, setRamType] = useState("");
+  const [powerTier, setPowerTier] = useState("");
   const [saving, setSaving] = useState(false);
 
   const needsSocket = categoryKey === "cpu" || categoryKey === "motherboard";
   const needsRamType = categoryKey === "ram";
+  const needsPowerTier = categoryKey === "psu" || categoryKey === "gpu";
+  const powerField = categoryKey === "psu" ? "power_tier" : "min_power_tier";
 
   const add = async () => {
     if (!name.trim() || !price) return;
@@ -208,6 +257,7 @@ function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () 
       const body: Record<string, unknown> = { category: categoryKey, name: name.trim(), price: Number(price) };
       if (needsSocket && socket) body.socket = socket;
       if (needsRamType && ramType) body.ram_type = ramType;
+      if (needsPowerTier && powerTier) body[powerField] = Number(powerTier);
       await fetch(COMPONENTS_API_URL, {
         method: "POST",
         headers: authHeaders(),
@@ -217,6 +267,7 @@ function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () 
       setPrice("");
       setSocket("");
       setRamType("");
+      setPowerTier("");
       onAdded();
     } finally {
       setSaving(false);
@@ -232,6 +283,13 @@ function AddRow({ categoryKey, onAdded }: { categoryKey: SelectKey; onAdded: () 
         <div className="flex items-center gap-2 justify-end">
           {needsSocket && <SocketSelect value={socket} onChange={setSocket} placeholder="Сокет" />}
           {needsRamType && <RamTypeSelect value={ramType} onChange={setRamType} />}
+          {needsPowerTier && (
+            <PowerTierSelect
+              value={powerTier}
+              onChange={setPowerTier}
+              placeholder={categoryKey === "psu" ? "Мощность БП" : "Мин. БП"}
+            />
+          )}
           <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Цена" className="h-8 w-24 text-right text-base" />
           <button onClick={add} disabled={saving || !name.trim() || !price} className="text-primary hover:opacity-70 transition-opacity disabled:opacity-30 shrink-0">
             <Icon name="Plus" size={20} />
@@ -290,6 +348,8 @@ function CategoryCard({ categoryKey, components, onChanged }: { categoryKey: Sel
                       <SocketCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
                     )}
                     {categoryKey === "ram" && <RamTypeCell part={p} categoryKey={categoryKey} onSaved={onChanged} />}
+                    {categoryKey === "psu" && <PowerTierCell part={p} categoryKey={categoryKey} field="power_tier" onSaved={onChanged} />}
+                    {categoryKey === "gpu" && <PowerTierCell part={p} categoryKey={categoryKey} field="min_power_tier" onSaved={onChanged} />}
                     <PriceCell part={p} categoryKey={categoryKey} onSaved={onChanged} />
                     <button onClick={() => setPendingDelete(p)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0">
                       <Icon name="Trash2" size={16} />

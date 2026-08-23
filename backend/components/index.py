@@ -104,6 +104,12 @@ def fetch_all(cur, include_inactive: bool):
         elif key == 'ram':
             cur.execute(f'SELECT id, name, price, active, ram_type FROM {table} {where} ORDER BY price')
             result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3], 'ram_type': r[4]} for r in cur.fetchall()]
+        elif key == 'psu':
+            cur.execute(f'SELECT id, name, price, active, power_tier FROM {table} {where} ORDER BY price')
+            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3], 'power_tier': r[4]} for r in cur.fetchall()]
+        elif key == 'gpu':
+            cur.execute(f'SELECT id, name, price, active, min_power_tier FROM {table} {where} ORDER BY price')
+            result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3], 'min_power_tier': r[4]} for r in cur.fetchall()]
         else:
             cur.execute(f'SELECT id, name, price, active FROM {table} {where} ORDER BY price')
             result[key] = [{'id': r[0], 'name': r[1], 'price': r[2], 'active': r[3]} for r in cur.fetchall()]
@@ -175,6 +181,16 @@ def handler(event: dict, context) -> dict:
                     f'INSERT INTO {table} (name, price, active, ram_type) VALUES (%s, %s, true, %s) RETURNING id',
                     (name, price, body.get('ram_type')),
                 )
+            elif category == 'psu':
+                cur.execute(
+                    f'INSERT INTO {table} (name, price, active, power_tier) VALUES (%s, %s, true, %s) RETURNING id',
+                    (name, price, body.get('power_tier')),
+                )
+            elif category == 'gpu':
+                cur.execute(
+                    f'INSERT INTO {table} (name, price, active, min_power_tier) VALUES (%s, %s, true, %s) RETURNING id',
+                    (name, price, body.get('min_power_tier')),
+                )
             else:
                 cur.execute(
                     f'INSERT INTO {table} (name, price, active) VALUES (%s, %s, true) RETURNING id',
@@ -199,6 +215,10 @@ def handler(event: dict, context) -> dict:
                 extra_fields = ['socket']
             elif category == 'ram':
                 extra_fields = ['ram_type']
+            elif category == 'psu':
+                extra_fields = ['power_tier']
+            elif category == 'gpu':
+                extra_fields = ['min_power_tier']
             fields = ['name', 'price', 'active'] + extra_fields
             body_keys = {'image_url': 'image'}
             updates = []
