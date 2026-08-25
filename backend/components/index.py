@@ -40,13 +40,26 @@ COMPONENT_TABLE_BY_LINK = {
 }
 
 
+def calc_assembly_fee(parts_total: int) -> int:
+    """Плата за сборку — та же формула, что и в калькуляторе на сайте (src/lib/pcParts.ts)."""
+    if parts_total == 0:
+        return 0
+    if parts_total >= 300000:
+        return 10000
+    if parts_total >= 200000:
+        return 7000
+    if parts_total > 150000:
+        return 6000
+    return 5000
+
+
 def recalc_products_using(cur, category: str, component_id: int):
     """Пересчитывает цену всех сборок в каталоге, которые используют изменённую комплектующую и считают цену автоматически."""
     link_field = LINK_FIELD.get(category)
     if not link_field:
         return
     cur.execute(
-        f'SELECT id, cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, markup '
+        f'SELECT id, cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id '
         f'FROM {PRODUCTS_TABLE} WHERE auto_price = true AND {link_field} = %s',
         (component_id,),
     )
@@ -57,7 +70,6 @@ def recalc_products_using(cur, category: str, component_id: int):
     for row in products:
         product_id = row[0]
         links = dict(zip(link_fields, row[1:9]))
-        markup = row[9] or 0
         total = 0
         for field, comp_id in links.items():
             if not comp_id:
@@ -67,7 +79,7 @@ def recalc_products_using(cur, category: str, component_id: int):
             comp_row = cur.fetchone()
             if comp_row:
                 total += comp_row[0]
-        new_price = total + markup
+        new_price = total + calc_assembly_fee(total)
         cur.execute(f'UPDATE {PRODUCTS_TABLE} SET price = %s, updated_at = NOW() WHERE id = %s', (new_price, product_id))
 
 

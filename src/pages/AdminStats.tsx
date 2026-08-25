@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Components, SelectKey, COMPONENTS_API_URL, fmt } from "@/lib/pcParts";
+import { Components, SelectKey, COMPONENTS_API_URL, fmt, calcAssemblyFee } from "@/lib/pcParts";
 
 const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b7407b194";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
@@ -117,7 +117,6 @@ interface ProductItem {
   cooler_id: number | null;
   psu_id: number | null;
   case_id: number | null;
-  markup: number;
   auto_price: boolean;
 }
 
@@ -142,7 +141,6 @@ const EMPTY_PRODUCT: Omit<ProductItem, "id" | "img" | "imgs"> = {
   cooler_id: null,
   psu_id: null,
   case_id: null,
-  markup: 5000,
   auto_price: true,
 };
 
@@ -188,7 +186,6 @@ function ProductForm({
     cooler_id: initial?.cooler_id ?? null,
     psu_id: initial?.psu_id ?? null,
     case_id: initial?.case_id ?? null,
-    markup: initial?.markup ?? EMPTY_PRODUCT.markup,
     auto_price: initial?.auto_price ?? EMPTY_PRODUCT.auto_price,
   });
   const [components, setComponents] = useState<Components | null>(null);
@@ -214,12 +211,11 @@ function ProductForm({
     return components[key].find(p => p.id === id)?.price ?? 0;
   };
 
-  const previewPrice = form.auto_price
-    ? findPrice("cpu", form.cpu_id) + findPrice("gpu", form.gpu_id) + findPrice("ram", form.ram_id) +
-      findPrice("ssd", form.ssd_id) + findPrice("motherboard", form.motherboard_id) +
-      findPrice("cooler", form.cooler_id) + findPrice("psu", form.psu_id) + findPrice("case", form.case_id) +
-      (form.markup || 0)
-    : form.price;
+  const partsTotal = findPrice("cpu", form.cpu_id) + findPrice("gpu", form.gpu_id) + findPrice("ram", form.ram_id) +
+    findPrice("ssd", form.ssd_id) + findPrice("motherboard", form.motherboard_id) +
+    findPrice("cooler", form.cooler_id) + findPrice("psu", form.psu_id) + findPrice("case", form.case_id);
+  const assemblyFee = calcAssemblyFee(partsTotal);
+  const previewPrice = form.auto_price ? partsTotal + assemblyFee : form.price;
 
   const addFiles = (files: FileList | null) => {
     if (!files) return;
@@ -397,8 +393,8 @@ function ProductForm({
         {form.auto_price ? (
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-muted-foreground mb-1 block">Наценка за сборку (₽, можно отрицательную)</label>
-              <input type="number" value={form.markup} onChange={e => set("markup", e.target.value === "" ? 0 : Number(e.target.value))} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary" />
+              <label className="text-xs text-muted-foreground mb-1 block">Плата за сборку (авто, как в калькуляторе)</label>
+              <div className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-muted-foreground">{fmt(assemblyFee)}</div>
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Итоговая цена</label>

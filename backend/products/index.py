@@ -9,7 +9,7 @@ import boto3
 
 TABLE = 't_p288352_240fps_site_project.products'
 
-FIELDS = ['name', 'brand', 'cpu_brand', 'ram', 'storage', 'fps', 'tag', 'active', 'sort_order', 'markup', 'auto_price']
+FIELDS = ['name', 'brand', 'cpu_brand', 'ram', 'storage', 'fps', 'tag', 'active', 'sort_order', 'auto_price']
 LINK_FIELDS = ['cpu_id', 'gpu_id', 'ram_id', 'ssd_id', 'motherboard_id', 'cooler_id', 'psu_id', 'case_id']
 
 COMPONENT_TABLES = {
@@ -26,7 +26,7 @@ COMPONENT_TABLES = {
 SELECT_COLS = [
     'id', 'name', 'brand', 'cpu_brand', 'cpu', 'gpu', 'ram', 'storage', 'price', 'fps', 'tag',
     'img', 'imgs', 'active', 'sort_order', 'cpu_id', 'gpu_id', 'ram_id', 'ssd_id',
-    'motherboard_id', 'cooler_id', 'psu_id', 'case_id', 'markup', 'auto_price',
+    'motherboard_id', 'cooler_id', 'psu_id', 'case_id', 'auto_price',
 ]
 
 
@@ -59,8 +59,21 @@ def upload_image(file_base64: str, content_type: str) -> str:
     return f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{file_key}"
 
 
-def compute_auto_price(cur, link_values: dict, markup: int):
-    """Считает цену из связанных комплектующих + наценка. link_values: {cpu_id: 5, ...}"""
+def calc_assembly_fee(parts_total: int) -> int:
+    """Плата за сборку — та же формула, что и в калькуляторе на сайте (src/lib/pcParts.ts)."""
+    if parts_total == 0:
+        return 0
+    if parts_total >= 300000:
+        return 10000
+    if parts_total >= 200000:
+        return 7000
+    if parts_total > 150000:
+        return 6000
+    return 5000
+
+
+def compute_auto_price(cur, link_values: dict):
+    """Считает цену из связанных комплектующих + плата за сборку (единая формула с калькулятором)."""
     total = 0
     for field, comp_table in COMPONENT_TABLES.items():
         comp_id = link_values.get(field)
@@ -70,7 +83,7 @@ def compute_auto_price(cur, link_values: dict, markup: int):
         row = cur.fetchone()
         if row:
             total += row[0]
-    return total + (markup or 0)
+    return total + calc_assembly_fee(total)
 
 
 def get_component_names(cur, link_values: dict):
@@ -148,16 +161,15 @@ def handler(event: dict, context) -> dict:
 
         link_values = {f: body.get(f) for f in LINK_FIELDS}
         auto_price = body.get('auto_price', True)
-        markup = body.get('markup', 5000)
         comp_names = get_component_names(cur, link_values)
-        price = compute_auto_price(cur, link_values, markup) if auto_price else body.get('price', 0)
+        price = compute_auto_price(cur, link_values) if auto_price else body.get('price', 0)
 
         cur.execute(f'SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {TABLE}')
         sort_order = cur.fetchone()[0]
         cur.execute(
             f'INSERT INTO {TABLE} (name, brand, cpu_brand, cpu, gpu, ram, storage, price, fps, tag, img, imgs, sort_order, '
-            f'cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, markup, auto_price) '
-            f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
+            f'cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, auto_price) '
+            f'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id',
             (
                 body.get('name', ''), body.get('brand', 'NVIDIA'), body.get('cpu_brand', 'Intel'),
                 comp_names.get('cpu_id', body.get('cpu', '')), comp_names.get('gpu_id', body.get('gpu', '')),
@@ -165,7 +177,7 @@ def handler(event: dict, context) -> dict:
                 price, body.get('fps', ''), body.get('tag'), img, imgs, sort_order,
                 link_values.get('cpu_id'), link_values.get('gpu_id'), link_values.get('ram_id'), link_values.get('ssd_id'),
                 link_values.get('motherboard_id'), link_values.get('cooler_id'), link_values.get('psu_id'), link_values.get('case_id'),
-                markup, auto_price,
+                auto_price,
             )
         )
         new_id = cur.fetchone()[0]
@@ -204,18 +216,16 @@ def handler(event: dict, context) -> dict:
                     updates.append(f'{f} = %s')
                     values.append(body[f])
 
-        should_recalc = body.get('auto_price', True) and (link_touched or 'markup' in body)
+        should_recalc = body.get('auto_price', True) and link_touched
         if should_recalc:
-            cur.execute(f'SELECT cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id, markup FROM {TABLE} WHERE id = %s', (product_id,))
+            cur.execute(f'SELECT cpu_id, gpu_id, ram_id, ssd_id, motherboard_id, cooler_id, psu_id, case_id FROM {TABLE} WHERE id = %s', (product_id,))
             row = cur.fetchone()
             if row:
                 current_links = dict(zip(LINK_FIELDS, row[:8]))
-                current_markup = row[8]
                 for f in LINK_FIELDS:
                     if f in body:
                         current_links[f] = body[f]
-                markup = body.get('markup', current_markup)
-                new_price = compute_auto_price(cur, current_links, markup)
+                new_price = compute_auto_price(cur, current_links)
                 updates.append('price = %s')
                 values.append(new_price)
                 comp_names = get_component_names(cur, current_links)
