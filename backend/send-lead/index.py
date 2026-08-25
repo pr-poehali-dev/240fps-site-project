@@ -6,7 +6,7 @@ import urllib.error
 
 
 def handler(event: dict, context) -> dict:
-    """Отправляет заявку клиента (звонок, заказ сборки, конфигуратор) в Telegram чат владельца через Bot API."""
+    """Отправляет заявку клиента (звонок, заказ сборки, конфигуратор) в чат владельца в мессенджере MAX через Bot API."""
     cors = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -34,55 +34,50 @@ def handler(event: dict, context) -> dict:
             'body': json.dumps({'ok': False, 'error': 'Пустое сообщение'}),
         }
 
-    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-    chat_id = os.environ.get('TELEGRAM_CHAT_ID', '')
+    bot_token = os.environ.get('MAX_BOT_TOKEN', '')
+    chat_id = os.environ.get('MAX_CHAT_ID', '')
 
     if not bot_token or not chat_id:
         return {
             'statusCode': 500,
             'headers': {**cors, 'Content-Type': 'application/json'},
-            'body': json.dumps({'ok': False, 'error': 'Telegram не настроен'}),
+            'body': json.dumps({'ok': False, 'error': 'MAX не настроен'}),
         }
 
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
-    data = urllib.parse.urlencode({
-        'chat_id': chat_id,
-        'text': text,
-    }).encode()
+    url = f'https://platform-api.max.ru/messages?chat_id={urllib.parse.quote(chat_id)}'
+    data = json.dumps({'text': text}).encode()
 
     last_error = None
     for attempt in range(3):
-        req = urllib.request.Request(url, data=data, method='POST')
+        req = urllib.request.Request(
+            url,
+            data=data,
+            method='POST',
+            headers={'Authorization': bot_token, 'Content-Type': 'application/json'},
+        )
         try:
             with urllib.request.urlopen(req, timeout=8) as resp:
-                resp_body = json.loads(resp.read().decode())
-                if resp_body.get('ok'):
+                if 200 <= resp.status < 300:
                     return {
                         'statusCode': 200,
                         'headers': {**cors, 'Content-Type': 'application/json'},
                         'body': json.dumps({'ok': True}),
                     }
-                print(f'Telegram API error: {resp_body}')
-                last_error = 'Telegram API отклонил запрос'
+                print(f'MAX API unexpected status: {resp.status}')
+                last_error = 'MAX API отклонил запрос'
                 break
         except urllib.error.HTTPError as e:
             err_body = e.read().decode()
-            print(f'Telegram HTTPError {e.code}: {err_body}')
-            last_error = 'Не удалось отправить сообщение в Telegram'
+            print(f'MAX HTTPError {e.code}: {err_body}')
+            last_error = 'Не удалось отправить сообщение в MAX'
             break
         except Exception as e:
-            print(f'Telegram send exception (attempt {attempt + 1}): {repr(e)}')
-            last_error = 'Не удалось отправить сообщение в Telegram'
+            print(f'MAX send exception (attempt {attempt + 1}): {repr(e)}')
+            last_error = 'Не удалось отправить сообщение в MAX'
             continue
 
     return {
         'statusCode': 502,
         'headers': {**cors, 'Content-Type': 'application/json'},
         'body': json.dumps({'ok': False, 'error': last_error}),
-    }
-
-    return {
-        'statusCode': 200,
-        'headers': {**cors, 'Content-Type': 'application/json'},
-        'body': json.dumps({'ok': True}),
     }
