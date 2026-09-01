@@ -249,14 +249,16 @@ const Index = () => {
 
   const filtered = useMemo(
     () =>
-      products.filter(
-        (p) =>
-          p.price >= price[0] && p.price <= price[1] &&
-          (gpuModels.length === 0 || gpuModels.includes(p.gpu)) &&
-          (cpuModels.length === 0 || cpuModels.includes(p.cpu)) &&
-          (rams.length === 0 || rams.includes(p.ram)) &&
-          (ssds.length === 0 || ssds.includes(p.storage))
-      ),
+      products
+        .filter(
+          (p) =>
+            p.price >= price[0] && p.price <= price[1] &&
+            (gpuModels.length === 0 || gpuModels.includes(p.gpu)) &&
+            (cpuModels.length === 0 || cpuModels.includes(p.cpu)) &&
+            (rams.length === 0 || rams.includes(p.ram)) &&
+            (ssds.length === 0 || ssds.includes(p.storage))
+        )
+        .sort((a, b) => a.price - b.price),
     [products, price, gpuModels, cpuModels, rams, ssds]
   );
 
