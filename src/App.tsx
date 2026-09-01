@@ -4,14 +4,15 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import Calculator from "./pages/Calculator";
-import AdminStats from "./pages/AdminStats";
-import CrmOrders from "./pages/CrmOrders";
-import CrmIssuedOrders from "./pages/CrmIssuedOrders";
-import CrmPrices from "./pages/CrmPrices";
-import NotFound from "./pages/NotFound";
+
+const AdminStats = lazy(() => import("./pages/AdminStats"));
+const CrmOrders = lazy(() => import("./pages/CrmOrders"));
+const CrmIssuedOrders = lazy(() => import("./pages/CrmIssuedOrders"));
+const CrmPrices = lazy(() => import("./pages/CrmPrices"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const TRACK_URL = "https://functions.poehali.dev/fdc3b327-c084-4a85-af66-47e8827965dc";
 
@@ -56,16 +57,18 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Tracker />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/calculator" element={<Calculator />} />
-          <Route path="/admin/stats" element={<AdminStats />} />
-          <Route path="/admin/crm" element={<CrmOrders />} />
-          <Route path="/admin/crm/issued" element={<CrmIssuedOrders />} />
-          <Route path="/admin/crm/prices" element={<CrmPrices />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/calculator" element={<Calculator />} />
+            <Route path="/admin/stats" element={<AdminStats />} />
+            <Route path="/admin/crm" element={<CrmOrders />} />
+            <Route path="/admin/crm/issued" element={<CrmIssuedOrders />} />
+            <Route path="/admin/crm/prices" element={<CrmPrices />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

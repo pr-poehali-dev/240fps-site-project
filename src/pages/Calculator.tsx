@@ -51,6 +51,17 @@ export default function Calculator() {
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   useEffect(() => {
+    document.title = 'Собрать игровой ПК на заказ — калькулятор конфигурации | 240FPS';
+    const meta = document.querySelector('meta[name="description"]');
+    const prevDescription = meta?.getAttribute('content') ?? '';
+    meta?.setAttribute('content', 'Собери игровой компьютер под себя: выбери процессор, видеокарту, память и корпус. Калькулятор покажет только совместимые детали и итоговую цену сборки.');
+    return () => {
+      document.title = '240FPS — Игровые компьютеры высокой производительности';
+      if (meta) meta.setAttribute('content', prevDescription);
+    };
+  }, []);
+
+  useEffect(() => {
     fetch(API_URL)
       .then((r) => r.json())
       .then((data) => { setComponents(data); setLoading(false); })
@@ -430,7 +441,7 @@ export default function Calculator() {
                       <div className="rounded-xl bg-muted/30 border border-border overflow-hidden mb-1">
                         <div className="aspect-square bg-muted/50 flex items-center justify-center overflow-hidden">
                           {selected.case.image ? (
-                            <img src={selected.case.image} alt={selected.case.name} className="w-full h-full object-contain p-3" />
+                            <img src={selected.case.image} alt={selected.case.name} loading="lazy" className="w-full h-full object-contain p-3" />
                           ) : (
                             <Icon name="Box" size={40} className="text-muted-foreground" />
                           )}

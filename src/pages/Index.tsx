@@ -348,7 +348,7 @@ const Index = () => {
               Больше <span className="text-gradient">кадров</span> —<br />больше <span className="text-primary">побед</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-md mb-8">
-              Игровые компьютеры 240FPS, собранные для максимальной производительности. Мощь без компромиссов.
+              Игровые компьютеры на RTX 5060–5090 от 240FPS — готовые сборки и ПК на заказ с максимальной производительностью. Мощь без компромиссов.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-600 glow-yellow" asChild>
@@ -531,7 +531,7 @@ const Index = () => {
                   className="relative aspect-square overflow-hidden bg-muted cursor-pointer"
                   onClick={() => { setProductModal(p); setProductImgIdx(0); }}
                 >
-                  <img src={p.img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <img src={p.img} alt={`Игровой компьютер ${p.name} — ${p.cpu}, ${p.gpu}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   {p.tag && <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-600">{p.tag}</Badge>}
                   <Badge className="absolute top-3 right-3 bg-secondary/90 text-secondary-foreground font-500">{p.fps}</Badge>
                   {p.imgs && p.imgs.length > 1 && (
@@ -609,7 +609,7 @@ const Index = () => {
           {BLOG.map((b) => (
             <button key={b.title} onClick={() => setBlogPost(b)} className="group text-left rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
               <div className="aspect-video overflow-hidden bg-muted">
-                <img src={b.img} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src={b.img} alt={b.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </div>
               <div className="p-5">
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
