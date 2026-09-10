@@ -1,11 +1,44 @@
 import json
 import os
+import socket
+import ssl
+import http.client
 import urllib.request
 import urllib.parse
 import urllib.error
 import psycopg2
 
 LEADS_TABLE = 't_p288352_240fps_site_project.leads'
+
+# Часть IP api.telegram.org недоступна из облака (DNS отдаёт заблокированный адрес),
+# поэтому перебираем известные рабочие адреса, а DNS используем как запасной вариант.
+TELEGRAM_KNOWN_IPS = [
+    '149.154.167.220',
+    '149.154.167.197',
+    '149.154.167.198',
+    '149.154.167.199',
+]
+
+
+def telegram_ips() -> list:
+    ips = list(TELEGRAM_KNOWN_IPS)
+    try:
+        for res in socket.getaddrinfo('api.telegram.org', 443, socket.AF_INET):
+            ip = res[4][0]
+            if ip not in ips:
+                ips.append(ip)
+    except Exception as e:
+        print(f'Telegram DNS failed: {repr(e)}')
+    return ips
+
+_orig_getaddrinfo = socket.getaddrinfo
+
+
+def _ipv4_only_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    return _orig_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
+
+socket.getaddrinfo = _ipv4_only_getaddrinfo
 
 
 def _post(url: str, data: bytes, headers: dict) -> tuple:
@@ -44,19 +77,37 @@ def send_via_telegram(text: str) -> bool:
         print('Telegram skipped: not configured')
         return False
 
-    url = f'https://api.telegram.org/bot{bot_token}/sendMessage'
     data = urllib.parse.urlencode({'chat_id': chat_id, 'text': text}).encode()
-    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    path = f'/bot{bot_token}/sendMessage'
 
-    try:
-        status, resp_text = _post(url, data, headers)
-        if json.loads(resp_text).get('ok'):
-            return True
-        print(f'Telegram API error: {resp_text}')
-    except urllib.error.HTTPError as e:
-        print(f'Telegram HTTPError {e.code}: {e.read().decode()}')
-    except Exception as e:
-        print(f'Telegram exception: {repr(e)}')
+    ctx = ssl.create_default_context()
+
+    for ip in telegram_ips():
+        try:
+            raw_sock = socket.create_connection((ip, 443), timeout=5)
+            tls_sock = ctx.wrap_socket(raw_sock, server_hostname='api.telegram.org')
+            conn = http.client.HTTPSConnection('api.telegram.org', 443, timeout=5)
+            conn.sock = tls_sock
+            conn.request(
+                'POST', path, body=data,
+                headers={
+                    'Host': 'api.telegram.org',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Length': str(len(data)),
+                },
+            )
+            resp_text = conn.getresponse().read().decode()
+            conn.close()
+            if json.loads(resp_text).get('ok'):
+                print(f'Telegram delivered via {ip}')
+                return True
+            print(f'Telegram API error via {ip}: {resp_text}')
+            return False
+        except Exception as e:
+            print(f'Telegram {ip} failed: {repr(e)}')
+            continue
+
+    print('Telegram: all endpoints unreachable')
     return False
 
 
