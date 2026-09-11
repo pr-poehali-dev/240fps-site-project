@@ -158,19 +158,23 @@ export default function Calculator() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/75 border-b border-border/80 shadow-lg shadow-black/20">
         <div className="container flex items-center justify-between h-16 md:h-18 py-3">
-          <a href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow shrink-0">
+          <a href="/" className="group flex items-center gap-2.5 shrink-0">
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-8deg]">
               <Icon name="Zap" className="text-primary-foreground" size={20} />
             </div>
-            <span className="font-display font-700 text-xl md:text-2xl tracking-tight">
+            <span className="font-display font-700 text-xl md:text-2xl tracking-[-0.02em]">
               240<span className="text-primary">FPS</span>
             </span>
           </a>
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-7 lg:gap-9">
             {NAV.map((n) => (
-              <a key={n.label} href={n.href} className="text-sm font-500 text-muted-foreground hover:text-primary transition-colors">
+              <a
+                key={n.label}
+                href={n.href}
+                className="relative text-sm font-600 text-muted-foreground hover:text-foreground transition-colors duration-300 py-1 after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 hover:after:scale-x-100"
+              >
                 {n.label}
               </a>
             ))}
@@ -209,9 +213,9 @@ export default function Calculator() {
 
       <div className="container py-12">
         <div className="mb-10">
-          <Badge className="bg-primary/15 text-primary border-primary/30 mb-4 font-500">Конфигуратор</Badge>
-          <h1 className="font-display font-700 text-4xl md:text-5xl uppercase mb-3">Собери свой ПК</h1>
-          <p className="text-muted-foreground">Выбери платформу — калькулятор покажет только совместимые детали.</p>
+          <div className="section-eyebrow">Конфигуратор</div>
+          <h1 className="section-title text-4xl md:text-6xl mb-4">Собери свой ПК</h1>
+          <p className="text-muted-foreground text-lg leading-relaxed max-w-xl">Выбери платформу — калькулятор покажет только совместимые детали.</p>
         </div>
 
         {loading && (

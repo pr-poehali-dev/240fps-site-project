@@ -265,67 +265,72 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/75 border-b border-border/80 shadow-lg shadow-black/20">
         <div className="container flex items-center justify-between h-16 md:h-18 py-3">
           <div className="flex items-center gap-2 min-w-0">
             <a href="/admin/stats" className="w-4 h-8 opacity-0 cursor-default" aria-hidden="true" tabIndex={-1} />
-            <a href="#home" className="flex items-center gap-2 shrink-0">
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow shrink-0">
+            <a href="#home" className="group flex items-center gap-2.5 shrink-0">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-8deg]">
                 <Icon name="Zap" className="text-primary-foreground" size={20} />
               </div>
-              <span className="font-display font-700 text-xl md:text-2xl tracking-tight">
+              <span className="font-display font-700 text-xl md:text-2xl tracking-[-0.02em]">
                 240<span className="text-primary">FPS</span>
               </span>
             </a>
           </div>
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-7 lg:gap-9">
             {NAV.map((n) => (
-              <a key={n.label} href={n.href} className="text-sm font-500 text-muted-foreground hover:text-primary transition-colors">
+              <a
+                key={n.label}
+                href={n.href}
+                className="relative text-sm font-600 text-muted-foreground hover:text-foreground transition-colors duration-300 py-1 after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 hover:after:scale-x-100"
+              >
                 {n.label}
               </a>
             ))}
           </nav>
           <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            <Button variant="outline" size="sm" className="hidden lg:flex border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground" onClick={() => setCallbackOpen(true)}>
+            <Button variant="outline" size="sm" className="hidden lg:flex border-secondary/60 text-secondary font-600 hover:bg-secondary hover:text-secondary-foreground hover:border-secondary transition-all duration-300 hover:glow-purple-strong" onClick={() => setCallbackOpen(true)}>
               <Icon name="Phone" size={16} /> Заказать звонок
             </Button>
-            <button className="relative shrink-0">
+            <button className="relative shrink-0 transition-transform duration-300 hover:scale-110 active:scale-95">
               <Icon name="ShoppingCart" size={22} className="text-foreground hover:text-primary transition-colors" />
               {cart.length > 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-secondary text-secondary-foreground text-xs flex items-center justify-center font-600">
+                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-secondary text-secondary-foreground text-xs flex items-center justify-center font-700 animate-pulse-ring">
                   {cart.length}
                 </span>
               )}
             </button>
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <button className="md:hidden shrink-0 text-foreground hover:text-primary transition-colors">
+                <button className="md:hidden shrink-0 -mr-1 p-2 text-foreground hover:text-primary transition-colors active:scale-90" aria-label="Меню">
                   <Icon name="Menu" size={24} />
                 </button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-4/5 max-w-xs flex flex-col">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-yellow">
+              <SheetContent side="right" className="w-4/5 max-w-xs flex flex-col bg-card/95 backdrop-blur-xl">
+                <div className="flex items-center gap-2.5 mb-8">
+                  <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center glow-yellow">
                     <Icon name="Zap" className="text-primary-foreground" size={18} />
                   </div>
                   <span className="font-display font-700 text-xl tracking-tight">
                     240<span className="text-primary">FPS</span>
                   </span>
                 </div>
-                <nav className="flex flex-col gap-1">
+                <nav className="flex flex-col gap-1.5">
                   {NAV.map((n) => (
                     <a
                       key={n.label}
                       href={n.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="py-3 px-2 rounded-lg text-base font-500 text-foreground hover:bg-muted hover:text-primary transition-colors"
+                      className="group flex items-center justify-between py-3.5 px-3 rounded-xl text-base font-600 text-foreground border border-transparent hover:border-primary/30 hover:bg-primary/10 hover:text-primary transition-all duration-300 active:scale-[0.98]"
                     >
                       {n.label}
+                      <Icon name="ChevronRight" size={16} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                     </a>
                   ))}
                 </nav>
                 <Button
-                  className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 font-600 glow-yellow"
+                  className="btn-sheen mt-7 h-12 bg-primary text-primary-foreground hover:bg-primary font-700 uppercase tracking-wide glow-yellow active:scale-[0.98] transition-transform"
                   onClick={() => { setMobileMenuOpen(false); setCallbackOpen(true); }}
                 >
                   <Icon name="Phone" size={16} /> Заказать звонок
@@ -341,68 +346,74 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-secondary/10 via-transparent to-background pointer-events-none" />
         <div className="container relative grid lg:grid-cols-2 gap-10 items-center py-20 md:py-28">
           <div className="animate-fade-in">
-            <Badge className="bg-secondary/20 text-secondary border-secondary/40 mb-6 font-500">
+            <Badge className="bg-secondary/15 text-secondary border-secondary/40 mb-7 font-600 uppercase text-[11px] tracking-[0.18em] px-3 py-1.5 backdrop-blur-sm">
               Сборка мечты за 24 часа
             </Badge>
-            <h1 className="font-display font-700 text-5xl md:text-7xl leading-[0.95] uppercase mb-6">
+            <h1 className="font-display font-700 text-[3.25rem] leading-[0.88] md:text-[5.5rem] uppercase mb-7 tracking-[-0.03em]">
               Больше <span className="text-gradient">кадров</span> —<br />больше <span className="text-primary">побед</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-md mb-8">
+            <p className="text-lg text-muted-foreground max-w-md mb-10 leading-relaxed">
               Игровые компьютеры на RTX 5060–5090 от 240FPS — готовые сборки и ПК на заказ с максимальной производительностью. Мощь без компромиссов.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-600 glow-yellow" asChild>
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3.5">
+              <Button size="lg" className="btn-sheen w-full sm:w-auto h-13 py-3.5 bg-primary text-primary-foreground hover:bg-primary font-700 uppercase tracking-wide glow-yellow transition-all duration-300 hover:glow-yellow-strong sm:hover:scale-[1.04] active:scale-95" asChild>
                 <a href="#catalog"><Icon name="Cpu" size={18} /> Выбрать компьютер</a>
               </Button>
-              <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-600 glow-purple" asChild>
+              <Button size="lg" className="btn-sheen w-full sm:w-auto h-13 py-3.5 bg-secondary text-secondary-foreground hover:bg-secondary font-700 uppercase tracking-wide glow-purple transition-all duration-300 hover:glow-purple-strong sm:hover:scale-[1.04] active:scale-95" asChild>
                 <a href="/calculator"><Icon name="Calculator" size={18} /> Собрать свой ПК</a>
               </Button>
             </div>
-            <div className="flex gap-8 mt-12">
-              {[['5000+', 'Сборок'], ['5.0', 'Рейтинг'], ['1 год', 'Гарантия']].map(([v, l]) => (
-                <div key={l}>
-                  <div className="font-display font-700 text-3xl text-primary">{v}</div>
-                  <div className="text-sm text-muted-foreground">{l}</div>
+            <div className="flex gap-6 sm:gap-10 mt-14">
+              {[['5000+', 'Сборок'], ['5.0', 'Рейтинг'], ['1 год', 'Гарантия']].map(([v, l], i) => (
+                <div key={l} className={`relative ${i > 0 ? 'pl-6 sm:pl-10 border-l border-border/70' : ''}`}>
+                  <div className="font-display font-700 text-3xl sm:text-4xl text-primary tracking-tight leading-none mb-1.5">{v}</div>
+                  <div className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground">{l}</div>
                 </div>
               ))}
             </div>
           </div>
           <div className="relative animate-scale-in">
             <div className="absolute -inset-4 bg-secondary/30 blur-3xl rounded-full animate-glow" />
-            <img src={HERO_IMG} alt="Игровой ПК 240FPS" className="relative rounded-2xl border border-border w-full object-cover" />
+            <div className="absolute -inset-2 bg-gradient-to-tr from-primary/20 via-transparent to-secondary/30 blur-2xl rounded-full" />
+            <img src={HERO_IMG} alt="Игровой ПК 240FPS" className="relative rounded-2xl border border-border/80 w-full object-cover shadow-2xl shadow-black/60 animate-float" />
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="container py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <section className="container py-16 md:py-20 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
           { icon: 'Rocket', t: 'Максимальный FPS', d: 'Оптимизация под 240+ кадров' },
           { icon: 'ShieldCheck', t: 'Гарантия 1 год', d: 'Официальная поддержка' },
           { icon: 'Truck', t: 'Доставка по РФ', d: 'Бережная упаковка' },
           { icon: 'Wrench', t: 'Тест 24 часа', d: 'Каждая сборка под нагрузкой' },
         ].map((f) => (
-          <div key={f.t} className="p-6 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors">
-            <Icon name={f.icon} className="text-primary mb-3" size={28} />
-            <div className="font-600 mb-1">{f.t}</div>
-            <div className="text-sm text-muted-foreground">{f.d}</div>
+          <div key={f.t} className="group card-premium edge-light p-6">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:border-primary/50 group-hover:scale-110">
+              <Icon name={f.icon} className="text-primary" size={24} />
+            </div>
+            <div className="font-display font-700 uppercase tracking-tight text-lg mb-1.5">{f.t}</div>
+            <div className="text-sm text-muted-foreground leading-relaxed">{f.d}</div>
           </div>
         ))}
       </section>
 
       {/* Catalog */}
-      <section id="catalog" className="container py-14">
-        <div className="flex items-end justify-between mb-8">
+      <section id="catalog" className="container py-16 md:py-20">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-10">
           <div>
-            <h2 className="font-display font-700 text-4xl uppercase">Каталог</h2>
-            <p className="text-muted-foreground mt-1">Найдено сборок: {filtered.length}</p>
+            <div className="section-eyebrow">Готовые сборки</div>
+            <h2 className="section-title text-4xl md:text-5xl">Каталог</h2>
           </div>
+          <p className="text-sm text-muted-foreground pb-1">
+            Найдено сборок: <span className="text-primary font-700 font-display text-lg">{filtered.length}</span>
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           {/* Filters */}
-          <aside className="space-y-1 p-6 rounded-xl bg-card border border-border h-fit lg:sticky lg:top-24">
-            <h3 className="font-display font-600 text-lg uppercase mb-4 flex items-center gap-2">
+          <aside className="space-y-1 p-6 rounded-2xl bg-card border border-border h-fit lg:sticky lg:top-24 shadow-xl shadow-black/30">
+            <h3 className="font-display font-700 text-lg uppercase tracking-tight mb-4 flex items-center gap-2">
               <Icon name="SlidersHorizontal" size={18} className="text-primary" /> Фильтры
             </h3>
 
@@ -526,33 +537,38 @@ const Index = () => {
           {/* Products */}
           <div className="grid gap-5 items-start" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
             {filtered.map((p) => (
-              <div key={p.id} className="group rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
+              <div key={p.id} className="group card-premium edge-light">
                 <div
                   className="relative aspect-square overflow-hidden bg-muted cursor-pointer"
                   onClick={() => { setProductModal(p); setProductImgIdx(0); }}
                 >
-                  <img src={p.img} alt={`Игровой компьютер ${p.name} — ${p.cpu}, ${p.gpu}`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  {p.tag && <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-600">{p.tag}</Badge>}
-                  <Badge className="absolute top-3 right-3 bg-secondary/90 text-secondary-foreground font-500">{p.fps}</Badge>
+                  <img src={p.img} alt={`Игровой компьютер ${p.name} — ${p.cpu}, ${p.gpu}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.09]" />
+                  <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-card/80 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-secondary/25 via-transparent to-primary/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  {p.tag && <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground font-700 uppercase text-[10px] tracking-wider shadow-lg shadow-primary/30">{p.tag}</Badge>}
+                  <Badge className="absolute top-3 right-3 bg-background/70 backdrop-blur-md text-primary border border-primary/40 font-700 text-[10px] tracking-wider">{p.fps}</Badge>
                   {p.imgs && p.imgs.length > 1 && (
-                    <div className="absolute bottom-2 right-2 bg-black/60 rounded-md px-2 py-1 text-xs text-white flex items-center gap-1">
+                    <div className="absolute bottom-3 right-3 bg-background/70 backdrop-blur-md border border-border/60 rounded-lg px-2 py-1 text-xs text-foreground flex items-center gap-1">
                       <Icon name="Images" size={12} /> {p.imgs.length}
                     </div>
                   )}
                 </div>
                 <div className="p-5">
-                  <div className="font-display font-600 text-lg mb-3">{p.name}</div>
-                  <div className="space-y-1.5 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center gap-2"><Icon name="Cpu" size={14} className="text-primary" /> {p.cpu}</div>
-                    <div className="flex items-center gap-2"><Icon name="Gpu" size={14} className="text-primary" fallback="MonitorPlay" /> {p.gpu}</div>
-                    <div className="flex items-center gap-2"><Icon name="MemoryStick" size={14} className="text-primary" /> {p.ram} ГБ RAM</div>
-                    <div className="flex items-center gap-2"><Icon name="HardDrive" size={14} className="text-primary" /> SSD {p.storage >= 1000 ? `${p.storage / 1000} ТБ` : `${p.storage} ГБ`}</div>
+                  <div className="font-display font-700 text-xl uppercase tracking-tight mb-3 group-hover:text-primary transition-colors duration-300">{p.name}</div>
+                  <div className="space-y-2 text-sm text-muted-foreground mb-5">
+                    <div className="flex items-center gap-2.5"><Icon name="Cpu" size={14} className="text-primary shrink-0" /> {p.cpu}</div>
+                    <div className="flex items-center gap-2.5"><Icon name="Gpu" size={14} className="text-primary shrink-0" fallback="MonitorPlay" /> {p.gpu}</div>
+                    <div className="flex items-center gap-2.5"><Icon name="MemoryStick" size={14} className="text-primary shrink-0" /> {p.ram} ГБ RAM</div>
+                    <div className="flex items-center gap-2.5"><Icon name="HardDrive" size={14} className="text-primary shrink-0" /> SSD {p.storage >= 1000 ? `${p.storage / 1000} ТБ` : `${p.storage} ГБ`}</div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-display font-700 text-xl">{fmt(p.price)}</span>
+                  <div className="flex items-end justify-between gap-3 pt-4 border-t border-border/70">
+                    <div className="leading-none">
+                      <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground mb-1.5">Цена</div>
+                      <span className="font-display font-700 text-2xl text-primary">{fmt(p.price)}</span>
+                    </div>
                     <Button
                       size="sm"
-                      className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-600"
+                      className="btn-sheen bg-secondary text-secondary-foreground hover:bg-secondary font-700 uppercase tracking-wide transition-all duration-300 hover:glow-purple-strong hover:scale-[1.04] active:scale-95"
                       onClick={() => setOrderProduct(p)}
                     >
                       <Icon name="Plus" size={16} />
@@ -573,51 +589,59 @@ const Index = () => {
       </section>
 
       {/* About */}
-      <section id="about" className="relative grid-bg py-20 border-y border-border">
-        <div className="container grid lg:grid-cols-2 gap-12 items-center">
+      <section id="about" className="relative grid-bg noise-overlay py-20 md:py-28 border-y border-border">
+        <div className="container grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
-            <Badge className="bg-primary/15 text-primary border-primary/30 mb-4 font-500">О нас</Badge>
-            <h2 className="font-display font-700 text-4xl uppercase mb-5">Мы собираем компьютеры мечты</h2>
-            <p className="text-muted-foreground mb-4">
+            <div className="section-eyebrow">О нас</div>
+            <h2 className="section-title text-4xl md:text-5xl mb-6 leading-[1.05]">Мы собираем компьютеры мечты</h2>
+            <p className="text-muted-foreground mb-4 leading-relaxed">
               240FPS — команда энтузиастов, которая с 2018 года создаёт игровые ПК для геймеров, стримеров и киберспортсменов.
               Каждая сборка проходит стресс-тест 24 часа перед отправкой.
             </p>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-8 leading-relaxed">
               Используем только оригинальные комплектующие с официальной гарантией и подбираем конфигурацию под ваши задачи и бюджет.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[['Cpu', 'Только оригинальные детали'], ['Headphones', 'Поддержка 24/7'], ['Award', 'Официальная гарантия'], ['Gauge', 'Тонкая оптимизация FPS']].map(([i, t]) => (
-                <div key={t} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center shrink-0">
+                <div key={t} className="group flex items-center gap-3.5 rounded-xl border border-border/60 bg-card/40 backdrop-blur-sm p-3 transition-all duration-300 hover:border-secondary/50 hover:bg-card/70">
+                  <div className="w-10 h-10 rounded-lg bg-secondary/20 border border-secondary/30 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110">
                     <Icon name={i} size={18} className="text-secondary" />
                   </div>
-                  <span className="text-sm font-500">{t}</span>
+                  <span className="text-sm font-600 leading-snug">{t}</span>
                 </div>
               ))}
             </div>
           </div>
-          <img src={HERO_IMG} alt="Сборка ПК" className="rounded-2xl border border-border w-full object-cover glow-purple" />
+          <div className="relative">
+            <div className="absolute -inset-3 bg-secondary/20 blur-3xl rounded-full" />
+            <img src={HERO_IMG} alt="Сборка ПК" loading="lazy" className="relative rounded-2xl border border-border/80 w-full object-cover glow-purple" />
+          </div>
         </div>
       </section>
 
       {/* Blog */}
-      <section id="blog" className="container py-16">
-        <div className="flex items-end justify-between mb-8">
-          <h2 className="font-display font-700 text-4xl uppercase">Блог</h2>
+      <section id="blog" className="container py-16 md:py-20">
+        <div className="mb-10">
+          <div className="section-eyebrow">Полезное</div>
+          <h2 className="section-title text-4xl md:text-5xl">Блог</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
           {BLOG.map((b) => (
-            <button key={b.title} onClick={() => setBlogPost(b)} className="group text-left rounded-xl bg-card border border-border overflow-hidden hover:border-primary/60 transition-all hover:-translate-y-1">
-              <div className="aspect-video overflow-hidden bg-muted">
-                <img src={b.img} alt={b.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <button key={b.title} onClick={() => setBlogPost(b)} className="group card-premium edge-light text-left">
+              <div className="relative aspect-video overflow-hidden bg-muted">
+                <img src={b.img} alt={b.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 ease-premium group-hover:scale-[1.09]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-70" />
               </div>
               <div className="p-5">
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-                  <Badge variant="outline" className="border-primary/40 text-primary">{b.cat}</Badge>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+                  <Badge variant="outline" className="border-primary/40 text-primary uppercase text-[10px] tracking-wider font-700">{b.cat}</Badge>
                   {b.date}
                   <span className="ml-auto flex items-center gap-1"><Icon name="Clock" size={11} /> {b.readTime}</span>
                 </div>
-                <div className="font-600 group-hover:text-primary transition-colors">{b.title}</div>
+                <div className="font-display font-700 text-lg leading-snug uppercase tracking-tight group-hover:text-primary transition-colors duration-300">{b.title}</div>
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-600 uppercase tracking-wider text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                  Читать <Icon name="ArrowRight" size={13} />
+                </div>
               </div>
             </button>
           ))}
@@ -628,8 +652,9 @@ const Index = () => {
       <section id="contacts" className="relative grid-bg py-20 border-t border-border">
         <div className="container grid lg:grid-cols-2 gap-12">
           <div>
-            <h2 className="font-display font-700 text-4xl uppercase mb-5">Контакты</h2>
-            <p className="text-muted-foreground mb-8">Свяжитесь с нами любым удобным способом — поможем подобрать сборку.</p>
+            <div className="section-eyebrow">Связаться</div>
+            <h2 className="section-title text-4xl md:text-5xl mb-5">Контакты</h2>
+            <p className="text-muted-foreground mb-8 leading-relaxed">Свяжитесь с нами любым удобным способом — поможем подобрать сборку.</p>
             <div className="space-y-5">
               {[
                 { i: 'Phone', t: '+7-913-149-82-40', s: 'Ежедневно 10:00–19:00', href: 'tel:+79131498240' },
@@ -640,11 +665,11 @@ const Index = () => {
                 { i: 'MapPin', t: 'Тюмень, Казачьи Луга 9', s: 'Магазин "240ФПС" · Самовывоз и доставка по РФ', href: 'https://yandex.ru/maps/?text=Тюмень+Казачьи+Луга+9' },
                 { i: 'MapPin', t: 'Краснодар, Восточно-Кругликовская 30/2', s: 'Магазин "240ФПС" · Самовывоз и доставка по РФ', href: 'https://yandex.ru/maps/?text=Краснодар+Восточно-Кругликовская+30/2' },
               ].map((c) => (
-                <div key={c.t} className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                <div key={c.t} className="group flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-primary/20 group-hover:border-primary/50 group-hover:scale-105">
                     <Icon name={c.i} size={22} className="text-primary" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     {c.href ? (
                       <a href={c.href} target="_blank" rel="noopener noreferrer" className="font-600 hover:text-primary transition-colors">{c.t}</a>
                     ) : (
@@ -656,8 +681,8 @@ const Index = () => {
               ))}
             </div>
           </div>
-          <div className="p-8 rounded-2xl bg-card border border-border">
-            <h3 className="font-display font-600 text-xl uppercase mb-5">Оставить заявку</h3>
+          <div className="card-premium p-8 hover:translate-y-0">
+            <h3 className="font-display font-700 text-2xl uppercase tracking-tight mb-6">Оставить заявку</h3>
             {contactSent ? (
               <div className="flex flex-col items-center justify-center py-8 gap-4 text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center glow-yellow">
@@ -669,26 +694,26 @@ const Index = () => {
             ) : (
               <div className="space-y-4">
                 <input
-                  className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                  className="w-full h-12 px-4 rounded-xl bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300"
                   placeholder="Ваше имя"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
                 />
                 <input
-                  className="w-full h-12 px-4 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors"
+                  className="w-full h-12 px-4 rounded-xl bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300"
                   placeholder="Телефон"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
                 />
                 <textarea
-                  className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors min-h-28 resize-none"
+                  className="w-full px-4 py-3 rounded-xl bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 min-h-28 resize-none"
                   placeholder="Комментарий"
                   value={contactComment}
                   onChange={(e) => setContactComment(e.target.value)}
                 />
                 {contactError && <div className="text-destructive text-sm">{contactError}</div>}
                 <Button
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+                  className="btn-sheen w-full bg-primary text-primary-foreground hover:bg-primary font-700 uppercase tracking-wide h-13 py-3.5 glow-yellow transition-all duration-300 hover:glow-yellow-strong active:scale-[0.98] disabled:opacity-40 disabled:hover:shadow-none"
                   disabled={!contactName.trim() || !contactPhone.trim() || contactSending}
                   onClick={sendContact}
                 >
