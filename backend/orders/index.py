@@ -19,10 +19,11 @@ def get_role(event: dict):
         (os.environ.get('ADMIN_PASSWORD', ''), 'admin'),
         (os.environ.get('ADMIN2_PASSWORD', ''), 'admin'),
         (os.environ.get('CATALOG_PASSWORD', ''), 'catalog'),
-        (os.environ.get('TUMEN_PASSWORD', ''), 'tyumen'),
+        # Доступ «Тюмень» отключён вместе с закрытием раздела CRM.
+        # (os.environ.get('TUMEN_PASSWORD', ''), 'tyumen'),
     ]
     for pwd, role in accounts:
-        if pwd and hmac.compare_digest(password, pwd):
+        if pwd and hmac.compare_digest(password.encode('utf-8'), pwd.encode('utf-8')):
             return role
     return None
 

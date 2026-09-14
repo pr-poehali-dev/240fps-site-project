@@ -36,18 +36,21 @@ def handler(event: dict, context) -> dict:
             'password': os.environ.get('CATALOG_PASSWORD', ''),
             'role': 'catalog',
         },
-        {
-            'login': os.environ.get('TUMEN_LOGIN', ''),
-            'password': os.environ.get('TUMEN_PASSWORD', ''),
-            'role': 'tyumen',
-        },
+        # Учётная запись «Тюмень» отключена вместе с закрытием раздела CRM.
+        # Чтобы вернуть — раскомментируйте блок ниже.
+        # {
+        #     'login': os.environ.get('TUMEN_LOGIN', ''),
+        #     'password': os.environ.get('TUMEN_PASSWORD', ''),
+        #     'role': 'tyumen',
+        # },
     ]
 
     for acc in accounts:
         if not acc['login']:
             continue
-        login_ok = hmac.compare_digest(login, acc['login'])
-        password_ok = hmac.compare_digest(password, acc['password'])
+        # Сравниваем в байтах: иначе логин с русскими буквами роняет функцию
+        login_ok = hmac.compare_digest(login.encode('utf-8'), acc['login'].encode('utf-8'))
+        password_ok = hmac.compare_digest(password.encode('utf-8'), acc['password'].encode('utf-8'))
         if login_ok and password_ok:
             return {
                 'statusCode': 200,

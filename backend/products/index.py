@@ -38,7 +38,8 @@ def check_password(event: dict) -> bool:
     headers = event.get('headers', {}) or {}
     password = headers.get('X-Admin-Password') or headers.get('x-admin-password') or ''
     valid_passwords = [os.environ.get('ADMIN_PASSWORD', ''), os.environ.get('ADMIN2_PASSWORD', ''), os.environ.get('CATALOG_PASSWORD', '')]
-    return any(p and hmac.compare_digest(password, p) for p in valid_passwords)
+    pwd_bytes = password.encode('utf-8')
+    return any(p and hmac.compare_digest(pwd_bytes, p.encode('utf-8')) for p in valid_passwords)
 
 
 def upload_image(file_base64: str, content_type: str) -> str:
