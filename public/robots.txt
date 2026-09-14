@@ -13,4 +13,8 @@ Allow: /
 User-agent: *
 Allow: /
 
+Disallow: /admin/
+
+Host: https://240fps.ru
+
 Sitemap: https://240fps.ru/sitemap.xml

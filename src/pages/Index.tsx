@@ -767,6 +767,25 @@ const Index = () => {
             ))}
           </div>
         </div>
+        {/* Ссылки на все сборки — помогают поисковым роботам найти каждую страницу */}
+        {products.length > 0 && (
+          <div className="border-t border-border py-6">
+            <div className="container">
+              <div className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground mb-3">Все сборки</div>
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                {products.map((p) => (
+                  <a
+                    key={p.id}
+                    href={`/build/${buildSlug(p.name)}`}
+                    className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    {p.name}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="border-t border-border py-4 text-center text-sm text-muted-foreground">
           © 2026 240FPS. Все права защищены.
         </div>

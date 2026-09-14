@@ -1,15 +1,205 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://240fps.ru/</loc>
-    <lastmod>2026-09-01</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://240fps.ru/calculator</loc>
-    <lastmod>2026-09-01</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/gladiator</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/4079f3d7-173f-4ec9-b02e-3cf6d5f49c80.jpg</image:loc>
+      <image:title>GLADIATOR — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/gladiator-v2</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/bb311114-0e18-44cd-96a2-920df5ea7bd0.jpg</image:loc>
+      <image:title>GLADIATOR V2 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/raptor</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/6e2e2860-daa5-424a-87d3-82bf2b21a960.jpg</image:loc>
+      <image:title>RAPTOR — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/gladiator-v3</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/0803535d-b676-4e0c-8b70-5eac0a2c5287.jpg</image:loc>
+      <image:title>GLADIATOR V3 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/raptor-v2</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/711804f4-3dac-4c7d-8404-1f34d7381035.jpg</image:loc>
+      <image:title>RAPTOR V2 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/gladiator-v4</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/707d36fc-dcae-49f6-8d33-576995289cc3.jpg</image:loc>
+      <image:title>GLADIATOR V4 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/raptor-v3</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/2eaa82d5-0128-4a14-9f71-546dd3a23c8a.jpg</image:loc>
+      <image:title>RAPTOR V3 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/gladiator-v5</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/ffd79944-4a0c-41a1-bd6b-bd8d512a98d1.jpg</image:loc>
+      <image:title>GLADIATOR V5 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/raptor-v4</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/bafadacd-6290-45bb-9fe3-f5c4a634ee19.jpg</image:loc>
+      <image:title>RAPTOR V4 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/dominator</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/cd8bd802-f277-40fb-b933-9621752995a4.jpg</image:loc>
+      <image:title>DOMINATOR — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/dominator-v2</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/f69e76ae-a40f-4f5f-96cf-7cb7cbae560c.jpg</image:loc>
+      <image:title>DOMINATOR V2 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/dominator-v3</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/2f76d041-9ccb-4166-8d77-aab635651087.jpg</image:loc>
+      <image:title>DOMINATOR V3 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/berserk</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/3680a4b1-3b4c-4e80-b338-9adebbf3eda3.jpg</image:loc>
+      <image:title>BERSERK — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/dominator-v4</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/3541cee0-bd2f-4208-a4e3-f87f6f226c47.jpg</image:loc>
+      <image:title>DOMINATOR V4 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/berserk-v3</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/f5aaaf3b-9f60-41c0-8f04-56bc94b30c7f.jpg</image:loc>
+      <image:title>BERSERK V3 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/dominator2-v4</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/54787b52-cdb6-42bb-98a9-527380ed7f14.jpg</image:loc>
+      <image:title>DOMINATOR2 V4 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/berserk-v4</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/63b2df7e-4b8e-49a5-9f87-71e4d097281e.jpg</image:loc>
+      <image:title>BERSERK V4 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/berserk-v5</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/61693caa-3df2-4dd2-8551-8075cf690fac.jpg</image:loc>
+      <image:title>BERSERK V5 — игровой компьютер</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://240fps.ru/build/berserk-v2</loc>
+    <lastmod>2026-09-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/products/10870e81-28ab-484a-af8a-30f5edb9043c.jpg</image:loc>
+      <image:title>BERSERK V2 — игровой компьютер</image:title>
+    </image:image>
   </url>
 </urlset>
