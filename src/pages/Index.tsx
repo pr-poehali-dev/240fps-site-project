@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { buildSlug } from '@/lib/buildSlug';
 
 const HERO_IMG = 'https://cdn.poehali.dev/projects/5376b460-4536-4f54-ba9a-faff1ad7ec10/bucket/1ac8b245-73c4-4432-bd62-0af698d5fefa.png';
 
@@ -554,7 +555,12 @@ const Index = () => {
                   )}
                 </div>
                 <div className="p-5">
-                  <div className="font-display font-700 text-xl uppercase tracking-tight mb-3 group-hover:text-primary transition-colors duration-300">{p.name}</div>
+                  <a
+                    href={`/build/${buildSlug(p.name)}`}
+                    className="block font-display font-700 text-xl uppercase tracking-tight mb-3 group-hover:text-primary transition-colors duration-300"
+                  >
+                    {p.name}
+                  </a>
                   <div className="space-y-2 text-sm text-muted-foreground mb-5">
                     <div className="flex items-center gap-2.5"><Icon name="Cpu" size={14} className="text-primary shrink-0" /> {p.cpu}</div>
                     <div className="flex items-center gap-2.5"><Icon name="Gpu" size={14} className="text-primary shrink-0" fallback="MonitorPlay" /> {p.gpu}</div>
@@ -575,6 +581,12 @@ const Index = () => {
                       Купить
                     </Button>
                   </div>
+                  <a
+                    href={`/build/${buildSlug(p.name)}`}
+                    className="mt-3 flex items-center justify-center gap-1.5 h-9 rounded-lg border border-border/70 text-xs font-600 uppercase tracking-wider text-muted-foreground hover:text-primary hover:border-primary/50 transition-all duration-300"
+                  >
+                    Подробнее <Icon name="ArrowRight" size={13} />
+                  </a>
                 </div>
               </div>
             ))}
@@ -713,7 +725,7 @@ const Index = () => {
                 />
                 {contactError && <div className="text-destructive text-sm">{contactError}</div>}
                 <Button
-                  className="btn-sheen w-full bg-primary text-primary-foreground hover:bg-primary font-700 uppercase tracking-wide h-13 py-3.5 glow-yellow transition-all duration-300 hover:glow-yellow-strong active:scale-[0.98] disabled:opacity-40 disabled:hover:shadow-none"
+                  className="btn-sheen w-full bg-primary text-primary-foreground hover:bg-primary font-700 uppercase tracking-wide h-13 py-3.5 glow-yellow transition-all duration-300 hover:glow-yellow-strong active:scale-[0.98] disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:opacity-100"
                   disabled={!contactName.trim() || !contactPhone.trim() || contactSending}
                   onClick={sendContact}
                 >

@@ -3,10 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, Suspense, lazy } from "react";
 import Index from "./pages/Index";
 import Calculator from "./pages/Calculator";
+import Build from "./pages/Build";
 
 const AdminStats = lazy(() => import("./pages/AdminStats"));
 const CrmOrders = lazy(() => import("./pages/CrmOrders"));
@@ -23,6 +24,24 @@ function getSessionId() {
     sessionStorage.setItem("sid", sid);
   }
   return sid;
+}
+
+/**
+ * Старые ссылки из товарного фида вида /?build=gladiator-v2 ведут на главную.
+ * Переводим их на полноценную страницу сборки, чтобы посетитель и модератор
+ * сразу видели карточку товара, а не верх главной страницы.
+ */
+function BuildQueryRedirect() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.pathname !== "/") return;
+    const slug = new URLSearchParams(location.search).get("build");
+    if (slug) navigate(`/build/${slug.trim().toLowerCase()}`, { replace: true });
+  }, [location.pathname, location.search, navigate]);
+
+  return null;
 }
 
 function Tracker() {
@@ -56,10 +75,12 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <BuildQueryRedirect />
         <Tracker />
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/build/:slug" element={<Build />} />
             <Route path="/calculator" element={<Calculator />} />
             <Route path="/admin/stats" element={<AdminStats />} />
             <Route path="/admin/crm" element={<CrmOrders />} />

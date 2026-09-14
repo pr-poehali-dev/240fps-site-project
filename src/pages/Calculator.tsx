@@ -229,12 +229,14 @@ export default function Calculator() {
             <div className="space-y-5">
 
               {/* Шаг 1: выбор бренда */}
-              <div className="rounded-xl bg-card border border-border overflow-hidden">
+              <div className="card-premium hover:translate-y-0">
                 <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
-                  <Icon name="Cpu" size={18} className="text-primary" />
-                  <span className="font-600">Шаг 1 — Производитель процессора</span>
+                  <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                    <Icon name="Cpu" size={16} className="text-primary" />
+                  </div>
+                  <span className="font-display font-700 uppercase tracking-tight">Шаг 1 — Производитель процессора</span>
                   {brand && (
-                    <button onClick={reset} className="ml-auto text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                    <button onClick={reset} className="ml-auto text-xs font-600 uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
                       <Icon name="RotateCcw" size={12} /> Сбросить
                     </button>
                   )}
@@ -244,10 +246,10 @@ export default function Calculator() {
                     <button
                       key={b}
                       onClick={() => chooseBrand(b)}
-                      className={`flex items-center justify-center gap-3 h-16 rounded-xl border-2 font-600 text-lg transition-all ${
+                      className={`flex items-center justify-center gap-3 h-16 rounded-xl border-2 font-display font-700 uppercase tracking-wide text-lg transition-all duration-300 active:scale-[0.97] ${
                         brand === b
-                          ? 'border-primary bg-primary/10 text-primary glow-yellow'
-                          : 'border-border bg-background hover:border-primary/50'
+                          ? 'border-primary bg-primary/10 text-primary glow-yellow-strong'
+                          : 'border-border bg-background hover:border-primary/50 hover:bg-primary/5 hover:-translate-y-0.5'
                       }`}
                     >
                       <Icon name={b === 'intel' ? 'Cpu' : 'Zap'} size={20} className={brand === b ? 'text-primary' : 'text-muted-foreground'} />
@@ -259,10 +261,12 @@ export default function Calculator() {
 
               {/* Шаг 2: выбор платформы */}
               {brand && (
-                <div className="rounded-xl bg-card border border-border overflow-hidden">
+                <div className="card-premium hover:translate-y-0 animate-fade-up">
                   <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
-                    <Icon name="CircuitBoard" size={18} className="text-primary" />
-                    <span className="font-600">Шаг 2 — Платформа {brand === 'intel' ? 'Intel' : 'AMD'}</span>
+                    <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                      <Icon name="CircuitBoard" size={16} className="text-primary" />
+                    </div>
+                    <span className="font-display font-700 uppercase tracking-tight">Шаг 2 — Платформа {brand === 'intel' ? 'Intel' : 'AMD'}</span>
                   </div>
                   <div className="p-4 grid grid-cols-2 gap-3">
                     {(brand === 'intel'
@@ -278,13 +282,13 @@ export default function Calculator() {
                       <button
                         key={key}
                         onClick={() => choosePlatform(key)}
-                        className={`flex flex-col items-center justify-center gap-1 h-20 rounded-xl border-2 font-600 transition-all ${
+                        className={`flex flex-col items-center justify-center gap-1 h-20 rounded-xl border-2 font-600 transition-all duration-300 active:scale-[0.97] ${
                           platform === key
-                            ? 'border-primary bg-primary/10 text-primary glow-yellow'
-                            : 'border-border bg-background hover:border-primary/50'
+                            ? 'border-primary bg-primary/10 text-primary glow-yellow-strong'
+                            : 'border-border bg-background hover:border-primary/50 hover:bg-primary/5 hover:-translate-y-0.5'
                         }`}
                       >
-                        <span className="text-xl">{title}</span>
+                        <span className="font-display font-700 text-xl tracking-tight">{title}</span>
                         <span className={`text-xs font-400 ${platform === key ? 'text-primary/80' : 'text-muted-foreground'}`}>{sub}</span>
                       </button>
                     ))}
@@ -300,12 +304,14 @@ export default function Calculator() {
 
                 if (key === 'case') {
                   return (
-                    <div key={key} className="rounded-xl bg-card border border-border overflow-hidden">
+                    <div key={key} className="card-premium hover:translate-y-0">
                       <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
-                        <Icon name={icon} size={18} className="text-primary" />
-                        <span className="font-600">{label}</span>
+                        <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                          <Icon name={icon} size={16} className="text-primary" />
+                        </div>
+                        <span className="font-display font-700 uppercase tracking-tight">{label}</span>
                         {picked && (
-                          <Badge className="ml-auto bg-primary/15 text-primary border-primary/30 font-500 text-xs">
+                          <Badge className="ml-auto bg-primary/15 text-primary border-primary/30 font-600 text-xs max-w-[55%] truncate">
                             {picked.name}
                           </Badge>
                         )}
@@ -327,7 +333,7 @@ export default function Calculator() {
                                 if (part) selectPart(key, part);
                               }
                             }}
-                            className="w-full h-11 pl-4 pr-10 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors text-sm appearance-none cursor-pointer"
+                            className="w-full h-12 pl-4 pr-10 rounded-xl bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 text-sm appearance-none cursor-pointer hover:border-primary/40"
                           >
                             <option value="">— Выберите {label.toLowerCase()} —</option>
                             {parts.map((p) => {
@@ -369,12 +375,14 @@ export default function Calculator() {
                 }
 
                 return (
-                  <div key={key} className="rounded-xl bg-card border border-border overflow-hidden">
+                  <div key={key} className="card-premium hover:translate-y-0">
                     <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/30">
-                      <Icon name={icon} size={18} className="text-primary" />
-                      <span className="font-600">{label}</span>
+                      <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                        <Icon name={icon} size={16} className="text-primary" />
+                      </div>
+                      <span className="font-display font-700 uppercase tracking-tight">{label}</span>
                       {picked && (
-                        <Badge className="ml-auto bg-primary/15 text-primary border-primary/30 font-500 text-xs">
+                        <Badge className="ml-auto bg-primary/15 text-primary border-primary/30 font-600 text-xs max-w-[55%] truncate">
                           {picked.name}
                         </Badge>
                       )}
@@ -398,7 +406,7 @@ export default function Calculator() {
                               if (part) selectPart(key, part);
                             }
                           }}
-                          className="w-full h-11 pl-4 pr-10 rounded-lg bg-background border border-input focus:border-primary outline-none transition-colors text-sm appearance-none cursor-pointer"
+                          className="w-full h-12 pl-4 pr-10 rounded-xl bg-background border border-input focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300 text-sm appearance-none cursor-pointer hover:border-primary/40"
                         >
                           <option value="">— Выберите {label.toLowerCase()} —</option>
                           {parts.map((p) => {
@@ -423,7 +431,7 @@ export default function Calculator() {
 
             {/* Summary */}
             <div className="lg:sticky lg:top-24 space-y-4">
-              <div className="rounded-xl bg-card border border-border p-6">
+              <div className="card-premium hover:translate-y-0 p-6">
                 <h2 className="font-display font-700 text-xl uppercase mb-5 flex items-center gap-2">
                   <Icon name="ShoppingCart" size={20} className="text-primary" /> Ваша сборка
                 </h2>
@@ -467,31 +475,31 @@ export default function Calculator() {
                   </div>
                 )}
 
-                <div className="border-t border-border pt-4 mt-4">
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="text-muted-foreground text-sm font-600">Итого:</span>
-                    <span className="font-display font-700 text-2xl text-primary">{fmt(total)}</span>
+                <div className="border-t border-border pt-5 mt-4">
+                  <div className="flex items-end justify-between mb-5">
+                    <span className="text-[11px] uppercase tracking-[0.15em] text-muted-foreground pb-1">Итого</span>
+                    <span className="font-display font-700 text-3xl text-primary leading-none">{fmt(total)}</span>
                   </div>
                   <Button
-                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-600 h-12 glow-yellow"
+                    className="btn-sheen w-full h-13 py-3.5 bg-primary text-primary-foreground hover:bg-primary font-700 uppercase tracking-wide glow-yellow transition-all duration-300 hover:glow-yellow-strong active:scale-[0.98] disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none disabled:opacity-100"
                     disabled={total === 0}
                     onClick={() => setOrderOpen(true)}
                   >
                     <Icon name="Send" size={18} /> Заказать сборку
                   </Button>
                   {total > 0 && (
-                    <button onClick={reset} className="w-full mt-3 text-sm text-muted-foreground hover:text-primary transition-colors">
+                    <button onClick={reset} className="w-full mt-3 text-xs font-600 uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors">
                       Сбросить всё
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-xl bg-secondary/10 border border-secondary/30 p-4 text-sm text-secondary">
-                <div className="flex items-center gap-2 font-600 mb-1">
+              <div className="rounded-2xl bg-secondary/10 border border-secondary/30 p-4 text-sm text-secondary">
+                <div className="flex items-center gap-2 font-700 uppercase tracking-wide text-xs mb-1.5">
                   <Icon name="Info" size={15} /> Сборка за 24 часа
                 </div>
-                Цены актуальны на сегодня. После заявки менеджер свяжется с вами для уточнения деталей.
+                <span className="leading-relaxed">Цены актуальны на сегодня. После заявки менеджер свяжется с вами для уточнения деталей.</span>
               </div>
             </div>
           </div>
