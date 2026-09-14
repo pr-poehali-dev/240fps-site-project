@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { Components, SelectKey, COMPONENTS_API_URL, fmt, calcAssemblyFee } from "@/lib/pcParts";
+import SitemapPanel from "@/components/admin/SitemapPanel";
 
 const STATS_URL = "https://functions.poehali.dev/e937ccf1-a114-4bab-9dce-6d7b7407b194";
 const AUTH_URL = "https://functions.poehali.dev/e2bd2fe3-82aa-49a6-8f39-0bc794e6f497";
@@ -531,6 +532,7 @@ function ProductsManager() {
 
   return (
     <div>
+      <SitemapPanel />
       <div className="flex justify-end mb-5">
         <button
           onClick={() => setEditing("new")}
