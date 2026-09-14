@@ -10,9 +10,6 @@ import Calculator from "./pages/Calculator";
 import Build from "./pages/Build";
 
 const AdminStats = lazy(() => import("./pages/AdminStats"));
-const CrmOrders = lazy(() => import("./pages/CrmOrders"));
-const CrmIssuedOrders = lazy(() => import("./pages/CrmIssuedOrders"));
-const CrmPrices = lazy(() => import("./pages/CrmPrices"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const TRACK_URL = "https://functions.poehali.dev/fdc3b327-c084-4a85-af66-47e8827965dc";
@@ -83,9 +80,11 @@ const App = () => (
             <Route path="/build/:slug" element={<Build />} />
             <Route path="/calculator" element={<Calculator />} />
             <Route path="/admin/stats" element={<AdminStats />} />
-            <Route path="/admin/crm" element={<CrmOrders />} />
-            <Route path="/admin/crm/issued" element={<CrmIssuedOrders />} />
-            <Route path="/admin/crm/prices" element={<CrmPrices />} />
+            {/* Раздел CRM закрыт. Страницы сохранены в src/pages/Crm*.tsx —
+                чтобы вернуть, раскомментируйте маршруты ниже. */}
+            {/* <Route path="/admin/crm" element={<CrmOrders />} /> */}
+            {/* <Route path="/admin/crm/issued" element={<CrmIssuedOrders />} /> */}
+            {/* <Route path="/admin/crm/prices" element={<CrmPrices />} /> */}
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

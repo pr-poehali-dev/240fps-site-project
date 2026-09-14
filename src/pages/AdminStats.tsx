@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import Icon from "@/components/ui/icon";
 import { Components, SelectKey, COMPONENTS_API_URL, fmt, calcAssemblyFee } from "@/lib/pcParts";
 import SitemapPanel from "@/components/admin/SitemapPanel";
 
@@ -756,6 +756,30 @@ export default function AdminStats() {
   const [role, setRole] = useState(() => sessionStorage.getItem(ROLE_KEY) || "admin");
 
   if (!authed) return <LoginScreen onLogin={(r) => { setRole(r); setAuthed(true); }} />;
-  if (role === "tyumen") return <Navigate to="/admin/crm" replace />;
+  // Раздел CRM закрыт — роль «Тюмень» больше некуда перенаправлять
+  if (role === "tyumen") {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+          <Icon name="Lock" size={26} className="text-muted-foreground" />
+        </div>
+        <div className="font-display text-2xl font-bold uppercase">Раздел недоступен</div>
+        <p className="text-muted-foreground text-sm max-w-sm">
+          Доступ к CRM заказов закрыт. Обратитесь к руководителю.
+        </p>
+        <button
+          onClick={() => {
+            sessionStorage.removeItem(AUTH_KEY);
+            sessionStorage.removeItem(PWD_KEY);
+            sessionStorage.removeItem(ROLE_KEY);
+            window.location.reload();
+          }}
+          className="border border-border rounded-lg px-5 py-2 text-sm font-semibold hover:bg-muted transition-colors"
+        >
+          Выйти
+        </button>
+      </div>
+    );
+  }
   return <Dashboard role={role} />;
 }
